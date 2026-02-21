@@ -32,15 +32,72 @@ function generateElementHTML(el, idx) {
 
   switch (type) {
     case 'navbar': {
-      const links = (props.links || [])
-        .map((l) => `    <li><a href="${l.href}">${escHtml(l.text)}</a></li>`)
-        .join('\n')
-      return `<nav${sAttr}>
-  <div class="nav-brand">${escHtml(props.brand)}</div>
-  <ul class="nav-links">
-${links}
-  </ul>
+      const layout = props.navLayout || 'classic'
+      const linkStyle = props.navLinkStyle || 'plain'
+      const effect = props.navEffect || 'none'
+      const links = props.links || []
+      const half = Math.ceil(links.length / 2)
+
+      // Apply effect overrides to inline styles
+      let navStyles = { ...styles }
+      if (effect === 'glass') {
+        navStyles.backgroundColor = 'rgba(255,255,255,0.1)'
+        navStyles.backdropFilter = 'blur(16px)'
+        navStyles.borderBottom = '1px solid rgba(255,255,255,0.15)'
+      } else if (effect === 'bold') {
+        navStyles.borderBottom = '3px solid #4f6ef7'
+      }
+      const navInline = stylesToInline(navStyles)
+      const navSAttr = navInline ? ` style="${navInline}"` : ''
+      const navBg = styles.backgroundColor || '#1a1a2e'
+
+      const brandHTML = effect === 'bold'
+        ? `<div class="nav-brand"><span class="nav-brand-icon">${escHtml((props.brand || 'B')[0].toUpperCase())}</span><span>${escHtml(props.brand)}</span></div>`
+        : `<div class="nav-brand">${escHtml(props.brand)}</div>`
+
+      const makeLinkItem = (link, isFirst) => {
+        const activeClass = isFirst ? ' class="active"' : ''
+        return `<li><a href="${link.href}"${activeClass}>${escHtml(link.text)}</a></li>`
+      }
+
+      const makeLinksHTML = (linkItems, offset = 0) => {
+        let items
+        if (linkStyle === 'underline') {
+          items = linkItems.map((l, i) => {
+            const sep = i > 0 ? `<li><span class="nav-sep">·</span></li>` : ''
+            return `${sep}${makeLinkItem(l, offset + i === 0)}`
+          }).join('\n    ')
+        } else {
+          items = linkItems.map((l, i) => makeLinkItem(l, offset + i === 0)).join('\n    ')
+        }
+        return `<ul class="nav-links nav-links-${linkStyle}">\n    ${items}\n  </ul>`
+      }
+
+      const mobileLinksHTML = links.map((l) => `    <li><a href="${l.href}">${escHtml(l.text)}</a></li>`).join('\n')
+      const mobileMenu = `<div class="nav-mobile-menu" style="background-color:${navBg}">\n  <ul>\n${mobileLinksHTML}\n  </ul>\n</div>`
+
+      let navHTML
+      if (layout === 'centered') {
+        navHTML = `<div class="site-nav nav-layout-centered nav-effect-${effect}"${navSAttr}>
+  ${brandHTML}
+  ${makeLinksHTML(links)}
+  <button class="nav-hamburger" aria-label="Toggle menu">&#9776;</button>
+</div>`
+      } else if (layout === 'split') {
+        navHTML = `<nav class="site-nav nav-layout-split nav-effect-${effect}"${navSAttr}>
+  <div class="nav-split-left">${makeLinksHTML(links.slice(0, half), 0)}</div>
+  ${brandHTML}
+  <div class="nav-split-right">${makeLinksHTML(links.slice(half), half)}</div>
+  <button class="nav-hamburger" aria-label="Toggle menu">&#9776;</button>
 </nav>`
+      } else {
+        navHTML = `<nav class="site-nav nav-layout-classic nav-effect-${effect}"${navSAttr}>
+  ${brandHTML}
+  ${makeLinksHTML(links)}
+  <button class="nav-hamburger" aria-label="Toggle menu">&#9776;</button>
+</nav>`
+      }
+      return navHTML + '\n' + mobileMenu
     }
 
     case 'hero': {
@@ -60,11 +117,31 @@ ${links}
 </section>`
     }
 
-    case 'section':
+    case 'section': {
+      const sLayout = props.layout || 'stack'
+      const sGap = props.gap || '24px'
+      const colCount = { '2-col': 2, '3-col': 3, '4-col': 4 }[sLayout]
+      const children = el.children || []
+      let childrenHTML = ''
+      if (children.length > 0) {
+        const childContent = children.map((child, ci) => {
+          const html = generateElementHTML(child, `${idx}-${ci}`)
+          if (colCount && child.props?.gridSpan === 'full') {
+            return `<div style="grid-column: 1 / -1">\n${html}\n</div>`
+          }
+          return html
+        }).join('\n')
+        if (colCount) {
+          childrenHTML = `\n<div class="section-grid section-grid-${colCount}" style="--col-gap:${sGap}">\n${childContent}\n</div>`
+        } else {
+          childrenHTML = '\n' + childContent
+        }
+      }
       return `<section${sAttr}>
   ${props.title ? `<h2>${escHtml(props.title)}</h2>` : ''}
-  ${props.subtitle ? `<p class="subtitle">${escHtml(props.subtitle)}</p>` : ''}
+  ${props.subtitle ? `<p class="subtitle">${escHtml(props.subtitle)}</p>` : ''}${childrenHTML}
 </section>`
+    }
 
     case 'columns': {
       const cols = (props.columns || [])
@@ -231,11 +308,43 @@ body {
 }
 
 /* Navbar */
-nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.nav-brand { font-weight: 700; font-size: 1.2rem; }
-.nav-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
-.nav-links a { text-decoration: none; opacity: 0.85; transition: opacity 0.2s; }
-.nav-links a:hover { opacity: 1; }
+.site-nav { position: relative; }
+.nav-layout-classic { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav-layout-centered { display: flex; flex-direction: column; align-items: center; }
+.nav-layout-centered .nav-brand { margin-bottom: 14px; }
+.nav-layout-split { display: flex; align-items: center; }
+.nav-split-left { flex: 1; display: flex; justify-content: flex-end; padding-right: 24px; }
+.nav-split-right { flex: 1; display: flex; justify-content: flex-start; padding-left: 24px; }
+.nav-brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+.nav-brand-icon { width: 34px; height: 34px; border-radius: 9px; background: #4f6ef7; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: #fff; flex-shrink: 0; }
+.nav-effect-glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.15); }
+.nav-effect-bold { border-bottom: 3px solid #4f6ef7; }
+.nav-links { display: flex; gap: 24px; list-style: none; padding: 0; margin: 0; flex-wrap: wrap; align-items: center; }
+.nav-links a { text-decoration: none; color: inherit; opacity: 0.85; transition: all 0.2s; }
+.nav-links a:hover, .nav-links a.active { opacity: 1; }
+/* Pill */
+.nav-links-pill { gap: 6px; }
+.nav-links-pill a { font-size: 0.85rem; font-weight: 600; padding: 7px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); opacity: 1; background: rgba(255,255,255,0.12); }
+.nav-links-pill a.active { background: #4f6ef7; color: #fff !important; border-color: transparent; }
+/* Ghost */
+.nav-links-ghost { gap: 6px; }
+.nav-links-ghost a { font-size: 0.87rem; font-weight: 500; padding: 6px 14px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.25); }
+.nav-links-ghost a.active, .nav-links-ghost a:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); opacity: 1; }
+/* Underline */
+.nav-links-underline { gap: 0; }
+.nav-links-underline a { font-size: 0.88rem; font-weight: 400; opacity: 0.75; padding-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.4); }
+.nav-links-underline a.active { opacity: 1; font-weight: 600; border-bottom-width: 2px; }
+.nav-sep { opacity: 0.25; padding: 0 8px; font-size: 0.65rem; }
+/* Uppercase */
+.nav-links-uppercase a { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
+.nav-links-uppercase a.active { opacity: 1; }
+/* Hamburger */
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; font-size: 1.4rem; color: inherit; padding: 4px 8px; }
+.nav-mobile-menu { overflow: hidden; max-height: 0; transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1); }
+.nav-mobile-menu.open { max-height: 480px; }
+.nav-mobile-menu ul { list-style: none; padding: 8px 20px 16px; margin: 0; }
+.nav-mobile-menu li { border-bottom: 1px solid rgba(255,255,255,0.08); }
+.nav-mobile-menu a { display: block; padding: 13px 4px; text-decoration: none; font-size: 0.95rem; font-weight: 500; opacity: 0.9; color: inherit; }
 
 /* Hero */
 .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -255,6 +364,11 @@ nav { display: flex; align-items: center; justify-content: space-between; flex-w
 /* Section */
 section h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
 .subtitle { opacity: 0.7; max-width: 600px; margin: 0 auto; }
+/* Section grid layouts */
+.section-grid { display: grid; gap: var(--col-gap, 24px); align-items: start; margin-top: 24px; }
+.section-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.section-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.section-grid-4 { grid-template-columns: repeat(4, 1fr); }
 
 /* Columns */
 .columns-grid { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
@@ -315,35 +429,68 @@ blockquote cite { font-size: 0.9rem; font-style: normal; opacity: 0.6; }
   .columns-grid { flex-direction: column; align-items: center; }
   .column { max-width: 100%; }
   .stats-grid { gap: 24px; }
-  nav { flex-direction: column; }
-  .nav-links { gap: 16px; }
+  .nav-hamburger { display: block; }
+  .nav-links { display: none !important; }
+  .nav-split-left, .nav-split-right { display: none !important; }
+  .nav-layout-centered { flex-direction: row; justify-content: space-between; }
+  .nav-layout-centered .nav-brand { margin-bottom: 0; }
+  .nav-mobile-menu.open { display: block; }
+  .section-grid-2, .section-grid-3, .section-grid-4 { grid-template-columns: 1fr; }
 }
 `
 
 const BASE_JS = `// Generated by SiteForge
-// Add your custom JavaScript here
+document.addEventListener('DOMContentLoaded', function() {
 
-document.addEventListener('DOMContentLoaded', () => {
   // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const href = this.getAttribute('href');
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var href = this.getAttribute('href');
       if (href === '#') return;
       e.preventDefault();
-      const target = document.querySelector(href);
+      var target = document.querySelector(href);
       if (target) target.scrollIntoView({ behavior: 'smooth' });
     });
   });
 
+  // Mobile hamburger menu
+  var hamburger = document.querySelector('.nav-hamburger');
+  var mobileMenu = document.querySelector('.nav-mobile-menu');
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', function() {
+      var isOpen = mobileMenu.classList.toggle('open');
+      hamburger.textContent = isOpen ? '\\u2715' : '\\u2630';
+    });
+    mobileMenu.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        mobileMenu.classList.remove('open');
+        hamburger.textContent = '\\u2630';
+      });
+    });
+  }
+
+  // Active nav link highlighting
+  var allNavLinks = document.querySelectorAll('.nav-links a, .nav-mobile-menu a');
+  allNavLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      var href = this.getAttribute('href');
+      document.querySelectorAll('.nav-links a, .nav-mobile-menu a').forEach(function(a) {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === href) a.classList.add('active');
+      });
+    });
+  });
+
   // Contact form handling
-  const form = document.querySelector('.contact-form');
+  var form = document.querySelector('.contact-form');
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
       alert('Thank you for your message! We will get back to you soon.');
       form.reset();
     });
   }
+
 });
 `
 

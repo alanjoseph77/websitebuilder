@@ -198,6 +198,24 @@ function slugify(name) {
   return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 }
 
+const NAV_LAYOUTS = [
+  { key: 'classic',  label: 'Classic',  icon: '▤', desc: 'Brand left, links right' },
+  { key: 'centered', label: 'Centered', icon: '⊞', desc: 'Brand top, links below' },
+  { key: 'split',    label: 'Split',    icon: '◈', desc: 'Links | Brand | Links' },
+]
+const NAV_LINK_STYLES = [
+  { key: 'plain',     label: 'Plain',     icon: '—', desc: 'Simple text links' },
+  { key: 'pill',      label: 'Pill',      icon: '◯', desc: 'Rounded pill buttons' },
+  { key: 'ghost',     label: 'Ghost',     icon: '□', desc: 'Outlined border links' },
+  { key: 'underline', label: 'Underline', icon: '⊔', desc: 'Underlined with dots' },
+  { key: 'uppercase', label: 'Caps',      icon: 'AA', desc: 'ALL CAPS spaced' },
+]
+const NAV_EFFECTS = [
+  { key: 'none',  label: 'Solid',  icon: '■', desc: 'Solid background' },
+  { key: 'glass', label: 'Glass',  icon: '◫', desc: 'Frosted glass blur' },
+  { key: 'bold',  label: 'Bold',   icon: '◉', desc: 'Icon logo + accent bar' },
+]
+
 function ContentTab({ element, updateElement }) {
   const { type, props } = element
   const { currentPage, state } = useBuilder()
@@ -226,8 +244,32 @@ function ContentTab({ element, updateElement }) {
 
   switch (type) {
     case 'navbar': {
+      const VariantPicker = ({ title, items, propKey, cols = 3 }) => {
+        const active = props[propKey] || items[0].key
+        return (
+          <div style={S.section}>
+            <div style={S.sectionTitle}>{title}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '6px' }}>
+              {items.map((v) => {
+                const isActive = active === v.key
+                return (
+                  <div key={v.key} onClick={() => up({ [propKey]: v.key })} title={v.desc}
+                    style={{ padding: '8px 4px 7px', borderRadius: '8px', border: `2px solid ${isActive ? '#4f6ef7' : '#e8e8e8'}`, backgroundColor: isActive ? '#eff6ff' : '#fafafa', cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s' }}>
+                    <div style={{ fontSize: '1rem', marginBottom: '3px', lineHeight: 1 }}>{v.icon}</div>
+                    <div style={{ fontSize: '0.67rem', fontWeight: '700', color: isActive ? '#4f6ef7' : '#374151', lineHeight: 1.2 }}>{v.label}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      }
+
       return (
         <>
+          <VariantPicker title="Layout" items={NAV_LAYOUTS} propKey="navLayout" cols={3} />
+          <VariantPicker title="Link Style" items={NAV_LINK_STYLES} propKey="navLinkStyle" cols={3} />
+          <VariantPicker title="Effect" items={NAV_EFFECTS} propKey="navEffect" cols={3} />
           <div style={S.section}>
             <div style={S.sectionTitle}>Brand</div>
             <Field label="Brand Name">
@@ -338,30 +380,67 @@ function ContentTab({ element, updateElement }) {
         </div>
       )
 
-    case 'section':
+    case 'section': {
+      const SECTION_LAYOUTS = [
+        { key: 'stack',  label: 'Stack',  icon: '▤', desc: 'Vertical stack (default)' },
+        { key: '2-col',  label: '2 Col',  icon: '◫', desc: 'Two columns side by side' },
+        { key: '3-col',  label: '3 Col',  icon: '⊟', desc: 'Three columns' },
+        { key: '4-col',  label: '4 Col',  icon: '⊞', desc: 'Four columns' },
+      ]
+      const activeLayout = props.layout || 'stack'
       return (
-        <div style={S.section}>
-          <div style={S.sectionTitle}>Section Content</div>
-          <Field label="Title">
-            <input style={S.input} value={props.title || ''} onChange={(e) => up({ title: e.target.value })} />
-          </Field>
-          <Field label="Subtitle">
-            <textarea style={S.textarea} rows={3} value={props.subtitle || ''} onChange={(e) => up({ subtitle: e.target.value })} />
-          </Field>
-          <div style={{ ...S.sectionTitle, marginTop: '10px' }}>Anchor Link</div>
-          <Field label="Section ID">
-            <input
-              style={S.input}
-              value={props.sectionId || ''}
-              placeholder={`Auto: ${element.id.slice(0, 8)}`}
-              onChange={(e) => up({ sectionId: e.target.value.replace(/\s+/g, '-').replace(/[^a-z0-9-]/gi, '') })}
-            />
-          </Field>
-          <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '-4px 0 4px', lineHeight: 1.4 }}>
-            Navbar links can target this section using #{props.sectionId || element.id.slice(0, 8)}
-          </p>
-        </div>
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Children Layout</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '5px', marginBottom: '10px' }}>
+              {SECTION_LAYOUTS.map((v) => {
+                const isActive = activeLayout === v.key
+                return (
+                  <div key={v.key} onClick={() => up({ layout: v.key })} title={v.desc}
+                    style={{ padding: '8px 4px 7px', borderRadius: '8px', border: `2px solid ${isActive ? '#4f6ef7' : '#e8e8e8'}`, backgroundColor: isActive ? '#eff6ff' : '#fafafa', cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s' }}>
+                    <div style={{ fontSize: '1rem', marginBottom: '3px', lineHeight: 1 }}>{v.icon}</div>
+                    <div style={{ fontSize: '0.62rem', fontWeight: '700', color: isActive ? '#4f6ef7' : '#374151', lineHeight: 1.2 }}>{v.label}</div>
+                  </div>
+                )
+              })}
+            </div>
+            {activeLayout !== 'stack' && (
+              <>
+                <Field label="Column Gap">
+                  <input style={S.input} value={props.gap || '24px'} onChange={(e) => up({ gap: e.target.value })} placeholder="24px" />
+                </Field>
+                <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '-4px 0 4px', lineHeight: 1.4 }}>
+                  Drag elements into the section — they auto-fill columns. Stacks on mobile.
+                </p>
+              </>
+            )}
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Section Content</div>
+            <Field label="Title">
+              <input style={S.input} value={props.title || ''} onChange={(e) => up({ title: e.target.value })} />
+            </Field>
+            <Field label="Subtitle">
+              <textarea style={S.textarea} rows={3} value={props.subtitle || ''} onChange={(e) => up({ subtitle: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Anchor Link</div>
+            <Field label="Section ID">
+              <input
+                style={S.input}
+                value={props.sectionId || ''}
+                placeholder={`Auto: ${element.id.slice(0, 8)}`}
+                onChange={(e) => up({ sectionId: e.target.value.replace(/\s+/g, '-').replace(/[^a-z0-9-]/gi, '') })}
+              />
+            </Field>
+            <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '-4px 0 4px', lineHeight: 1.4 }}>
+              Navbar links can target this section using #{props.sectionId || element.id.slice(0, 8)}
+            </p>
+          </div>
+        </>
       )
+    }
 
     case 'columns':
       return (
@@ -709,7 +788,7 @@ function StyleTab({ element, updateElement }) {
 }
 
 export default function PropertiesPanel() {
-  const { selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement } = useBuilder()
+  const { selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage } = useBuilder()
   const [activeTab, setActiveTab] = useState('content')
 
   // Determine what is selected: child element takes priority
@@ -719,6 +798,12 @@ export default function PropertiesPanel() {
   const activeUpdateElement = isChild
     ? (id, updates) => updateChildElement(selectedChildInfo.parentId, id, updates)
     : updateElement
+
+  // Detect if the selected child is inside a grid-layout section
+  const parentElement = isChild && selectedChildInfo
+    ? (currentPage?.elements || []).find((el) => el.id === selectedChildInfo.parentId)
+    : null
+  const parentIsGrid = parentElement?.props?.layout && parentElement.props.layout !== 'stack'
 
   if (!activeElement) {
     return (
@@ -743,6 +828,35 @@ export default function PropertiesPanel() {
           {activeElement.type}
         </span>
       </div>
+
+      {/* Full-width span toggle — only shown for children inside a grid section */}
+      {isChild && parentIsGrid && (
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Column Span</span>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {[
+              { key: 'auto', label: 'Auto' },
+              { key: 'full', label: '↔ Full Row' },
+            ].map(({ key, label }) => {
+              const isActive = (activeElement.props?.gridSpan || 'auto') === key
+              return (
+                <button
+                  key={key}
+                  onClick={() => activeUpdateElement(activeElement.id, { props: { gridSpan: key } })}
+                  style={{
+                    padding: '4px 10px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer', border: 'none',
+                    backgroundColor: isActive ? '#4f6ef7' : '#e5e7eb',
+                    color: isActive ? '#fff' : '#374151',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div style={S.tabs}>
         {['content', 'style'].map((tab) => (

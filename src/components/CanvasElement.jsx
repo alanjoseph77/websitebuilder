@@ -189,47 +189,88 @@ export default function CanvasElement({ element, index, totalCount }) {
       )}
 
       {/* Element content */}
-      <ElementRenderer
-        element={element}
-        isPreview={false}
-        childrenSlot={element.type === 'section' ? (
-          <div onClick={(e) => e.stopPropagation()}>
-            {(element.children || []).map((child) => {
-              const isChildSelected = selectedChildInfo?.parentId === element.id && selectedChildInfo?.childId === child.id
-              return (
-                <div
-                  key={child.id}
-                  onClick={(e) => { e.stopPropagation(); selectChild(element.id, child.id) }}
+      {(() => {
+        if (element.type !== 'section') {
+          return <ElementRenderer element={element} isPreview={false} childrenSlot={null} />
+        }
+
+        const sectionLayout = element.props?.layout || 'stack'
+        const sectionGap = element.props?.gap || '24px'
+        const gridCols = { '2-col': 'repeat(2, 1fr)', '3-col': 'repeat(3, 1fr)', '4-col': 'repeat(4, 1fr)' }[sectionLayout]
+        const hasHeader = element.props?.title || element.props?.subtitle
+
+        const renderChild = (child) => {
+          const isChildSelected = selectedChildInfo?.parentId === element.id && selectedChildInfo?.childId === child.id
+          const isFullSpan = gridCols && child.props?.gridSpan === 'full'
+          return (
+            <div
+              key={child.id}
+              onClick={(e) => { e.stopPropagation(); selectChild(element.id, child.id) }}
+              style={{
+                position: 'relative',
+                outline: isChildSelected ? '2px solid #4f6ef7' : '1px dashed #e5e7eb',
+                outlineOffset: '2px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                minHeight: gridCols ? '60px' : undefined,
+                gridColumn: isFullSpan ? '1 / -1' : undefined,
+              }}
+            >
+              <ElementRenderer element={child} isPreview={false} />
+              {isChildSelected && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteChildElement(element.id, child.id) }}
                   style={{
-                    position: 'relative',
-                    marginTop: '8px',
-                    outline: isChildSelected ? '2px solid #4f6ef7' : '1px dashed transparent',
-                    outlineOffset: '2px',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
+                    position: 'absolute', top: '6px', right: '6px',
+                    background: '#ef4444', color: '#fff', border: 'none',
+                    borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem',
+                    cursor: 'pointer', zIndex: 10,
                   }}
                 >
-                  <ElementRenderer element={child} isPreview={false} />
-                  {isChildSelected && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); deleteChildElement(element.id, child.id) }}
-                      style={{
-                        position: 'absolute', top: '6px', right: '6px',
-                        background: '#ef4444', color: '#fff', border: 'none',
-                        borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem',
-                        cursor: 'pointer', zIndex: 10,
-                      }}
-                    >
-                      × Remove
-                    </button>
-                  )}
+                  × Remove
+                </button>
+              )}
+            </div>
+          )
+        }
+
+        const childrenSlot = (
+          <div onClick={(e) => e.stopPropagation()}>
+            {gridCols ? (
+              <>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: gridCols,
+                  gap: sectionGap,
+                  alignItems: 'start',
+                  marginTop: hasHeader ? '16px' : '0',
+                }}>
+                  {(element.children || []).map(renderChild)}
+                  {(element.children || []).length === 0 && Array.from({ length: { '2-col': 2, '3-col': 3, '4-col': 4 }[sectionLayout] }).map((_, i) => (
+                    <div key={i} style={{ border: '2px dashed #e5e7eb', borderRadius: '6px', padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: '0.75rem', minHeight: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      Column {i + 1}
+                    </div>
+                  ))}
                 </div>
-              )
-            })}
-            <SectionInnerDropZone parentId={element.id} addChildElement={addChildElement} />
+                <div style={{ marginTop: '8px' }}>
+                  <SectionInnerDropZone parentId={element.id} addChildElement={addChildElement} />
+                </div>
+              </>
+            ) : (
+              <>
+                {(element.children || []).map((child) => (
+                  <div key={child.id} style={{ marginTop: '8px' }}>
+                    {renderChild(child)}
+                  </div>
+                ))}
+                <SectionInnerDropZone parentId={element.id} addChildElement={addChildElement} />
+              </>
+            )}
           </div>
-        ) : null}
-      />
+        )
+
+        return <ElementRenderer element={element} isPreview={false} childrenSlot={childrenSlot} />
+      })()}
     </div>
   )
 }

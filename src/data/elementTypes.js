@@ -10,6 +10,9 @@ export const ELEMENT_CATEGORIES = [
         description: 'Navigation bar',
         props: {
           brand: 'MyBrand',
+          navLayout: 'classic',
+          navLinkStyle: 'plain',
+          navEffect: 'none',
           links: [
             { text: 'Home', href: '#' },
             { text: 'About', href: '#about' },
@@ -53,6 +56,8 @@ export const ELEMENT_CATEGORIES = [
         props: {
           title: 'Section Title',
           subtitle: 'Add your content here.',
+          layout: 'stack',
+          gap: '24px',
         },
         styles: {
           backgroundColor: '#ffffff',

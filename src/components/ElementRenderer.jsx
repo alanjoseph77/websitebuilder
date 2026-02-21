@@ -7,10 +7,12 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
   const { type, props, styles } = element
   const { state, switchPage, viewportWidth } = useBuilder()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [activeHref, setActiveHref] = useState(() => element?.props?.links?.[0]?.href || null)
   const isMobile = viewportWidth === 'mobile'
 
   const handleNavLinkClick = (link, e) => {
     e.preventDefault()
+    setActiveHref(link.href)
     if (!isPreview) return
 
     if (link.linkType === 'section') {
@@ -32,110 +34,134 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
   switch (type) {
     case 'navbar': {
-      const navStyle = {
-        ...styles,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-      }
-      const sidebarBg = styles.backgroundColor || '#1a1a2e'
       const linkColor = styles.color || '#ccc'
+      const navBg = styles.backgroundColor || '#1a1a2e'
+      const links = props.links || []
+      const layout = props.navLayout || 'classic'
+      const linkStyle = props.navLinkStyle || 'plain'
+      const effect = props.navEffect || 'none'
 
+      // ── Effect: compute container style overrides ──
+      const effectStyles = effect === 'glass'
+        ? { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.15)' }
+        : effect === 'bold'
+        ? { borderBottom: '3px solid #4f6ef7' }
+        : {}
+
+      // ── Effect: brand renderer (bold adds icon) ──
+      const Brand = ({ centerStyle = {} }) => (
+        effect === 'bold' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', ...centerStyle }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '9px', backgroundColor: '#4f6ef7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1rem', color: '#fff', flexShrink: 0 }}>
+              {(props.brand || 'B')[0].toUpperCase()}
+            </div>
+            <span style={{ fontWeight: '800', fontSize: '1.2rem', color: linkColor, letterSpacing: '-0.02em' }}>{props.brand}</span>
+          </div>
+        ) : (
+          <div style={{ fontWeight: '700', fontSize: '1.2rem', color: linkColor, ...centerStyle }}>{props.brand}</div>
+        )
+      )
+
+      // ── Link style renderer ──
+      const renderLink = (link) => {
+        const isActive = link.href === activeHref
+        const base = { textDecoration: 'none', cursor: 'pointer', display: 'block', color: linkColor }
+        if (linkStyle === 'pill') return (
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.85rem', fontWeight: '600', padding: '7px 18px', borderRadius: '999px', color: isActive ? '#fff' : linkColor, backgroundColor: isActive ? '#4f6ef7' : 'rgba(255,255,255,0.12)', border: isActive ? 'none' : '1px solid rgba(255,255,255,0.2)', opacity: 1 }}>{link.text}</a>
+        )
+        if (linkStyle === 'ghost') return (
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.87rem', fontWeight: '500', padding: '6px 14px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.25)', opacity: isActive ? 1 : 0.85, backgroundColor: isActive ? 'rgba(255,255,255,0.15)' : 'transparent' }}>{link.text}</a>
+        )
+        if (linkStyle === 'underline') return (
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.88rem', fontWeight: isActive ? '600' : '400', opacity: isActive ? 1 : 0.75, paddingBottom: '2px', borderBottom: isActive ? '2px solid currentColor' : '1px solid rgba(255,255,255,0.4)' }}>{link.text}</a>
+        )
+        if (linkStyle === 'uppercase') return (
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.76rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: isActive ? 1 : 0.8 }}>{link.text}</a>
+        )
+        // plain (default)
+        return (
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.9rem', opacity: isActive ? 1 : 0.85, fontWeight: isActive ? '700' : '500', borderBottom: isActive ? '2px solid rgba(255,255,255,0.6)' : 'none', paddingBottom: isActive ? '2px' : '0' }}>{link.text}</a>
+        )
+      }
+
+      const linkGap = (linkStyle === 'pill' || linkStyle === 'ghost') ? '6px' : linkStyle === 'underline' ? '0' : '24px'
+
+      const LinkList = ({ items, extraStyle = {} }) => (
+        <ul style={{ display: 'flex', gap: linkGap, listStyle: 'none', padding: 0, margin: 0, flexWrap: 'wrap', alignItems: 'center', ...extraStyle }}>
+          {items.map((link, i) => (
+            <React.Fragment key={i}>
+              {linkStyle === 'underline' && i > 0 && (
+                <li style={{ color: linkColor, opacity: 0.25, padding: '0 6px', fontSize: '0.65rem' }}>·</li>
+              )}
+              <li>{renderLink(link)}</li>
+            </React.Fragment>
+          ))}
+        </ul>
+      )
+
+      // ── Mobile: hamburger dropdown (same for all layouts/styles) ──
       if (isMobile) {
         return (
-          // Wrapper with position:relative so dropdown is contained within the canvas
           <div style={{ position: 'relative' }}>
-            <nav style={navStyle}>
-              {/* Brand */}
-              <div style={{ fontWeight: '700', fontSize: '1.2rem', color: linkColor }}>
-                {props.brand}
-              </div>
-
-              {/* Hamburger / Close toggle */}
-              <button
-                onClick={(e) => { e.stopPropagation(); setSidebarOpen((o) => !o) }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: linkColor,
-                  fontSize: '1.4rem',
-                  lineHeight: 1,
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'opacity 0.15s',
-                }}
+            <nav style={{ ...styles, ...effectStyles, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <Brand />
+              <button onClick={(e) => { e.stopPropagation(); setSidebarOpen((o) => !o) }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: linkColor, fontSize: '1.4rem', lineHeight: 1, padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 title={sidebarOpen ? 'Close menu' : 'Open menu'}
               >
                 {sidebarOpen ? '✕' : '☰'}
               </button>
             </nav>
-
-            {/* Dropdown drawer — drops below the navbar, contained within the canvas */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                backgroundColor: sidebarBg,
-                zIndex: 20,
-                overflow: 'hidden',
-                maxHeight: sidebarOpen ? '480px' : '0px',
-                transition: 'max-height 0.32s cubic-bezier(0.4,0,0.2,1)',
-                boxShadow: sidebarOpen ? '0 8px 24px rgba(0,0,0,0.25)' : 'none',
-              }}
-            >
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: navBg, zIndex: 20, overflow: 'hidden', maxHeight: sidebarOpen ? '480px' : '0px', transition: 'max-height 0.32s cubic-bezier(0.4,0,0.2,1)', boxShadow: sidebarOpen ? '0 8px 24px rgba(0,0,0,0.25)' : 'none' }}>
               <ul style={{ listStyle: 'none', padding: '8px 20px 16px', margin: 0 }}>
-                {(props.links || []).map((link, i) => (
-                  <li key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                    <a
-                      href={link.href || '#'}
-                      onClick={(e) => { setSidebarOpen(false); handleNavLinkClick(link, e) }}
-                      style={{
-                        display: 'block',
-                        padding: '13px 4px',
-                        color: linkColor,
-                        textDecoration: 'none',
-                        fontSize: '0.95rem',
-                        fontWeight: '500',
-                        opacity: 0.9,
-                        letterSpacing: '0.01em',
-                      }}
-                    >
-                      {link.text}
-                    </a>
-                  </li>
-                ))}
+                {links.map((link, i) => {
+                  const isActive = link.href === activeHref
+                  return (
+                    <li key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                      <a href={link.href || '#'} onClick={(e) => { setSidebarOpen(false); handleNavLinkClick(link, e) }}
+                        style={{ display: 'block', padding: '13px 4px', color: linkColor, textDecoration: 'none', fontSize: '0.95rem', fontWeight: isActive ? '700' : '500', opacity: isActive ? 1 : 0.9 }}>
+                        {link.text}
+                      </a>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </div>
         )
       }
 
-      // Tablet / Desktop — horizontal nav
-      return (
-        <nav style={navStyle}>
-          <div style={{ fontWeight: '700', fontSize: '1.2rem', color: linkColor }}>
-            {props.brand}
+      // ── Desktop layouts (composed with any link style + effect) ──
+
+      if (layout === 'centered') {
+        return (
+          <div style={{ ...styles, ...effectStyles, textAlign: 'center' }}>
+            <Brand centerStyle={{ justifyContent: 'center', display: 'flex', marginBottom: '14px' }} />
+            <LinkList items={links} extraStyle={{ justifyContent: 'center' }} />
           </div>
-          <ul style={{ display: 'flex', gap: '24px', listStyle: 'none', padding: 0, margin: 0, flexWrap: 'wrap' }}>
-            {(props.links || []).map((link, i) => (
-              <li key={i}>
-                <a
-                  href={link.href || '#'}
-                  onClick={(e) => handleNavLinkClick(link, e)}
-                  style={{ color: linkColor, textDecoration: 'none', fontSize: '0.9rem', opacity: 0.85, cursor: 'pointer' }}
-                >
-                  {link.text}
-                </a>
-              </li>
-            ))}
-          </ul>
+        )
+      }
+
+      if (layout === 'split') {
+        const half = Math.ceil(links.length / 2)
+        return (
+          <nav style={{ ...styles, ...effectStyles, display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', paddingRight: '24px' }}>
+              <LinkList items={links.slice(0, half)} />
+            </div>
+            <Brand />
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', paddingLeft: '24px' }}>
+              <LinkList items={links.slice(half)} />
+            </div>
+          </nav>
+        )
+      }
+
+      // ── Classic (default): brand left, links right ──
+      return (
+        <nav style={{ ...styles, ...effectStyles, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <Brand />
+          <LinkList items={links} />
         </nav>
       )
     }
@@ -190,6 +216,19 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
     }
 
     case 'section': {
+      const sectionLayout = props.layout || 'stack'
+      const sectionGap = props.gap || '24px'
+      const gridCols = {
+        '2-col': isMobile ? '1fr' : 'repeat(2, 1fr)',
+        '3-col': isMobile ? '1fr' : 'repeat(3, 1fr)',
+        '4-col': isMobile ? '1fr' : 'repeat(4, 1fr)',
+      }[sectionLayout]
+
+      const hasHeader = props.title || props.subtitle
+      const gridStyle = gridCols
+        ? { display: 'grid', gridTemplateColumns: gridCols, gap: sectionGap, alignItems: 'start', marginTop: hasHeader ? '24px' : '0' }
+        : {}
+
       return (
         <section id={props.sectionId || element.id} style={styles}>
           {props.title && (
@@ -200,13 +239,25 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
               {props.subtitle}
             </p>
           )}
-          {isPreview
-            ? (element.children || []).map((child) => (
+          {isPreview ? (
+            gridCols ? (
+              <div style={gridStyle}>
+                {(element.children || []).map((child) => (
+                  <div key={child.id} style={{ gridColumn: child.props?.gridSpan === 'full' ? '1 / -1' : undefined }}>
+                    <ScrollReveal animation={child.props?.animation}>
+                      <ElementRenderer element={child} isPreview />
+                    </ScrollReveal>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              (element.children || []).map((child) => (
                 <ScrollReveal key={child.id} animation={child.props?.animation}>
                   <ElementRenderer element={child} isPreview />
                 </ScrollReveal>
               ))
-            : childrenSlot}
+            )
+          ) : childrenSlot}
         </section>
       )
     }
