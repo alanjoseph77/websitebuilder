@@ -19,6 +19,7 @@ function SectionInnerDropZone({ parentId, addChildElement }) {
     }
   }
 
+
   return (
     <div
       onDragOver={handleDragOver}
@@ -57,8 +58,10 @@ const OVERLAY_BTN = (color = '#4f6ef7') => ({
   gap: '3px',
 })
 
-export default function CanvasElement({ element, index, totalCount }) {
-  const { state, selectElement, deleteElement, duplicateElement, moveElementUp, moveElementDown, reorderElements, addElement, addChildElement, deleteChildElement, selectChild, selectedChildInfo } = useBuilder()
+export default function CanvasElement({ element, index, totalCount, sidebarOnly = false }) {
+  const { state, selectElement, deleteElement, duplicateElement, moveElementUp, moveElementDown, reorderElements, addElement, addChildElement, deleteChildElement, selectChild, selectedChildInfo, viewportWidth } = useBuilder()
+  const isMobile = viewportWidth === 'mobile'
+  const isTablet = viewportWidth === 'tablet'
   const isSelected = state.selectedElementId === element.id
   const [hovered, setHovered] = useState(false)
   const [dragging, setDragging] = useState(false)
@@ -138,9 +141,10 @@ export default function CanvasElement({ element, index, totalCount }) {
         <div
           style={{
             position: 'absolute',
-            top: isSelected ? '-32px' : '-26px',
-            left: 0,
-            zIndex: 20,
+            top: index === 0 ? '6px' : (isSelected ? '-32px' : '-26px'),
+            left: index === 0 ? 'auto' : 0,
+            right: index === 0 ? '6px' : 'auto',
+            zIndex: 30,
             display: 'flex',
             gap: '4px',
             alignItems: 'center',
@@ -191,12 +195,16 @@ export default function CanvasElement({ element, index, totalCount }) {
       {/* Element content */}
       {(() => {
         if (element.type !== 'section') {
-          return <ElementRenderer element={element} isPreview={false} childrenSlot={null} />
+          return <ElementRenderer element={element} isPreview={false} childrenSlot={null} sidebarOnly={sidebarOnly} />
         }
 
         const sectionLayout = element.props?.layout || 'stack'
         const sectionGap = element.props?.gap || '24px'
-        const gridCols = { '2-col': 'repeat(2, 1fr)', '3-col': 'repeat(3, 1fr)', '4-col': 'repeat(4, 1fr)' }[sectionLayout]
+        const gridCols = {
+          '2-col': isMobile ? '1fr' : 'repeat(2, 1fr)',
+          '3-col': isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+          '4-col': isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+        }[sectionLayout]
         const hasHeader = element.props?.title || element.props?.subtitle
 
         const renderChild = (child) => {

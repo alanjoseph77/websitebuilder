@@ -8,7 +8,93 @@ const initialState = {
     {
       id: 'page-home',
       name: 'Home',
-      elements: [],
+      elements: [
+        {
+          id: 'init-navbar',
+          type: 'navbar',
+          props: {
+            brand: 'MyBrand',
+            navLayout: 'classic',
+            navLinkStyle: 'plain',
+            navEffect: 'none',
+            links: [
+              { text: 'Home', href: '#' },
+              { text: 'About', href: '#about' },
+              { text: 'Services', href: '#services' },
+              { text: 'Contact', href: '#contact' },
+            ],
+          },
+          styles: {
+            backgroundColor: '#1a1a2e',
+            color: '#ffffff',
+            padding: '16px 40px',
+            fontSize: '1rem',
+          },
+        },
+        {
+          id: 'init-section',
+          type: 'section',
+          props: {
+            title: 'Section Title',
+            subtitle: 'Add your content here.',
+            layout: '2-col',
+            gap: '24px',
+          },
+          styles: {
+            backgroundColor: '#ffffff',
+            color: '#333333',
+            padding: '60px 40px',
+            textAlign: 'center',
+          },
+          children: [
+            {
+              id: 'init-image',
+              type: 'image',
+              props: {
+                src: 'https://placehold.co/800x400/4f6ef7/ffffff?text=Your+Image',
+                alt: 'Image description',
+                caption: '',
+              },
+              styles: {
+                width: '100%',
+                textAlign: 'center',
+                padding: '20px 40px',
+              },
+            },
+            {
+              id: 'init-para1',
+              type: 'paragraph',
+              props: {
+                text: 'Add your paragraph text here. Click to select and edit in the properties panel.',
+              },
+              styles: {
+                color: '#555555',
+                fontSize: '1rem',
+                textAlign: 'left',
+                padding: '10px 40px',
+                lineHeight: '1.7',
+                fontFamily: 'inherit',
+              },
+            },
+            {
+              id: 'init-para2',
+              type: 'paragraph',
+              props: {
+                text: 'Add your second paragraph text here. Click to select and edit in the properties panel.',
+                gridSpan: 'full',
+              },
+              styles: {
+                color: '#555555',
+                fontSize: '1rem',
+                textAlign: 'left',
+                padding: '10px 40px',
+                lineHeight: '1.7',
+                fontFamily: 'inherit',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
   currentPageId: 'page-home',
@@ -29,10 +115,29 @@ function builderReducer(state, action) {
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
         const elements = [...page.elements]
-        if (insertIndex !== undefined && insertIndex >= 0) {
-          elements.splice(insertIndex, 0, newElement)
-        } else {
-          elements.push(newElement)
+        let addedToChild = false
+
+        // Feature for Mobile: If a section is selected, auto-add to its children
+        if (state.selectedElementId) {
+          const targetIndex = elements.findIndex(el => el.id === state.selectedElementId)
+          if (targetIndex !== -1) {
+            const targetEl = elements[targetIndex]
+            if (targetEl.type === 'section' || targetEl.type === 'columns') {
+              elements[targetIndex] = {
+                ...targetEl,
+                children: [...(targetEl.children || []), newElement]
+              }
+              addedToChild = true
+            }
+          }
+        }
+
+        if (!addedToChild) {
+          if (insertIndex !== undefined && insertIndex >= 0) {
+            elements.splice(insertIndex, 0, newElement)
+          } else {
+            elements.push(newElement)
+          }
         }
         return { ...page, elements }
       })
@@ -165,6 +270,12 @@ function builderReducer(state, action) {
       return { ...state, pages }
     }
 
+    case 'UPDATE_PAGE_SETTINGS': {
+      const { id, settings } = action.payload
+      const pages = state.pages.map((p) => p.id === id ? { ...p, ...settings } : p)
+      return { ...state, pages }
+    }
+
     case 'DELETE_CHILD_ELEMENT': {
       const { parentId, childId } = action.payload
       const pages = state.pages.map((page) => {
@@ -204,10 +315,98 @@ function builderReducer(state, action) {
   }
 }
 
+// ── Actions that should NOT be recorded in undo history ──
+const NON_HISTORY_ACTIONS = new Set(['SELECT_ELEMENT', 'SELECT_CHILD', 'SWITCH_PAGE'])
+const MAX_HISTORY = 50
+
+function useUndoReducer(reducer, initialSt) {
+  const [history, setHistory] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem('siteforge_state')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed && parsed.pages && parsed.currentPageId) {
+          return { past: [], present: { ...initialSt, ...parsed, selectedElementId: null, selectedChildInfo: null }, future: [] }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse local storage siteforge_state", e)
+    }
+    return { past: [], present: initialSt, future: [] }
+  })
+
+  const dispatch = useCallback((action) => {
+    if (action.type === 'UNDO') {
+      setHistory(h => {
+        if (h.past.length === 0) return h
+        const prev = h.past[h.past.length - 1]
+        return { past: h.past.slice(0, -1), present: prev, future: [h.present, ...h.future].slice(0, MAX_HISTORY) }
+      })
+      return
+    }
+    if (action.type === 'REDO') {
+      setHistory(h => {
+        if (h.future.length === 0) return h
+        const next = h.future[0]
+        return { past: [...h.past, h.present].slice(-MAX_HISTORY), present: next, future: h.future.slice(1) }
+      })
+      return
+    }
+    setHistory(h => {
+      const newPresent = reducer(h.present, action)
+      if (newPresent === h.present) return h
+      if (NON_HISTORY_ACTIONS.has(action.type)) {
+        return { ...h, present: newPresent }
+      }
+      return { past: [...h.past, h.present].slice(-MAX_HISTORY), present: newPresent, future: [] }
+    })
+  }, [reducer])
+
+  return [history.present, dispatch, history.past.length > 0, history.future.length > 0]
+}
+
 export function BuilderProvider({ children }) {
-  const [state, dispatch] = useReducer(builderReducer, initialState)
+  const [state, dispatch, canUndo, canRedo] = useUndoReducer(builderReducer, initialState)
   const [previewMode, setPreviewMode] = useState(false)
   const [viewportWidth, setViewportWidth] = useState('desktop')
+
+  // Save state to local storage whenever it changes
+  React.useEffect(() => {
+    try {
+      const toSave = { pages: state.pages, currentPageId: state.currentPageId }
+      localStorage.setItem('siteforge_state', JSON.stringify(toSave))
+    } catch (e) {
+      console.warn("Failed to save siteforge_state to local storage", e)
+    }
+  }, [state.pages, state.currentPageId])
+
+  // ── Keyboard shortcuts: Ctrl+Z / Ctrl+Y ──
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isMeta = e.ctrlKey || e.metaKey
+      if (!isMeta) return
+      if (e.key === 'z' || e.key === 'Z') {
+        e.preventDefault()
+        dispatch({ type: 'UNDO' })
+      }
+      if (e.key === 'y' || e.key === 'Y') {
+        e.preventDefault()
+        dispatch({ type: 'REDO' })
+      }
+      // Delete selected element
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Only delete if not typing in an input
+        const tag = document.activeElement?.tagName?.toLowerCase()
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+        if (state.selectedElementId) {
+          e.preventDefault()
+          dispatch({ type: 'DELETE_ELEMENT', payload: state.selectedElementId })
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [dispatch, state.selectedElementId])
 
   const currentPage = state.pages.find((p) => p.id === state.currentPageId)
   const selectedElement = currentPage?.elements.find((el) => el.id === state.selectedElementId)
@@ -219,54 +418,72 @@ export function BuilderProvider({ children }) {
 
   const addElement = useCallback((element, insertIndex) => {
     dispatch({ type: 'ADD_ELEMENT', payload: { element, insertIndex } })
-  }, [])
+  }, [dispatch])
 
   const updateElement = useCallback((id, updates) => {
     dispatch({ type: 'UPDATE_ELEMENT', payload: { id, updates } })
-  }, [])
+  }, [dispatch])
 
   const deleteElement = useCallback((id) => {
     dispatch({ type: 'DELETE_ELEMENT', payload: id })
-  }, [])
+  }, [dispatch])
 
   const duplicateElement = useCallback((id) => {
     dispatch({ type: 'DUPLICATE_ELEMENT', payload: id })
-  }, [])
+  }, [dispatch])
 
   const selectElement = useCallback((id) => {
     dispatch({ type: 'SELECT_ELEMENT', payload: id })
-  }, [])
+  }, [dispatch])
 
   const reorderElements = useCallback((fromIndex, toIndex) => {
     dispatch({ type: 'REORDER_ELEMENTS', payload: { fromIndex, toIndex } })
-  }, [])
+  }, [dispatch])
 
   const moveElementUp = useCallback((id) => {
     dispatch({ type: 'MOVE_ELEMENT_UP', payload: id })
-  }, [])
+  }, [dispatch])
 
   const moveElementDown = useCallback((id) => {
     dispatch({ type: 'MOVE_ELEMENT_DOWN', payload: id })
-  }, [])
+  }, [dispatch])
 
   const addChildElement = useCallback((parentId, childElement) => {
     dispatch({ type: 'ADD_CHILD_ELEMENT', payload: { parentId, childElement } })
-  }, [])
+  }, [dispatch])
 
   const deleteChildElement = useCallback((parentId, childId) => {
     dispatch({ type: 'DELETE_CHILD_ELEMENT', payload: { parentId, childId } })
-  }, [])
+  }, [dispatch])
 
   const switchPage = useCallback((pageId) => {
     dispatch({ type: 'SWITCH_PAGE', payload: pageId })
-  }, [])
+  }, [dispatch])
 
   const selectChild = useCallback((parentId, childId) => {
     dispatch({ type: 'SELECT_CHILD', payload: { parentId, childId } })
-  }, [])
+  }, [dispatch])
 
   const updateChildElement = useCallback((parentId, childId, updates) => {
     dispatch({ type: 'UPDATE_CHILD_ELEMENT', payload: { parentId, childId, updates } })
+  }, [dispatch])
+
+  const updatePageSettings = useCallback((id, settings) => {
+    dispatch({ type: 'UPDATE_PAGE_SETTINGS', payload: { id, settings } })
+  }, [dispatch])
+
+  const undo = useCallback(() => dispatch({ type: 'UNDO' }), [dispatch])
+  const redo = useCallback(() => dispatch({ type: 'REDO' }), [dispatch])
+
+  // ── Uploaded images (kept outside reducer — File objects aren't serialisable) ──
+  const [uploadedImages, setUploadedImages] = useState([])
+
+  const addUploadedImage = useCallback((file) => {
+    const objectUrl = URL.createObjectURL(file)
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    // Deduplicate by objectUrl
+    setUploadedImages(prev => [...prev, { objectUrl, name: safeName, file }])
+    return objectUrl
   }, [])
 
   return (
@@ -295,6 +512,13 @@ export function BuilderProvider({ children }) {
         selectedChildInfo: state.selectedChildInfo,
         viewportWidth,
         setViewportWidth,
+        updatePageSettings,
+        uploadedImages,
+        addUploadedImage,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
       }}
     >
       {children}

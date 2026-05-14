@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "Free drag-and-drop website builder",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-sitemap": "node scripts/update-sitemap.js",
+    "indexnow": "node scripts/indexnow.js",
+    "deploy": "node scripts/update-sitemap.js && vite build && firebase deploy --only hosting && node scripts/indexnow.js"
   },
   "dependencies": {
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.575.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "jszip": "^3.10.1",
-    "file-saver": "^2.0.5",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

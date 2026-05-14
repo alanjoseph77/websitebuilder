@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://studio.otaga.in/sitemap.xml
+
+# IndexNow API Key
+# Key file: https://studio.otaga.in/a4e37b1c24e4845b0a7f0e3d8c9f12567.txt

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veluno — The Science of Glow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-warm: #fdfaf6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle Film Grain Effect */
+        .grain::after {
+            content: "";
+            position: fixed;
+            top: -150%;
+            left: -150%;
+            width: 300%;
+            height: 300%;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .hero-height {
+            height: calc(100vh - 80px);
+        }
+
+        .split-divider {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+            z-index: 5;
+            transform: translateX(-50%);
+        }
+
+        .nav-item {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: black;
+            transition: width 0.3s ease;
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scroll-indicator {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scroll-indicator:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom scrollbar for premium feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+    </style>
+</head>
+<body class="grain">
+
+    <!-- Premium Navigation -->
+    <header class="h-20 w-full flex items-center justify-between px-8 lg:px-16 bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-[60]">
+        <!-- Brand Identity -->
+        <div class="flex items-center gap-3 cursor-pointer group">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover:rotate-180 transition-transform duration-1000">
+                <path d="M12 2L13.5 9.5L21 11L13.5 12.5L12 20L10.5 12.5L3 11L10.5 9.5L12 2Z" fill="black"/>
+            </svg>
+            <span class="text-2xl font-bold tracking-[-0.03em]">Veluno</span>
+        </div>
+
+        <!-- High-End Menu -->
+        <nav class="hidden lg:flex items-center gap-10 text-[14px] font-semibold tracking-wide uppercase">
+            <a href="#" class="nav-item">Men</a>
+            <a href="#" class="nav-item">Women</a>
+            <a href="#" class="nav-item">Kids</a>
+            <a href="#" class="nav-item">New Arrivals</a>
+            <div class="flex items-center gap-1.5 cursor-pointer group">
+                <span class="nav-item">Categories</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 group-hover:rotate-180 transition-transform"></i>
+            </div>
+        </nav>
+
+        <!-- Functional Actions -->
+        <div class="flex items-center gap-6">
+            <div class="hidden md:flex items-center bg-[#f7f7f7] border border-gray-100 rounded-full px-5 py-2.5 w-64 transition-all focus-within:w-72 focus-within:bg-white focus-within:shadow-sm">
+                <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                <input type="text" placeholder="Search products..." class="bg-transparent border-none outline-none px-3 text-sm w-full font-medium placeholder:text-gray-400">
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <button class="text-gray-900 hover:scale-110 transition-transform"><i data-lucide="heart" class="w-5 h-5"></i></button>
+                <button class="text-gray-900 hover:scale-110 transition-transform relative">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span class="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                </button>
+                <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-100 ring-1 ring-black/5 cursor-pointer hover:opacity-80 transition-opacity">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" alt="Profile" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Split Hero Section -->
+    <main class="relative hero-height flex flex-col md:flex-row bg-[#0c0c0c]">
+        <div class="split-divider hidden md:block"></div>
+        
+        <!-- Imagery: Left (Application Context) -->
+        <div class="relative flex-1 h-1/2 md:h-full overflow-hidden">
+            <img 
+                src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&q=90&w=1200" 
+                alt="Radiant Skin Care" 
+                class="w-full h-full object-cover opacity-90 transition-transform duration-[3s] hover:scale-110"
+            >
+            <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- Imagery: Right (Product Still Life) -->
+        <div class="relative flex-1 h-1/2 md:h-full overflow-hidden">
+            <img 
+                src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=90&w=1200" 
+                alt="Premium Serum Bottle" 
+                class="w-full h-full object-cover opacity-85 transition-transform duration-[3s] hover:scale-110"
+            >
+            <div class="absolute inset-0 bg-gradient-to-l from-black/40 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- Center Stage Content -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20 pointer-events-none">
+            <h1 class="reveal text-white text-7xl md:text-9xl lg:text-[140px] font-bold tracking-tight mb-6 pointer-events-auto leading-[0.9]">
+                Glow <span class="font-extralight opacity-80">&</span> Care
+            </h1>
+            
+            <p class="reveal text-white/80 text-[15px] md:text-[17px] max-w-xl font-light leading-relaxed mb-16 pointer-events-auto delay-100" style="animation-delay: 0.2s">
+                Veluno is your go-to destination for modern and versatile beauty. <br class="hidden md:block">
+                We bring together timeless care and premium quality to your routine.
+            </p>
+
+            <!-- Scroll CTA -->
+            <div class="reveal pointer-events-auto cursor-pointer flex flex-col items-center gap-6 group" style="animation-delay: 0.4s">
+                <div class="scroll-indicator w-[72px] h-[72px] rounded-full border border-white/20 flex items-center justify-center backdrop-blur-sm bg-white/5 group-hover:bg-white/10 group-hover:border-white/50">
+                    <div class="flex flex-col items-center">
+                        <div class="w-[1px] h-8 bg-gradient-to-b from-white to-transparent mb-[-2px]"></div>
+                        <i data-lucide="chevron-down" class="text-white w-4 h-4 mt-[-4px]"></i>
+                    </div>
+                </div>
+                <span class="text-white text-[11px] uppercase tracking-[0.5em] font-semibold opacity-60 group-hover:opacity-100 transition-opacity">Scroll Down</span>
+            </div>
+        </div>
+
+        <!-- Detail: Dynamic Corner Tag -->
+        <div class="absolute bottom-12 left-12 z-30 hidden lg:flex items-center gap-4 text-white/50 text-[10px] uppercase tracking-[0.3em] reveal" style="animation-delay: 0.8s">
+            <span>Cruelty Free</span>
+            <div class="w-1 h-1 bg-white/30 rounded-full"></div>
+            <span>Vegan Formula</span>
+            <div class="w-1 h-1 bg-white/30 rounded-full"></div>
+            <span>Dermatology Tested</span>
+        </div>
+    </main>
+
+    <!-- Content Sections (Mocked for Scroll context) -->
+    <section class="py-32 px-16 bg-[#fdfaf6]">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-24">
+            <div class="space-y-6">
+                <span class="text-xs font-bold uppercase tracking-widest text-black/40">The Origin</span>
+                <h3 class="text-3xl font-medium">Pure Science</h3>
+                <p class="text-gray-500 leading-relaxed font-light">Engineered with botanical extracts and advanced peptides for visible transformation.</p>
+            </div>
+            <div class="space-y-6">
+                <span class="text-xs font-bold uppercase tracking-widest text-black/40">The Process</span>
+                <h3 class="text-3xl font-medium">Eco-Conscious</h3>
+                <p class="text-gray-500 leading-relaxed font-light">Sustainable glass packaging and carbon-neutral shipping on every single order.</p>
+            </div>
+            <div class="space-y-6">
+                <span class="text-xs font-bold uppercase tracking-widest text-black/40">The Result</span>
+                <h3 class="text-3xl font-medium">Lasting Radiance</h3>
+                <p class="text-gray-500 leading-relaxed font-light">94% of users reported improved skin texture within the first 14 days of application.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        lucide.createIcons();
+
+        // Parallax effect on scroll for hero images
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const images = document.querySelectorAll('main img');
+            images.forEach(img => {
+                img.style.transform = `scale(1.1) translateY(${scrolled * 0.1}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

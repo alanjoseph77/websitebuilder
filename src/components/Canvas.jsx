@@ -4,6 +4,7 @@ import { getElementDefault } from '../data/elementTypes'
 import CanvasElement from './CanvasElement'
 import ElementRenderer from './ElementRenderer'
 import ScrollReveal from './ScrollReveal'
+import { Eye, Smartphone, Tablet, Monitor, Layers, LayoutTemplate, X } from 'lucide-react'
 
 const VIEWPORT_WIDTHS = { mobile: '375px', tablet: '768px', desktop: '960px' }
 
@@ -12,20 +13,21 @@ const S = {
     flex: 1,
     minHeight: 0,
     overflow: 'auto',
+    WebkitOverflowScrolling: 'touch',
     backgroundColor: '#e8eaed',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
     padding: '24px',
   },
   page: {
+    margin: '0 auto',
     width: '100%',
     maxWidth: '960px',
     backgroundColor: '#ffffff',
     minHeight: '600px',
     boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
     borderRadius: '4px',
-    overflow: 'hidden',
+    overflow: 'clip',
     position: 'relative',
     flexShrink: 0,
   },
@@ -43,26 +45,9 @@ const S = {
     borderRadius: '8px',
     margin: '40px',
   },
-  emptyIcon: {
-    fontSize: '3rem',
-  },
-  emptyTitle: {
-    fontSize: '1.2rem',
-    fontWeight: '600',
-    color: '#6b7280',
-  },
-  emptyText: {
-    fontSize: '0.9rem',
-    maxWidth: '280px',
-    lineHeight: 1.5,
-  },
-  dropIndicator: {
-    height: '4px',
-    backgroundColor: '#4f6ef7',
-    borderRadius: '2px',
-    margin: '0 -2px',
-    boxShadow: '0 0 8px rgba(79,110,247,0.5)',
-  },
+  emptyIcon: { color: '#9ca3af', display: 'flex', justifyContent: 'center' },
+  emptyTitle: { fontSize: '1.2rem', fontWeight: '600', color: '#6b7280' },
+  emptyText: { fontSize: '0.9rem', maxWidth: '280px', lineHeight: 1.5 },
   canvasLabel: {
     background: '#1a1a2e',
     color: '#9ca3af',
@@ -72,7 +57,7 @@ const S = {
     display: 'flex',
     gap: '16px',
     alignItems: 'center',
-    marginBottom: '8px',
+    margin: '0 auto 8px auto',
     width: '100%',
     maxWidth: '960px',
   },
@@ -86,13 +71,12 @@ const S = {
     width: '100%',
     maxWidth: '960px',
     borderRadius: '4px 4px 0 0',
-    marginBottom: '0',
+    margin: '0 auto 0 auto',
   },
 }
 
 function DropZone({ onDrop, compact = false }) {
   const [over, setOver] = useState(false)
-
   return (
     <div
       onDragOver={(e) => { e.preventDefault(); setOver(true) }}
@@ -117,22 +101,36 @@ function DropZone({ onDrop, compact = false }) {
 }
 
 export default function Canvas() {
-  const { currentPage, addElement, selectElement, previewMode, viewportWidth } = useBuilder()
+  const { currentPage, addElement, selectElement, previewMode, viewportWidth, state } = useBuilder()
   const [canvasDragOver, setCanvasDragOver] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
   const elements = currentPage?.elements || []
   const maxWidth = VIEWPORT_WIDTHS[viewportWidth] || '960px'
+  const isSmallView = viewportWidth === 'mobile' || viewportWidth === 'tablet'
+
+  // ── Persistent sidebar: find any page that owns a sidebar navbar ──────────
+  // The sidebar stays visible even when switching between pages.
+  const allPages = state?.pages || []
+  const sidebarSourcePage = allPages.find((p) =>
+    p.elements?.[0]?.type === 'navbar' &&
+    ['sidebar', 'sidebar-tabs'].includes(p.elements[0]?.props?.navTemplate)
+  )
+  const sidebarEl = sidebarSourcePage?.elements[0] || null
+  const isSidebarLayout = !!sidebarEl
+
+  // On the sidebar's own page → skip index 0 (the sidebar) for main content
+  const onSidebarPage = isSidebarLayout && sidebarSourcePage?.id === currentPage?.id
+  const mainEls = onSidebarPage ? elements.slice(1) : elements
+  // Drop index offset accounts for the sidebar element occupying index 0
+  const sidebarOffset = onSidebarPage ? 1 : 0
 
   const handleDropAtIndex = (e, index) => {
-    // New element from panel
     const elementType = e.dataTransfer.getData('application/x-element-type')
     if (elementType) {
       const def = getElementDefault(elementType)
-      if (def) {
-        addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, index)
-      }
-      return
+      if (def) addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, index)
     }
-    // Reorder handled in CanvasElement
   }
 
   const handleCanvasDrop = (e) => {
@@ -141,28 +139,145 @@ export default function Canvas() {
     const elementType = e.dataTransfer.getData('application/x-element-type')
     if (elementType) {
       const def = getElementDefault(elementType)
-      if (def) {
-        addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } })
-      }
+      if (def) addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } })
     }
   }
 
   const handleCanvasClick = () => selectElement(null)
 
+  // ── Sidebar layout renderer ───────────────────────────────────────────────
+  const renderSidebarLayout = () => {
+    if (!sidebarEl) return null
+    const sidebarNavBg = sidebarEl.styles?.backgroundColor || '#1e1b4b'
+    const sidebarBrand = sidebarEl.props?.brand || 'Menu'
+
+    // The sidebar is editable only when the user is on the sidebar's source page.
+    // On other pages it renders as read-only so drag/delete operations target the right page.
+    const sidebarEditable = !previewMode && onSidebarPage
+    const SidebarNode = sidebarEditable
+      ? <CanvasElement element={sidebarEl} index={0} totalCount={elements.length} sidebarOnly />
+      : <ElementRenderer element={sidebarEl} isPreview={previewMode} sidebarOnly />
+
+    return (
+      <div style={{ display: 'flex', minHeight: '600px', alignItems: 'stretch', position: 'relative' }}>
+
+        {/* ── Mobile: top bar with hamburger ── */}
+        {isSmallView && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '52px',
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '0 16px',
+            backgroundColor: sidebarNavBg, zIndex: 20, flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              style={{ background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#fff', padding: '7px 9px', display: 'flex', alignItems: 'center', lineHeight: 0, flexShrink: 0 }}
+              title="Open menu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <span style={{ fontWeight: '700', fontSize: '0.9rem', color: '#fff', whiteSpace: 'nowrap' }}>{sidebarBrand}</span>
+          </div>
+        )}
+
+        {/* ── Mobile: backdrop overlay ── */}
+        {isSmallView && mobileSidebarOpen && (
+          <div
+            onClick={() => setMobileSidebarOpen(false)}
+            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 25 }}
+          />
+        )}
+
+        {/* ── Sidebar panel ── */}
+        <div style={{
+          flexShrink: 0,
+          display: isSmallView ? (mobileSidebarOpen ? 'flex' : 'none') : 'flex',
+          alignSelf: 'stretch',
+          position: isSmallView ? 'absolute' : 'sticky',
+          top: 0,
+          bottom: isSmallView ? 0 : undefined,
+          left: 0,
+          maxHeight: isSmallView ? undefined : '100vh',
+          zIndex: 30,
+          transition: 'opacity 0.2s',
+        }}>
+          {/* Mobile close button */}
+          {isSmallView && (
+            <button
+              onClick={() => setMobileSidebarOpen(false)}
+              style={{
+                position: 'absolute', top: '12px', right: '10px',
+                background: 'rgba(255,255,255,0.15)', border: 'none',
+                borderRadius: '6px', cursor: 'pointer', color: '#fff',
+                padding: '4px 9px', fontSize: '1rem', zIndex: 40,
+                lineHeight: 1,
+              }}
+              title="Close menu"
+            >
+              <X size={14} />
+            </button>
+          )}
+          {SidebarNode}
+        </div>
+
+        {/* ── Main content area ── */}
+        <div style={{ flex: 1, minWidth: 0, paddingTop: isSmallView ? '52px' : 0 }}>
+          {previewMode ? (
+            mainEls.length === 0 ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: '#9ca3af' }}>
+                No page content yet. Switch to edit mode and drag elements here.
+              </div>
+            ) : (
+              mainEls.map((el) => (
+                <ScrollReveal key={el.id} animation={el.props?.animation}>
+                  <ElementRenderer element={el} isPreview />
+                </ScrollReveal>
+              ))
+            )
+          ) : (
+            <>
+              <DropZone onDrop={(e) => handleDropAtIndex(e, sidebarOffset)} />
+              {mainEls.length === 0 ? (
+                <div
+                  style={{ ...S.empty, margin: '24px' }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); handleDropAtIndex(e, sidebarOffset) }}
+                >
+                  <span style={S.emptyIcon}><LayoutTemplate size={36} strokeWidth={1.2} /></span>
+                  <div style={S.emptyTitle}>Add Page Content</div>
+                  <div style={S.emptyText}>Drag elements from the left panel into this area.</div>
+                </div>
+              ) : (
+                mainEls.map((el, i) => (
+                  <React.Fragment key={el.id}>
+                    <CanvasElement element={el} index={i + sidebarOffset} totalCount={elements.length} />
+                    <DropZone onDrop={(e) => handleDropAtIndex(e, i + sidebarOffset + 1)} compact />
+                  </React.Fragment>
+                ))
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={S.wrapper} onClick={handleCanvasClick}>
       {previewMode && (
-        <div style={{ ...S.previewBanner, maxWidth }}>
-          👁 Preview Mode — {viewportWidth === 'mobile' ? '📱 Mobile' : viewportWidth === 'tablet' ? '📟 Tablet' : '🖥 Desktop'}
+        <div style={{ ...S.previewBanner, maxWidth, display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Eye size={13} /> Preview Mode —{' '}
+          {viewportWidth === 'mobile' ? <><Smartphone size={13} /> Mobile</> : viewportWidth === 'tablet' ? <><Tablet size={13} /> Tablet</> : <><Monitor size={13} /> Desktop</>}
         </div>
       )}
 
       {!previewMode && (
         <div style={{ ...S.canvasLabel, maxWidth }}>
-          <span>🖥 Canvas</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Layers size={12} /> Canvas</span>
           <span>{elements.length} element{elements.length !== 1 ? 's' : ''}</span>
-          <span style={{ marginLeft: 'auto', fontSize: '0.68rem', color: '#6b7280' }}>
-            {viewportWidth === 'mobile' ? '📱 Mobile 375px' : viewportWidth === 'tablet' ? '📟 Tablet 768px' : '🖥 Desktop 960px'}
+          <span style={{ marginLeft: 'auto', fontSize: '0.68rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {viewportWidth === 'mobile' ? <><Smartphone size={11} /> Mobile 375px</> : viewportWidth === 'tablet' ? <><Tablet size={11} /> Tablet 768px</> : <><Monitor size={11} /> Desktop 960px</>}
           </span>
         </div>
       )}
@@ -170,7 +285,10 @@ export default function Canvas() {
       <div
         style={{
           ...S.page,
-          maxWidth,
+          width: VIEWPORT_WIDTHS[viewportWidth] || '960px',
+          maxWidth: 'none',
+          backgroundColor: currentPage?.canvasBg || '#ffffff',
+          overflow: isSidebarLayout ? 'visible' : 'clip',
           outline: !previewMode && canvasDragOver ? '2px dashed #4f6ef7' : 'none',
         }}
         onDragOver={(e) => { e.preventDefault(); setCanvasDragOver(true) }}
@@ -178,42 +296,40 @@ export default function Canvas() {
         onDrop={handleCanvasDrop}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Preview mode: render elements read-only with scroll animations */}
-        {previewMode ? (
-          elements.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#9ca3af' }}>
-              No elements yet. Switch back to edit mode to add content.
-            </div>
-          ) : (
-            elements.map((el) => (
-              <ScrollReveal key={el.id} animation={el.props?.animation}>
-                <ElementRenderer element={el} isPreview />
-              </ScrollReveal>
-            ))
-          )
-        ) : (
-          /* Edit mode: elements with controls + drop zones */
+        {isSidebarLayout ? renderSidebarLayout() : (
           <>
-            <DropZone onDrop={(e) => handleDropAtIndex(e, 0)} />
-            {elements.length === 0 ? (
-              <div
-                style={S.empty}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleCanvasDrop}
-              >
-                <span style={S.emptyIcon}>🏗️</span>
-                <div style={S.emptyTitle}>Start Building</div>
-                <div style={S.emptyText}>
-                  Drag elements from the left panel and drop them here, or click an element to add it.
+            {previewMode ? (
+              elements.length === 0 ? (
+                <div style={{ padding: '60px', textAlign: 'center', color: '#9ca3af' }}>
+                  No elements yet. Switch back to edit mode to add content.
                 </div>
-              </div>
+              ) : (
+                elements.map((el) => (
+                  <ScrollReveal key={el.id} animation={el.props?.animation}>
+                    <ElementRenderer element={el} isPreview />
+                  </ScrollReveal>
+                ))
+              )
             ) : (
-              elements.map((el, i) => (
-                <React.Fragment key={el.id}>
-                  <CanvasElement element={el} index={i} totalCount={elements.length} />
-                  <DropZone onDrop={(e) => handleDropAtIndex(e, i + 1)} compact />
-                </React.Fragment>
-              ))
+              <>
+                <DropZone onDrop={(e) => handleDropAtIndex(e, 0)} />
+                {elements.length === 0 ? (
+                  <div style={S.empty} onDragOver={(e) => e.preventDefault()} onDrop={handleCanvasDrop}>
+                    <span style={S.emptyIcon}><LayoutTemplate size={36} strokeWidth={1.2} /></span>
+                    <div style={S.emptyTitle}>Start Building</div>
+                    <div style={S.emptyText}>
+                      Drag elements from the left panel and drop them here, or click an element to add it.
+                    </div>
+                  </div>
+                ) : (
+                  elements.map((el, i) => (
+                    <React.Fragment key={el.id}>
+                      <CanvasElement element={el} index={i} totalCount={elements.length} />
+                      <DropZone onDrop={(e) => handleDropAtIndex(e, i + 1)} compact />
+                    </React.Fragment>
+                  ))
+                )}
+              </>
             )}
           </>
         )}

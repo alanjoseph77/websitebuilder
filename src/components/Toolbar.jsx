@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import { downloadSite } from '../utils/downloadCode'
+import { Flame, Smartphone, Tablet, Monitor, Eye, Pencil, Download, Loader2, Undo2, Redo2 } from 'lucide-react'
 
 const S = {
   toolbar: {
@@ -14,6 +15,9 @@ const S = {
     flexShrink: 0,
     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
     zIndex: 100,
+    overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    gap: '16px',
   },
   logo: {
     display: 'flex',
@@ -23,6 +27,7 @@ const S = {
     fontSize: '1.1rem',
     color: '#ffffff',
     textDecoration: 'none',
+    flexShrink: 0,
   },
   logoIcon: { fontSize: '1.4rem' },
   logoSpan: { color: '#4f6ef7' },
@@ -30,9 +35,10 @@ const S = {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
-    flex: 1,
-    marginLeft: '24px',
+    marginLeft: '8px',
+    marginRight: 'auto',
     overflowX: 'auto',
+    flexShrink: 0,
   },
   pageTab: (active) => ({
     padding: '4px 12px',
@@ -47,6 +53,7 @@ const S = {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
+    flexShrink: 0,
   }),
   addPageBtn: {
     padding: '4px 10px',
@@ -57,11 +64,13 @@ const S = {
     color: '#aaaaaa',
     border: '1px dashed rgba(255,255,255,0.2)',
     transition: 'all 0.15s',
+    flexShrink: 0,
   },
   actions: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
+    flexShrink: 0,
   },
   viewportGroup: {
     display: 'flex',
@@ -85,8 +94,8 @@ const S = {
     justifyContent: 'center',
     transition: 'all 0.15s',
   }),
-  btn: (variant = 'secondary') => ({
-    padding: '7px 16px',
+  btn: (variant = 'secondary', isMobile = false) => ({
+    padding: isMobile ? '7px 10px' : '7px 16px',
     borderRadius: '6px',
     fontSize: '0.82rem',
     fontWeight: '600',
@@ -95,7 +104,7 @@ const S = {
     transition: 'all 0.15s',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: isMobile ? '0' : '6px',
     ...(variant === 'primary'
       ? { backgroundColor: '#4f6ef7', color: '#fff' }
       : variant === 'success'
@@ -115,16 +124,23 @@ const S = {
 }
 
 const VIEWPORTS = [
-  { key: 'mobile', icon: '📱', label: 'Mobile (375px)' },
-  { key: 'tablet', icon: '📟', label: 'Tablet (768px)' },
-  { key: 'desktop', icon: '🖥', label: 'Desktop (960px)' },
+  { key: 'mobile', Icon: Smartphone, label: 'Mobile (375px)' },
+  { key: 'tablet', Icon: Tablet, label: 'Tablet (768px)' },
+  { key: 'desktop', Icon: Monitor, label: 'Desktop (960px)' },
 ]
 
 export default function Toolbar() {
-  const { state, dispatch, previewMode, setPreviewMode, viewportWidth, setViewportWidth } = useBuilder()
+  const { state, dispatch, previewMode, setPreviewMode, viewportWidth, setViewportWidth, undo, redo, canUndo, canRedo } = useBuilder()
   const [renamingId, setRenamingId] = useState(null)
   const [renameVal, setRenameVal] = useState('')
   const [downloading, setDownloading] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 840)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleAddPage = () => {
     const name = `Page ${state.pages.length + 1}`
@@ -152,10 +168,12 @@ export default function Toolbar() {
     }
   }
 
+  const { uploadedImages } = useBuilder()
+
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      await downloadSite(state.pages)
+      await downloadSite(state.pages, uploadedImages)
     } catch (err) {
       alert('Download failed: ' + err.message)
     }
@@ -166,7 +184,7 @@ export default function Toolbar() {
     <div style={S.toolbar}>
       {/* Logo */}
       <div style={S.logo}>
-        <span style={S.logoIcon}>🏗️</span>
+        <Flame size={18} style={{ color: '#dc2626' }} />
         Site<span style={S.logoSpan}>Forge</span>
       </div>
 
@@ -216,6 +234,25 @@ export default function Toolbar() {
 
       {/* Actions */}
       <div style={S.actions}>
+        {/* Undo / Redo */}
+        <div style={{ display: 'flex', gap: '2px' }}>
+          <button
+            style={{ ...S.viewportBtn(false), opacity: canUndo ? 1 : 0.3, cursor: canUndo ? 'pointer' : 'default' }}
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 size={15} />
+          </button>
+          <button
+            style={{ ...S.viewportBtn(false), opacity: canRedo ? 1 : 0.3, cursor: canRedo ? 'pointer' : 'default' }}
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo2 size={15} />
+          </button>
+        </div>
         {/* Viewport size toggle */}
         <div style={S.viewportGroup}>
           {VIEWPORTS.map((v) => (
@@ -225,24 +262,24 @@ export default function Toolbar() {
               onClick={() => setViewportWidth(v.key)}
               title={v.label}
             >
-              {v.icon}
+              <v.Icon size={14} />
             </button>
           ))}
         </div>
         <button
-          style={S.btn(previewMode ? 'primary' : 'secondary')}
+          style={S.btn(previewMode ? 'primary' : 'secondary', isMobile)}
           onClick={() => setPreviewMode(!previewMode)}
           title={previewMode ? 'Back to editor' : 'Preview your site'}
         >
-          {previewMode ? '✏️ Edit' : '👁 Preview'}
+          {previewMode ? <><Pencil size={15} /> {!isMobile && 'Edit'}</> : <><Eye size={15} /> {!isMobile && 'Preview'}</>}
         </button>
         <button
-          style={S.btn('success')}
+          style={S.btn('success', isMobile)}
           onClick={handleDownload}
           disabled={downloading}
           title="Download source code as ZIP"
         >
-          {downloading ? '⏳ Packing...' : '⬇ Download Code'}
+          {downloading ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> {!isMobile && 'Packing...'}</> : <><Download size={15} /> {!isMobile && 'Download Code'}</>}
         </button>
       </div>
     </div>
