@@ -490,6 +490,43 @@ ${mobileLinkHtml}
 </section>`
       }
 
+      case 'container': {
+        const children = el.children || []
+        const anchorId = props.sectionId || el.id?.slice(0, 8)
+        let childrenHTML = ''
+        if (children.length > 0) {
+          childrenHTML = children.map((child, ci) => generateElementHTML(child, `${idx}-${ci}`)).join('\n')
+        }
+        return `<div id="${anchorId}"${sAttr} style="max-width:${props.maxWidth || '1200px'};margin:0 auto;width:100%">
+${childrenHTML}
+</div>`
+      }
+
+      case 'flex': {
+        const children = el.children || []
+        const anchorId = props.sectionId || el.id?.slice(0, 8)
+        let childrenHTML = ''
+        if (children.length > 0) {
+          childrenHTML = children.map((child, ci) => generateElementHTML(child, `${idx}-${ci}`)).join('\n')
+        }
+        return `<div id="${anchorId}"${sAttr} style="display:flex;flex-direction:${props.direction || 'row'};justify-content:${props.justify || 'flex-start'};align-items:${props.align || 'stretch'};gap:${props.gap || '20px'};flex-wrap:wrap">
+${childrenHTML}
+</div>`
+      }
+
+      case 'grid': {
+        const children = el.children || []
+        const anchorId = props.sectionId || el.id?.slice(0, 8)
+        let childrenHTML = ''
+        if (children.length > 0) {
+          childrenHTML = children.map((child, ci) => generateElementHTML(child, `${idx}-${ci}`)).join('\n')
+        }
+        // Simplified inline style for export grid
+        return `<div id="${anchorId}"${sAttr} style="display:grid;grid-template-columns:${props.columns || 'repeat(3, 1fr)'};gap:${props.gap || '24px'}">
+${childrenHTML}
+</div>`
+      }
+
       case 'section': {
         const sLayout = props.layout || 'stack'
         const sGap = props.gap || '24px'

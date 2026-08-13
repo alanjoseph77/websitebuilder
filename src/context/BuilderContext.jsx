@@ -106,12 +106,14 @@ function builderReducer(state, action) {
   switch (action.type) {
     case 'ADD_ELEMENT': {
       const { element, insertIndex } = action.payload
-      const newElement = {
-        ...element,
+      const assignIds = (el) => ({
+        ...el,
         id: uuidv4(),
-        props: { ...(element.props || {}) },
-        styles: { ...(element.styles || {}) },
-      }
+        props: { ...(el.props || {}) },
+        styles: { ...(el.styles || {}) },
+        children: (el.children || []).map(assignIds)
+      })
+      const newElement = assignIds(element)
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
         const elements = [...page.elements]

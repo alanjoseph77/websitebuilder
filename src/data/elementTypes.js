@@ -1077,6 +1077,39 @@ export const ELEMENT_CATEGORIES = [
     ],
   },
   {
+    name: 'Layout (Core)',
+    icon: '🔲',
+    elements: [
+      {
+        type: 'container',
+        label: 'Container',
+        icon: '🔲',
+        thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=400',
+        description: 'Constrains content width and centers it',
+        props: { maxWidth: '1200px' },
+        styles: { margin: '0 auto', padding: '20px', width: '100%' },
+      },
+      {
+        type: 'flex',
+        label: 'Flexbox',
+        icon: '↔',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Flexible layout container',
+        props: { direction: 'row', justify: 'flex-start', align: 'stretch', gap: '20px' },
+        styles: { display: 'flex', flexWrap: 'wrap' },
+      },
+      {
+        type: 'grid',
+        label: 'Grid',
+        icon: '▦',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'CSS Grid layout',
+        props: { columns: 'repeat(3, 1fr)', gap: '24px' },
+        styles: { display: 'grid' },
+      }
+    ]
+  },
+  {
     name: 'Sections',
     icon: '⊞',
     elements: [

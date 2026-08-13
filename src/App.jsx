@@ -36,16 +36,17 @@ function TemplateLoader({ templateId }) {
       for (const cat of ELEMENT_CATEGORIES) {
         const def = cat.elements.find(el => el.type === type)
         if (def) {
-          // Deep clone props/styles so editing one doesn't mutate the global definition
-          return {
+          const assignIds = (el) => ({
             id: uuidv4(),
-            type,
-            props: JSON.parse(JSON.stringify(def.props || {})),
-            styles: JSON.parse(JSON.stringify(def.styles || {}))
-          }
+            type: el.type,
+            props: JSON.parse(JSON.stringify(el.props || {})),
+            styles: JSON.parse(JSON.stringify(el.styles || {})),
+            children: (el.children || []).map(assignIds)
+          })
+          return assignIds(def)
         }
       }
-      return { id: uuidv4(), type, props: {}, styles: {} }
+      return { id: uuidv4(), type, props: {}, styles: {}, children: [] }
     }
 
     if (templateId === 'make') {

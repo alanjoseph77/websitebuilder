@@ -5219,6 +5219,48 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
     case 'lumora-footer':
       return <LumoraFooter props={element.props} styles={element.styles} />
 
+    case 'container': {
+      return (
+        <div id={props.sectionId || element.id} style={{ ...styles, maxWidth: props.maxWidth || '1200px', margin: '0 auto', width: '100%' }}>
+          {isPreview ? (
+            (element.children || []).map((child) => (
+              <ScrollReveal key={child.id} animation={child.props?.animation}>
+                <ElementRenderer element={child} isPreview />
+              </ScrollReveal>
+            ))
+          ) : childrenSlot}
+        </div>
+      )
+    }
+
+    case 'flex': {
+      return (
+        <div id={props.sectionId || element.id} style={{ ...styles, display: 'flex', flexDirection: props.direction || 'row', justifyContent: props.justify || 'flex-start', alignItems: props.align || 'stretch', gap: props.gap || '20px', flexWrap: 'wrap' }}>
+          {isPreview ? (
+            (element.children || []).map((child) => (
+              <ScrollReveal key={child.id} animation={child.props?.animation}>
+                <ElementRenderer element={child} isPreview />
+              </ScrollReveal>
+            ))
+          ) : childrenSlot}
+        </div>
+      )
+    }
+
+    case 'grid': {
+      return (
+        <div id={props.sectionId || element.id} style={{ ...styles, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (props.columns || 'repeat(3, 1fr)'), gap: props.gap || '24px' }}>
+          {isPreview ? (
+            (element.children || []).map((child) => (
+              <ScrollReveal key={child.id} animation={child.props?.animation}>
+                <ElementRenderer element={child} isPreview />
+              </ScrollReveal>
+            ))
+          ) : childrenSlot}
+        </div>
+      )
+    }
+
     case 'section': {
       const sectionLayout = props.layout || 'stack'
       const sectionGap = props.gap || '24px'
