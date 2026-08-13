@@ -2,8 +2,22 @@ import React, { useState } from 'react';
 import { ArrowRight, Play, X, CheckCircle, Layout, Code, Globe, Star, ArrowUpRight } from 'lucide-react';
 
 export default function LandingPage({ onGetStarted }) {
+  const scrollTo = (id) => {
+    const container = document.querySelector('.lp-scroll-container');
+    if (!container) return;
+    
+    if (id === 'top') {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      container.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' }); // -80px to account for the navbar
+    }
+  };
+
   // Ticker items
-  const tickerItems = ['Drag & Drop', '50+ Templates', 'Code Export', 'Responsive Design', 'SEO Optimized', 'Fast Editing', 'Custom Assets'];
+  const tickerItems = ['Drag & Drop', '50+ Templates', 'Code Export', 'Responsive Design', 'Fast Editing', 'Custom Assets'];
 
   const stats = [
     { value: '10K+', label: 'Active Users', icon: <Star size={20} className="text-orange-500" /> },
@@ -13,7 +27,7 @@ export default function LandingPage({ onGetStarted }) {
   ];
 
   return (
-    <div style={{ position: 'relative', fontFamily: '"Inter", "Plus Jakarta Sans", sans-serif', backgroundColor: '#ffffff', color: '#111827', height: '100dvh', overflowY: 'auto', overflowX: 'hidden' }}>
+    <div className="lp-scroll-container" style={{ position: 'relative', fontFamily: '"Inter", "Plus Jakarta Sans", sans-serif', backgroundColor: '#ffffff', color: '#111827', height: '100dvh', overflowY: 'auto', overflowX: 'hidden' }}>
       
       <style dangerouslySetInnerHTML={{__html: `
         .lp-nav-links { display: flex; gap: 32px; font-weight: 500; font-size: 0.95rem; color: #4b5563; }
@@ -62,6 +76,9 @@ export default function LandingPage({ onGetStarted }) {
         .lp-card-1 { position: absolute; top: 0; width: 70%; height: 400px; background: #111827; border-radius: 24px; opacity: 0.9; transform: scale(0.9) translateY(0); transition: all 0.5s ease; overflow: hidden; }
         .lp-card-2 { position: absolute; top: 20px; width: 75%; height: 400px; background: #1e293b; border-radius: 24px; opacity: 0.95; transform: scale(0.95) translateY(20px); transition: all 0.5s ease; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .lp-card-3 { position: absolute; top: 40px; width: 80%; height: 400px; background: #0f172a; border-radius: 24px; transform: scale(1) translateY(40px); transition: all 0.5s ease; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .lp-stack-container:hover .lp-card-1 { transform: scale(0.9) translateY(-20px) rotate(-4deg); opacity: 0.8; }
+        .lp-stack-container:hover .lp-card-2 { transform: scale(0.95) translateY(10px) rotate(2deg); opacity: 0.9; }
+        .lp-stack-container:hover .lp-card-3 { transform: scale(1.02) translateY(50px); box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
         
         @media (max-width: 1024px) { 
           .lp-card-1 { width: 80%; } .lp-card-2 { width: 85%; } .lp-card-3 { width: 95%; } 
@@ -91,14 +108,14 @@ export default function LandingPage({ onGetStarted }) {
           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: '8px', height: '8px', background: '#fff', borderRadius: '50%' }}></div>
           </div>
-          SiteForge
+          SiteForge <span style={{ fontSize: '0.8rem', fontWeight: '500', color: '#6b7280', letterSpacing: 'normal', marginTop: '4px' }}>by OTAGA</span>
         </div>
         
         <div className="lp-nav-links">
-          <span style={{ cursor: 'pointer', color: '#111827', fontWeight: '600' }}>Home</span>
-          <span style={{ cursor: 'pointer', transition: 'color 0.2s' }}>Templates</span>
-          <span style={{ cursor: 'pointer', transition: 'color 0.2s' }}>Features</span>
-          <span style={{ cursor: 'pointer', transition: 'color 0.2s' }}>Pricing</span>
+          <span onClick={() => scrollTo('top')} style={{ cursor: 'pointer', color: '#111827', fontWeight: '600' }}>Home</span>
+          <span onClick={() => scrollTo('about')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>About</span>
+          <span onClick={() => scrollTo('templates')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>Templates</span>
+          <span onClick={() => scrollTo('features')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>Features</span>
         </div>
 
         <button 
@@ -113,7 +130,7 @@ export default function LandingPage({ onGetStarted }) {
       </nav>
 
       {/* Hero Section */}
-      <div style={{ position: 'relative', paddingTop: '140px', paddingBottom: '80px', textAlign: 'center', overflow: 'hidden' }}>
+      <div id="home" style={{ position: 'relative', paddingTop: '140px', paddingBottom: '80px', textAlign: 'center', overflow: 'hidden' }}>
         {/* Gradient Mesh Background */}
         <div style={{ position: 'absolute', top: 0, right: 0, width: '50%', height: '800px', background: 'radial-gradient(circle at top right, rgba(234, 88, 12, 0.4), rgba(255, 237, 213, 0.5) 40%, rgba(255,255,255,0) 70%)', zIndex: 0, pointerEvents: 'none' }}></div>
         <div style={{ position: 'absolute', top: '10%', left: '-10%', width: '40%', height: '600px', background: 'radial-gradient(circle at center, rgba(253, 186, 116, 0.3), rgba(255,255,255,0) 60%)', zIndex: 0, pointerEvents: 'none' }}></div>
@@ -124,7 +141,7 @@ export default function LandingPage({ onGetStarted }) {
           
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: '#ffffff', borderRadius: '30px', border: '1px solid #e5e7eb', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', color: '#111827', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
             <div style={{ width: '8px', height: '8px', background: '#ea580c', borderRadius: '50%' }}></div>
-            SiteForge Builder
+            SiteForge Builder by OTAGA
           </div>
 
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem)', fontWeight: '800', lineHeight: '1.05', letterSpacing: '-0.03em', marginBottom: '24px', color: '#111827' }}>
@@ -189,7 +206,7 @@ export default function LandingPage({ onGetStarted }) {
       </div>
 
       {/* About Us / Impact Section */}
-      <div className="lp-padding" style={{ background: '#ffffff' }}>
+      <div id="about" className="lp-padding" style={{ background: '#ffffff' }}>
         <div className="lp-about-container">
           <div className="lp-about-text">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: '#ffffff', borderRadius: '30px', border: '1px solid #e5e7eb', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', color: '#111827' }}>
@@ -264,7 +281,7 @@ export default function LandingPage({ onGetStarted }) {
       </div>
 
       {/* Services Section */}
-      <div className="lp-padding" style={{ background: '#f9fafb', position: 'relative', overflow: 'hidden' }}>
+      <div id="features" className="lp-padding" style={{ background: '#f9fafb', position: 'relative', overflow: 'hidden' }}>
         <div className="lp-watermark-1" aria-hidden="true">
           OUR SERVICES
         </div>
@@ -283,7 +300,7 @@ export default function LandingPage({ onGetStarted }) {
           <div className="lp-stack-container">
             {/* Stacked Cards */}
             <div className="lp-card-1">
-               <img src="https://images.unsplash.com/photo-1542744094-24638ea0b3b5?auto=format&fit=crop&w=800&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="Creative digital workspace for web design projects" />
+               <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="Creative digital workspace for web design projects" />
             </div>
             <div className="lp-card-2">
                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} alt="Analytics dashboard showing website performance metrics" />
@@ -304,53 +321,118 @@ export default function LandingPage({ onGetStarted }) {
       </div>
 
       {/* Projects Section (Dark) */}
-      <div className="lp-padding" style={{ background: '#111827', position: 'relative', overflow: 'hidden' }}>
+      <div id="templates" className="lp-padding" style={{ background: '#111827', position: 'relative', overflow: 'hidden' }}>
         <div className="lp-watermark-2" aria-hidden="true">
-          LATEST PROJECTS
+          WEBSITE TEMPLATES
         </div>
         
         <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
           <div className="lp-services-header">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(255,255,255,0.1)', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem', fontWeight: '600', color: '#fff' }}>
               <div style={{ width: '8px', height: '8px', background: '#ea580c', borderRadius: '50%' }}></div>
-              Our Work
+              Templates
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', lineHeight: '1.1', letterSpacing: '-0.02em', color: '#fff', maxWidth: '500px' }}>
-              Discover the Latest Projects Driving Business Growth
+              Start With Fully Built Website Templates
             </h2>
           </div>
           
           <div className="lp-projects-grid">
             <div style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
                <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-                 <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="SaaS dashboard template with analytics charts and data visualization" />
+                 <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Trend Fashion Apparel Store" />
                </div>
-               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>SaaS Dashboard</h3>
-               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>Highly scalable layout components designed perfectly for sophisticated dashboard analytics and user interfaces.</p>
-               <button onClick={onGetStarted} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Trend - Fashion Apparel</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>Modern, minimalistic fashion storefront template with clean typography and elegant imagery.</p>
+               <button onClick={() => onGetStarted('trend')} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
             </div>
 
             <div className="lp-proj-offset" style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
                <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-                 <img src="/assets/img/productdesign.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="E-commerce storefront template with product grid and shopping cart" />
+                 <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="SoleMate Sneaker Store" />
                </div>
-               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>E-Commerce Storefront</h3>
-               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>High-conversion focused product grids, features, and fully customizable checkout and shopping cart flows.</p>
-               <button onClick={onGetStarted} style={{ marginTop: '20px', background: '#ea580c', border: 'none', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.boxShadow='0 4px 15px rgba(234, 88, 12, 0.4)'} onMouseOut={e=>e.currentTarget.style.boxShadow='none'}>Use Template</button>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>SoleMate - E-Commerce</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>High-conversion sneaker store layout featuring dynamic product grids, categories, and shopping flow.</p>
+               <button onClick={() => onGetStarted('ecommerce')} style={{ marginTop: '20px', background: '#ea580c', border: 'none', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.boxShadow='0 4px 15px rgba(234, 88, 12, 0.4)'} onMouseOut={e=>e.currentTarget.style.boxShadow='none'}>Use Template</button>
             </div>
 
             <div style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
                <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
-                 <img src="https://images.unsplash.com/photo-1513530534585-c7b1394c6d51?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Creative portfolio website template showcasing design work and media" />
+                 <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Creative Studio Portfolio" />
                </div>
-               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Creative Portfolio</h3>
-               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>A bold and elegant modern agency portfolio built to highlight rich media and high resolution creative assets.</p>
-               <button onClick={onGetStarted} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Studio - Creative Portfolio</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>A bold, elegant modern agency portfolio built to highlight rich media and high-resolution creative assets.</p>
+               <button onClick={() => onGetStarted('portfolio')} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
+            </div>
+            
+            <div style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+               <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+                 <img src="/assets/img/make_preview.png" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Make.com Automation Builder Mockup" />
+               </div>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Make - Automation Builder</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>A visual workflow automation tool template inspired by platforms like Make.com.</p>
+               <button onClick={() => onGetStarted('make')} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
+            </div>
+
+            <div className="lp-proj-offset" style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+               <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+                 <img src="https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Lumora Mobile App Showcase" />
+               </div>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Lumora - App Showcase</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>High-converting mobile app showcase template with marquee features and download CTAs.</p>
+               <button onClick={() => onGetStarted('app')} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
+            </div>
+
+            <div style={{ background: '#1e293b', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+               <div style={{ height: '220px', background: '#0f172a', borderRadius: '12px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+                 <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="Foodies Delivery App" />
+               </div>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>Foodies - Delivery App</h3>
+               <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.5', flex: 1 }}>Vibrant, appetizing layout designed for restaurants, food delivery services, and culinary brands.</p>
+               <button onClick={() => onGetStarted('food')} style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 0', borderRadius: '8px', color: '#fff', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', width: '100%' }} onMouseOver={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseOut={e=>e.currentTarget.style.background='transparent'}>Use Template</button>
             </div>
           </div>
           
         </div>
       </div>
+
+      {/* Pricing Section Placeholder (Hidden for now)
+      <div id="pricing" className="lp-padding" style={{ background: '#ffffff', textAlign: 'center', borderTop: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: '#ffffff', borderRadius: '30px', border: '1px solid #e5e7eb', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', color: '#111827' }}>
+          <div style={{ width: '8px', height: '8px', background: '#ea580c', borderRadius: '50%' }}></div>
+          Pricing
+        </div>
+        <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', lineHeight: '1.1', letterSpacing: '-0.02em', color: '#111827', marginBottom: '20px' }}>
+          Simple, transparent pricing
+        </h2>
+        <p style={{ color: '#4b5563', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 40px' }}>
+          Start building for free, then upgrade when you're ready to publish and scale.
+        </p>
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          <div style={{ background: '#f9fafb', padding: '40px', borderRadius: '24px', border: '1px solid #e5e7eb', textAlign: 'left' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>Starter</h3>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#111827', marginBottom: '20px' }}>$0 <span style={{ fontSize: '1rem', color: '#6b7280', fontWeight: '500' }}>/mo</span></div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Access all elements</li>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Standard templates</li>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Free subdomain</li>
+            </ul>
+            <button onClick={onGetStarted} style={{ width: '100%', padding: '12px', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e=>e.currentTarget.style.borderColor='#d1d5db'} onMouseOut={e=>e.currentTarget.style.borderColor='#e5e7eb'}>Get Started Free</button>
+          </div>
+          <div style={{ background: '#111827', padding: '40px', borderRadius: '24px', textAlign: 'left', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: '20px', right: '20px', background: '#ea580c', color: '#fff', fontSize: '0.75rem', fontWeight: '700', padding: '4px 12px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Most Popular</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>Pro</h3>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#fff', marginBottom: '20px' }}>$19 <span style={{ fontSize: '1rem', color: '#9ca3af', fontWeight: '500' }}>/mo</span></div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Everything in Starter</li>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Custom domains</li>
+              <li style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><CheckCircle size={18} color="#ea580c" /> Export to React/HTML</li>
+            </ul>
+            <button onClick={onGetStarted} style={{ width: '100%', padding: '12px', background: '#ea580c', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e=>e.currentTarget.style.opacity=0.9} onMouseOut={e=>e.currentTarget.style.opacity=1}>Upgrade to Pro</button>
+          </div>
+        </div>
+      </div>
+      */}
 
     </div>
   );

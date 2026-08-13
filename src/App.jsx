@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { BuilderProvider } from './context/BuilderContext'
+import { BuilderProvider, useBuilder } from './context/BuilderContext'
 import Toolbar from './components/Toolbar'
 import ElementsPanel from './components/ElementsPanel'
 import Canvas from './components/Canvas'
 import PropertiesPanel from './components/PropertiesPanel'
 import LandingPage from './components/LandingPage'
 import { LayoutGrid, Sliders } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
+import { ELEMENT_CATEGORIES } from './data/elementTypes'
 
 const appStyles = {
   display: 'flex',
@@ -25,8 +27,80 @@ const bodyStyles = {
   position: 'relative'
 }
 
+function TemplateLoader({ templateId }) {
+  const { loadTemplate } = useBuilder()
+  
+  useEffect(() => {
+    // Helper to get an element definition with default props/styles
+    const createElement = (type) => {
+      for (const cat of ELEMENT_CATEGORIES) {
+        const def = cat.elements.find(el => el.type === type)
+        if (def) {
+          // Deep clone props/styles so editing one doesn't mutate the global definition
+          return {
+            id: uuidv4(),
+            type,
+            props: JSON.parse(JSON.stringify(def.props || {})),
+            styles: JSON.parse(JSON.stringify(def.styles || {}))
+          }
+        }
+      }
+      return { id: uuidv4(), type, props: {}, styles: {} }
+    }
+
+    if (templateId === 'make') {
+      loadTemplate([
+        createElement('make-navbar'),
+        createElement('make-hero'),
+        createElement('make-features'),
+        createElement('make-integrations'),
+        createElement('make-pricing'),
+        createElement('make-footer')
+      ])
+    } else if (templateId === 'trend') {
+      loadTemplate([
+        createElement('trend-navbar'), createElement('trend-hero')
+      ])
+    } else if (templateId === 'ecommerce') {
+      loadTemplate([
+        createElement('solemate-navbar'),
+        createElement('solemate-hero'),
+        createElement('solemate-categories'),
+        createElement('solemate-products'),
+        createElement('solemate-footer')
+      ])
+    } else if (templateId === 'portfolio') {
+      loadTemplate([
+        createElement('creative-navbar'),
+        createElement('creative-hero'),
+        createElement('creative-projects'),
+        createElement('creative-footer')
+      ])
+    } else if (templateId === 'app') {
+      loadTemplate([
+        createElement('lumora-navbar'),
+        createElement('lumora-hero'),
+        createElement('lumora-marquee'),
+        createElement('lumora-products'),
+        createElement('lumora-footer')
+      ])
+    } else if (templateId === 'food') {
+      loadTemplate([
+        createElement('food-navbar'),
+        createElement('food-hero'),
+        createElement('food-categories'),
+        createElement('food-items'),
+        createElement('food-footer')
+      ])
+    }
+  }, [templateId, loadTemplate])
+  
+  return null
+}
+
 export default function App() {
   const [showEditor, setShowEditor] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
@@ -49,11 +123,15 @@ export default function App() {
   }, [])
 
   if (!showEditor) {
-    return <LandingPage onGetStarted={() => setShowEditor(true)} />
+    return <LandingPage onGetStarted={(template) => {
+      if (template) setSelectedTemplate(template)
+      setShowEditor(true)
+    }} />
   }
 
   return (
     <BuilderProvider>
+      {selectedTemplate && <TemplateLoader templateId={selectedTemplate} />}
       <div style={appStyles}>
         <Toolbar />
         <div style={bodyStyles}>

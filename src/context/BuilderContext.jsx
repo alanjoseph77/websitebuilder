@@ -219,6 +219,22 @@ function builderReducer(state, action) {
       return { ...state, pages }
     }
 
+    case 'LOAD_TEMPLATE': {
+      return {
+        ...state,
+        pages: [
+          {
+            id: 'page-home',
+            name: 'Home',
+            elements: action.payload
+          }
+        ],
+        currentPageId: 'page-home',
+        selectedElementId: null,
+        selectedChildInfo: null
+      }
+    }
+
     case 'DELETE_PAGE': {
       if (state.pages.length === 1) return state
       const pages = state.pages.filter((p) => p.id !== action.payload)
@@ -398,7 +414,10 @@ export function BuilderProvider({ children }) {
         // Only delete if not typing in an input
         const tag = document.activeElement?.tagName?.toLowerCase()
         if (tag === 'input' || tag === 'textarea' || tag === 'select') return
-        if (state.selectedElementId) {
+        if (state.selectedChildInfo) {
+          e.preventDefault()
+          dispatch({ type: 'DELETE_CHILD_ELEMENT', payload: { parentId: state.selectedChildInfo.parentId, childId: state.selectedChildInfo.childId } })
+        } else if (state.selectedElementId) {
           e.preventDefault()
           dispatch({ type: 'DELETE_ELEMENT', payload: state.selectedElementId })
         }
@@ -504,6 +523,7 @@ export function BuilderProvider({ children }) {
         moveElementUp,
         moveElementDown,
         switchPage,
+        loadTemplate: useCallback((elements) => dispatch({ type: 'LOAD_TEMPLATE', payload: elements }), [dispatch]),
         addChildElement,
         deleteChildElement,
         selectChild,

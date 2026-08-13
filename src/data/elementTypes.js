@@ -38,6 +38,110 @@ export const ELEMENT_CATEGORIES = [
         styles: { backgroundColor: '#f8fafc', color: '#111827' },
       },
       {
+        type: 'make-navbar',
+        label: 'Make Navbar',
+        icon: '🟣',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Automation platform navbar with dark sleek look and gradient buttons',
+        props: {
+          brand: 'Make',
+          makeAccent: '#a855f7',
+          links: [
+            { text: 'Product', href: '#' },
+            { text: 'Solutions', href: '#solutions' },
+            { text: 'Pricing', href: '#pricing' },
+            { text: 'Resources', href: '#resources' },
+          ],
+        },
+        styles: { backgroundColor: '#0f172a', color: '#ffffff' },
+      },
+      {
+        type: 'make-hero',
+        label: 'Make Hero',
+        icon: '🟣',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Automation platform hero with dark background and glowing blobs',
+        props: {
+          makeHeading: 'Design, build, and automate anything',
+          makeDesc: 'From tasks and workflows to apps and systems, build and automate anything in one powerful visual platform.',
+          makeCtaText: 'Get started free',
+          makeSecondaryCtaText: 'Contact Sales',
+          makeAccent: '#a855f7',
+          makeImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
+        },
+        styles: { backgroundColor: '#0f172a', color: '#ffffff' },
+      },
+
+      {
+        type: 'make-features',
+        label: 'Make Features',
+        icon: '⚡',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Automation features grid with sleek dark cards',
+        props: {
+          mfHeading: 'Everything you need to automate your work',
+          mfAccent: '#a855f7',
+          mfFeatures: [
+            { icon: '🚀', title: 'Visual workflow builder', desc: 'Drag and drop apps to create powerful workflows in minutes.' },
+            { icon: '🔄', title: 'Infinite loops & branching', desc: 'Build complex logic with custom paths, iterators, and filters.' },
+            { icon: '🛡️', title: 'Enterprise-grade security', desc: 'SOC 2 Type II compliant with detailed execution history.' },
+          ]
+        },
+        styles: { backgroundColor: '#0f172a', color: '#ffffff' },
+      },
+      {
+        type: 'make-integrations',
+        label: 'Make Integrations',
+        icon: '🔗',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Integrations showcase with floating app icons',
+        props: {
+          miHeading: 'Connect 1,000+ apps out of the box',
+          miAccent: '#a855f7',
+          miCtaText: 'View all apps',
+          miIcons: [
+            { bg: '#2563eb', text: 'Fb' },
+            { bg: '#10b981', text: 'Sh' },
+            { bg: '#f59e0b', text: 'Sl' },
+            { bg: '#ef4444', text: 'Gm' },
+            { bg: '#6366f1', text: 'St' },
+            { bg: '#8b5cf6', text: 'Tw' },
+          ]
+        },
+        styles: { backgroundColor: '#0f172a', color: '#ffffff' },
+      },
+      {
+        type: 'make-pricing',
+        label: 'Make Pricing',
+        icon: '💳',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Sleek dark mode pricing cards',
+        props: {
+          mpHeading: 'Simple, transparent pricing',
+          mpAccent: '#a855f7',
+          mpPlans: [
+            { name: 'Free', price: '$0', desc: 'For individuals', features: ['1,000 ops/month', 'Basic apps', 'Community support'], highlight: false },
+            { name: 'Pro', price: '$16', desc: 'For professionals', features: ['10,000 ops/month', 'Premium apps', 'Priority support'], highlight: true },
+            { name: 'Teams', price: '$29', desc: 'For small teams', features: ['Custom ops', 'Team collaboration', 'Dedicated success'], highlight: false },
+          ]
+        },
+        styles: { backgroundColor: '#0f172a', color: '#ffffff' },
+      },
+      {
+        type: 'make-footer',
+        label: 'Make Footer',
+        icon: '🦶',
+        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
+        description: 'Dark minimal footer',
+        props: {
+          mftBrand: 'Make',
+          mftAccent: '#a855f7',
+          mftText: 'Design, build, and automate anything.',
+          mftCopy: '© 2026 Make Inc. All rights reserved.'
+        },
+        styles: { backgroundColor: '#0f172a', color: '#94a3b8' },
+      },
+      {
         type: 'puzzle-navbar',
         label: 'Puzzle Navbar',
         icon: '🧩',
@@ -301,6 +405,61 @@ export const ELEMENT_CATEGORIES = [
           foodHeroImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800',
           foodHeroBadgeText: '50% OFF',
           foodHeroBadgeSub: 'First Order',
+        },
+        styles: { backgroundColor: '#fff0eb', color: '#2d3436' },
+      },
+      {
+        type: 'food-categories',
+        label: 'Food Categories',
+        icon: '🍕',
+        thumbnail: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400',
+        description: 'Neo-brutalist horizontal category cards grid',
+        props: {
+          foodAccent: '#e67e22',
+          foodDark: '#2d3436',
+          foodCategoriesTitle: 'What are you craving?',
+          foodCategories: [
+            { icon: '🍔', name: 'Burgers' },
+            { icon: '🍕', name: 'Pizza' },
+            { icon: '🍣', name: 'Sushi' },
+            { icon: '🥗', name: 'Healthy' },
+            { icon: '🍩', name: 'Desserts' },
+            { icon: '🍹', name: 'Drinks' },
+          ]
+        },
+        styles: { backgroundColor: '#fff0eb', color: '#2d3436' },
+      },
+      {
+        type: 'food-items',
+        label: 'Food Items Grid',
+        icon: '🍱',
+        thumbnail: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400',
+        description: 'Neo-brutalist grid of food items with add to cart buttons',
+        props: {
+          foodAccent: '#e67e22',
+          foodDark: '#2d3436',
+          foodItemsTitle: 'Popular Dishes',
+          foodItems: [
+            { image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80', name: 'Classic Cheeseburger', price: '$8.99', desc: 'Juicy beef patty, cheddar, lettuce, tomato' },
+            { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80', name: 'Pepperoni Pizza', price: '$14.50', desc: 'Wood-fired crust, mozzarella, pepperoni' },
+            { image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=400&q=80', name: 'Spicy Tuna Roll', price: '$12.00', desc: 'Fresh tuna, spicy mayo, cucumber' },
+            { image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80', name: 'Healthy Bowl', price: '$10.99', desc: 'Quinoa, avocado, roasted veggies, tahini' }
+          ]
+        },
+        styles: { backgroundColor: '#fff0eb', color: '#2d3436' },
+      },
+      {
+        type: 'food-footer',
+        label: 'Food Footer',
+        icon: '📱',
+        thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400',
+        description: 'Neo-brutalist simple app footer',
+        props: {
+          foodAccent: '#e67e22',
+          foodDark: '#2d3436',
+          foodFooterBrand: 'Ideatefood',
+          foodFooterText: 'Delivering happiness to your door.',
+          foodFooterCopyright: '© 2026 Ideatefood. All rights reserved.'
         },
         styles: { backgroundColor: '#fff0eb', color: '#2d3436' },
       },

@@ -255,7 +255,7 @@ ${mobileLinkHtml}
       <div class="fn-logo-box" style="background-color:${fnAccent};border-color:${fnDark}">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
       </div>
-      <span class="fn-brand" style="color:${fnDark}">${escHtml(fnBrand)}</span>
+      ${fnLogoUrl ? `<img src="${escHtml(fnLogoUrl)}" alt="${escHtml(fnBrand)}" style="height:32px;object-fit:contain;" />` : `<span class="fn-brand" style="color:${fnDark}">${escHtml(fnBrand)}</span>`}
     </div>
     <div class="fn-links">
         ${linksHtml}
@@ -718,11 +718,97 @@ ${mobileLinkHtml}
 </header>`
       }
 
+      case 'trend-hero': {
+        const thAccent = props.trendAccent || '#e91e63'
+        const thHeading = props.trendHeading || 'Bring brand in life'
+        const thHighlight = props.trendHighlight || 'brand'
+        const thDesc = props.trendDescription || 'Brand cream is a sunshine cream good for your skin care.'
+        const thCtaText = props.trendCtaText || 'Shop Now'
+        const thCtaHref = props.trendCtaHref || '#'
+        const thRev = props.trendReviewCount || '10k+'
+        const thRating = props.trendRating || '4.5'
+        const thImg = props.trendProductImage || 'https://placehold.co/280x380/e91e63/ffffff?text=Product'
+        const thF1 = props.trendFeature1 || 'Organic'
+        const thF1D = props.trendFeature1Desc || 'Natural ingredients delivered fresh.'
+        const thF2 = props.trendFeature2 || 'Aroma'
+        const thF2D = props.trendFeature2Desc || 'Refreshing scents for all skin types.'
+        const thF3 = props.trendFeature3 || 'Botanic'
+        const thF3D = props.trendFeature3Desc || 'Plant-based formulas with proven results.'
+        const thVideoText = props.trendVideoText || 'SEE PRODUCT VIDEO NOW'
+        const thVideoLink = props.trendVideoLink || '#'
+        const thBg = styles?.backgroundColor || '#ffffff'
+        const thColor = styles?.color || '#1e293b'
+        
+        let headingHtml = escHtml(thHeading)
+        if (thHighlight) {
+          const idx = thHeading.indexOf(thHighlight)
+          if (idx !== -1) {
+            headingHtml = escHtml(thHeading.slice(0, idx)) + 
+              `<span class="th-hi" style="color:${thAccent}"><span class="th-hi-box" style="border-color:${thAccent}"></span>${escHtml(thHighlight)}</span>` + 
+              escHtml(thHeading.slice(idx + thHighlight.length))
+          }
+        }
+
+        return `<section class="th-sec" style="background-color:${thBg};color:${thColor}">
+  <div class="th-blob th-blob-1" style="background-color:${thAccent}"></div>
+  <div class="th-blob th-blob-2" style="background-color:${thAccent}"></div>
+  <div class="th-left">
+    <h1 class="th-h1">${headingHtml} <span style="color:${thAccent}">→</span></h1>
+    <p class="th-desc">${escHtml(thDesc)}</p>
+    <a href="${escHtml(thCtaHref)}" class="th-cta" style="background-color:${thAccent}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      ${escHtml(thCtaText)}
+    </a>
+    <div class="th-proof">
+      <div class="th-avatars">
+        <img src="https://i.pravatar.cc/100?u=a1" alt="" /><img src="https://i.pravatar.cc/100?u=a2" alt="" /><img src="https://i.pravatar.cc/100?u=a3" alt="" /><img src="https://i.pravatar.cc/100?u=a4" alt="" />
+      </div>
+      <div class="th-rating">
+        <div class="th-stars">
+          <svg width="14" height="14" fill="${thAccent}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="14" height="14" fill="${thAccent}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="14" height="14" fill="${thAccent}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="14" height="14" fill="${thAccent}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg width="14" height="14" fill="${thAccent}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <span>${escHtml(thRev)} Customers • ${escHtml(thRating)} Rating</span>
+      </div>
+    </div>
+  </div>
+  <div class="th-center">
+    <div class="th-img-bg" style="background-color:${thAccent}"></div>
+    <img src="${escHtml(thImg)}" alt="" class="th-img" />
+    <a href="${escHtml(thVideoLink)}" class="th-vid" target="_blank">
+      <svg viewBox="0 0 100 100" class="th-vid-text"><path id="th-circle-path" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none"/><text fill="${thColor}"><textPath href="#th-circle-path">${escHtml(thVideoText)} • ${escHtml(thVideoText)} • </textPath></text></svg>
+      <div class="th-vid-play" style="background-color:${thColor};color:${thBg}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+    </a>
+  </div>
+  <div class="th-right">
+    <div class="th-feat">
+      <p class="th-feat-num">01</p>
+      <h3 class="th-feat-h">${escHtml(thF1)}</h3>
+      <p class="th-feat-p">${escHtml(thF1D)}</p>
+    </div>
+    <div class="th-feat th-feat-hi" style="background-color:${thAccent}">
+      <p class="th-feat-num" style="color:#fff">02</p>
+      <h3 class="th-feat-h" style="color:#fff">${escHtml(thF2)}</h3>
+      <p class="th-feat-p" style="color:#fff;opacity:0.9">${escHtml(thF2D)}</p>
+    </div>
+    <div class="th-feat">
+      <p class="th-feat-num">03</p>
+      <h3 class="th-feat-h">${escHtml(thF3)}</h3>
+      <p class="th-feat-p">${escHtml(thF3D)}</p>
+    </div>
+  </div>
+</section>`
+      }
+
       case 'food-navbar': {
         const fnAccent = props.foodAccent || '#e67e22'
         const fnDark = props.foodDark || '#2d3436'
         const fnBg = styles?.backgroundColor || '#fff0eb'
         const fnBrand = props.foodBrand || 'Ideatefood'
+        const fnLogoUrl = props.foodLogoUrl
         const fnLogin = props.foodLoginText || 'Log In'
         const fnLoginHref = props.foodLoginHref || '#'
         const fnLoginBg = props.foodLoginBg || '#ffffff'
@@ -827,6 +913,107 @@ ${mobileLinkHtml}
     </div>
   </div>
 </section>`
+      }
+
+      case 'food-categories': {
+        const fcAccent = props.foodAccent || '#e67e22'
+        const fcDark = props.foodDark || '#2d3436'
+        const fcBg = styles?.backgroundColor || '#fff0eb'
+        const fcTitle = props.foodCategoriesTitle || 'Browse Categories'
+        const fcItems = props.foodCategories || [
+          { icon: '🍔', name: 'Burgers' }, { icon: '🍕', name: 'Pizza' },
+          { icon: '🍣', name: 'Sushi' }, { icon: '🥗', name: 'Healthy' },
+          { icon: '🍩', name: 'Desserts' }, { icon: '☕', name: 'Coffee' }
+        ]
+        const itemsHtml = fcItems.map(c => 
+          `<div class="fc-card" style="border-color:${fcDark};box-shadow:4px 4px 0px 0px ${fcDark}">
+            <div class="fc-icon" style="background-color:${fcAccent};border-color:${fcDark};box-shadow:2px 2px 0px 0px ${fcDark}">${escHtml(c.icon)}</div>
+            <span class="fc-name" style="color:${fcDark}">${escHtml(c.name)}</span>
+          </div>`
+        ).join('\n        ')
+        return `<section class="fc-section" style="background-color:${fcBg}">
+  <div class="fc-inner">
+    <h2 class="fc-heading" style="color:${fcDark}">${escHtml(fcTitle)}</h2>
+    <div class="fc-grid">${itemsHtml}</div>
+  </div>
+</section>`
+      }
+
+      case 'food-items': {
+        const fiAccent = props.foodAccent || '#e67e22'
+        const fiDark = props.foodDark || '#2d3436'
+        const fiBg = styles?.backgroundColor || '#fff0eb'
+        const fiTitle = props.foodItemsTitle || 'Popular Dishes'
+        const fiItems = props.foodItems || [
+          { image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600', name: 'Classic Smashburger', desc: 'Double beef patty, melted cheese, house sauce on a toasted brioche bun.', price: '$12.99' },
+          { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=600', name: 'Pepperoni Pizza', desc: 'Wood-fired crust, San Marzano tomato sauce, mozzarella, and crispy pepperoni.', price: '$16.50' },
+          { image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&q=80&w=600', name: 'Spicy Tuna Roll', desc: 'Fresh tuna, spicy mayo, cucumber, topped with sesame seeds and scallions.', price: '$14.00' },
+        ]
+        const itemsHtml = fiItems.map(item => 
+          `<div class="fi-card" style="border-color:${fiDark};box-shadow:6px 6px 0px 0px ${fiDark}">
+            <div class="fi-img-wrap" style="border-bottom-color:${fiDark}">
+              <img src="${escHtml(item.image)}" alt="${escHtml(item.name)}" class="fi-img">
+              <div class="fi-price" style="background-color:${fiAccent};border-color:${fiDark};box-shadow:2px 2px 0px 0px ${fiDark}">${escHtml(item.price)}</div>
+            </div>
+            <div class="fi-content">
+              <h3 class="fi-name" style="color:${fiDark}">${escHtml(item.name)}</h3>
+              <p class="fi-desc">${escHtml(item.desc)}</p>
+              <button class="fi-btn" style="background-color:${fiDark};border-color:${fiDark};box-shadow:4px 4px 0px 0px ${fiAccent}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                Add to Cart
+              </button>
+            </div>
+          </div>`
+        ).join('\n        ')
+        return `<section class="fi-section" style="background-color:${fiBg}">
+  <div class="fi-inner">
+    <h2 class="fi-heading" style="color:${fiDark}">${escHtml(fiTitle)}</h2>
+    <div class="fi-grid">${itemsHtml}</div>
+  </div>
+</section>`
+      }
+
+      case 'food-footer': {
+        const ffAccent = props.foodAccent || '#e67e22'
+        const ffDark = props.foodDark || '#2d3436'
+        const ffBg = styles?.backgroundColor || '#fff0eb'
+        const ffBrand = props.foodFooterBrand || 'Ideatefood'
+        const ffLogoUrl = props.foodFooterLogoUrl
+        const ffText = props.foodFooterText || 'Delivering happiness to your door.'
+        const ffCopyright = props.foodFooterCopyright || '© 2026 Ideatefood. All rights reserved.'
+        
+        let socialHtml = ''
+        if (props.foodFbUrl) {
+          socialHtml += `<a href="${escHtml(props.foodFbUrl)}" target="_blank" rel="noreferrer" class="ff-soc" style="background-color:${ffAccent}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+          </a>`
+        }
+        if (props.foodIgUrl) {
+          socialHtml += `<a href="${escHtml(props.foodIgUrl)}" target="_blank" rel="noreferrer" class="ff-soc" style="background-color:${ffAccent}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          </a>`
+        }
+        if (props.foodTwUrl) {
+          socialHtml += `<a href="${escHtml(props.foodTwUrl)}" target="_blank" rel="noreferrer" class="ff-soc" style="background-color:${ffAccent}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+          </a>`
+        }
+        if (!socialHtml) {
+          socialHtml = [1,2,3].map(i => `<div class="ff-soc" style="background-color:${ffAccent}"><div style="width:20px;height:20px;background-color:#fff;border-radius:50%"></div></div>`).join('')
+        }
+
+        return `<footer class="ff-footer" style="background-color:${ffBg}">
+  <div class="ff-inner" style="background-color:${ffDark}">
+    <div class="ff-left">
+      ${ffLogoUrl ? `<img src="${escHtml(ffLogoUrl)}" alt="${escHtml(ffBrand)}" class="ff-logo-img" />` : `<h2 class="ff-brand">${escHtml(ffBrand)}</h2>`}
+      <p class="ff-text">${escHtml(ffText)}</p>
+    </div>
+    <div class="ff-socials">${socialHtml}</div>
+  </div>
+  <div class="ff-copyright-wrap">
+    <p class="ff-copyright">${escHtml(ffCopyright)}</p>
+  </div>
+</footer>`
       }
 
       case 'present-section': {
@@ -1209,6 +1396,151 @@ ${mobileLinkHtml}
     </div>
   </div>
 </section>`
+      }
+
+      
+      case 'make-navbar': {
+        const mnBg = styles?.backgroundColor || '#0f172a'
+        const mnColor = styles?.color || '#ffffff'
+        const mnAccent = props.makeAccent || '#a855f7'
+        const mnBrand = props.brand || 'Make'
+        const mnLinks = props.links || []
+        const linksHtml = mnLinks.map(l => `<a href="${escHtml(l.href)}" class="mkn-link">${escHtml(l.text)}</a>`).join('\n        ')
+
+        return `<nav class="mkn-nav" style="background-color:${mnBg};color:${mnColor}">
+  <div class="mkn-brand">
+    <div class="mkn-logo" style="background:linear-gradient(135deg, ${mnAccent}, #3b82f6)"></div>
+    ${escHtml(mnBrand)}
+  </div>
+  <div class="mkn-links">${linksHtml}</div>
+  <div class="mkn-actions">
+    <a href="#" class="mkn-login">Log in</a>
+    <a href="#" class="mkn-btn" style="background-color:${mnColor};color:${mnBg}">Get Started</a>
+  </div>
+</nav>`
+      }
+
+      case 'make-hero': {
+        const mhBg = styles?.backgroundColor || '#0f172a'
+        const mhColor = styles?.color || '#ffffff'
+        const mhAccent = props.makeAccent || '#a855f7'
+        const mhHeading = props.makeHeading || 'Design, build, and automate anything'
+        const mhDesc = props.makeDesc || 'From tasks and workflows to apps and systems, build and automate anything in one powerful visual platform.'
+        const mhCtaText = props.makeCtaText || 'Get started free'
+        const mhCta2Text = props.makeSecondaryCtaText || 'Contact Sales'
+        const mhImage = props.makeImage || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200'
+
+        return `<section class="mkh-sec" style="background-color:${mhBg};color:${mhColor}">
+  <div class="mkh-glow" style="background:radial-gradient(circle, ${mhAccent}40 0%, transparent 70%)"></div>
+  <div class="mkh-inner">
+    <h1 class="mkh-h1">${escHtml(mhHeading)}</h1>
+    <p class="mkh-desc">${escHtml(mhDesc)}</p>
+    <div class="mkh-btns">
+      <a href="#" class="mkh-btn-1" style="background:linear-gradient(135deg, ${mhAccent}, #3b82f6);box-shadow:0 10px 30px ${mhAccent}40">${escHtml(mhCtaText)}</a>
+      <a href="#" class="mkh-btn-2">${escHtml(mhCta2Text)}</a>
+    </div>
+    <div class="mkh-img-wrap">
+      <div class="mkh-browser-bar">
+        <div class="mkh-dot" style="background:#ef4444"></div>
+        <div class="mkh-dot" style="background:#eab308"></div>
+        <div class="mkh-dot" style="background:#22c55e"></div>
+      </div>
+      <img src="${escHtml(mhImage)}" alt="App Interface" class="mkh-img" />
+    </div>
+  </div>
+</section>`
+      }
+
+
+      case 'make-features': {
+        const bg = styles?.backgroundColor || '#0f172a'
+        const color = styles?.color || '#ffffff'
+        const accent = props.mfAccent || '#a855f7'
+        const mfHeading = props.mfHeading || ''
+        const mfFeatures = props.mfFeatures || []
+        const featuresHtml = mfFeatures.map(f => `
+          <div class="mf-card">
+            <div class="mf-icon" style="background:linear-gradient(135deg, ${accent}40, transparent); border:1px solid ${accent}40">${escHtml(f.icon)}</div>
+            <h3 class="mf-title">${escHtml(f.title)}</h3>
+            <p class="mf-desc">${escHtml(f.desc)}</p>
+          </div>
+        `).join('')
+
+        return `<section class="mf-sec" style="background-color:${bg};color:${color}">
+  <div class="mf-inner">
+    <h2 class="mf-h2">${escHtml(mfHeading)}</h2>
+    <div class="mf-grid">${featuresHtml}</div>
+  </div>
+</section>`
+      }
+
+      case 'make-integrations': {
+        const bg = styles?.backgroundColor || '#0f172a'
+        const color = styles?.color || '#ffffff'
+        const accent = props.miAccent || '#a855f7'
+        const miHeading = props.miHeading || ''
+        const miCtaText = props.miCtaText || ''
+        const miIcons = props.miIcons || []
+        const iconsHtml = miIcons.map(icon => `<div class="mi-icon" style="background:${icon.bg}">${escHtml(icon.text)}</div>`).join('')
+
+        return `<section class="mi-sec" style="background-color:${bg};color:${color}">
+  <div class="mi-glow" style="background:radial-gradient(circle, ${accent}30 0%, transparent 70%)"></div>
+  <div class="mi-inner">
+    <h2 class="mi-h2">${escHtml(miHeading)}</h2>
+    <div class="mi-grid">${iconsHtml}</div>
+    <a href="#" class="mi-cta" style="color:${accent}">${escHtml(miCtaText)} <span>→</span></a>
+  </div>
+</section>`
+      }
+
+      case 'make-pricing': {
+        const bg = styles?.backgroundColor || '#0f172a'
+        const color = styles?.color || '#ffffff'
+        const accent = props.mpAccent || '#a855f7'
+        const mpHeading = props.mpHeading || ''
+        const mpPlans = props.mpPlans || []
+        const plansHtml = mpPlans.map(plan => {
+          const bgStyle = plan.highlight ? `background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border-color:${accent};transform:scale(1.05);box-shadow:0 20px 40px -10px ${accent}40` : `background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)`
+          const popularTag = plan.highlight ? `<div class="mp-popular" style="background:${accent}">Most Popular</div>` : ''
+          const btnStyle = plan.highlight ? `background:${accent}` : `background:rgba(255,255,255,0.1)`
+          const featsHtml = plan.features.map(f => `<div class="mp-feat"><div class="mp-check" style="background:${accent}30;color:${accent}">✓</div>${escHtml(f)}</div>`).join('')
+          
+          return `<div class="mp-card" style="${bgStyle}">
+            ${popularTag}
+            <h3 class="mp-name">${escHtml(plan.name)}</h3>
+            <p class="mp-desc">${escHtml(plan.desc)}</p>
+            <div class="mp-price">${escHtml(plan.price)}<span>/mo</span></div>
+            <button class="mp-btn" style="${btnStyle}">Get Started</button>
+            <div class="mp-feats">${featsHtml}</div>
+          </div>`
+        }).join('')
+
+        return `<section class="mp-sec" style="background-color:${bg};color:${color}">
+  <div class="mp-inner">
+    <h2 class="mp-h2">${escHtml(mpHeading)}</h2>
+    <div class="mp-grid">${plansHtml}</div>
+  </div>
+</section>`
+      }
+
+      case 'make-footer': {
+        const bg = styles?.backgroundColor || '#0f172a'
+        const color = styles?.color || '#94a3b8'
+        const accent = props.mftAccent || '#a855f7'
+        const mftBrand = props.mftBrand || ''
+        const mftText = props.mftText || ''
+        const mftCopy = props.mftCopy || ''
+
+        return `<footer class="mft-sec" style="background-color:${bg};color:${color}">
+  <div class="mft-inner">
+    <div class="mft-brand">
+      <div class="mft-logo" style="background:linear-gradient(135deg, ${accent}, #3b82f6)"></div>
+      ${escHtml(mftBrand)}
+    </div>
+    <p class="mft-text">${escHtml(mftText)}</p>
+    <p class="mft-copy">${escHtml(mftCopy)}</p>
+  </div>
+</footer>`
       }
 
       case 'skyline-hero': {
@@ -4068,6 +4400,132 @@ blockquote cite { font-size: 0.9rem; font-style: normal; opacity: 0.6; }
   .vl-divider { display: none; }
 }
 
+/* ── Food Templates (Categories, Items, Footer) ───────────────────────── */
+.fc-section { padding: 64px 48px; font-family: Outfit, system-ui, sans-serif; }
+.fc-inner { max-width: 1100px; margin: 0 auto; }
+.fc-heading { font-size: 2.5rem; font-weight: 900; margin: 0 0 32px; }
+.fc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; }
+.fc-card { background-color: #fff; border: 3px solid #2d3436; border-radius: 16px; padding: 24px 16px; text-align: center; transition: all 0.2s ease; cursor: pointer; }
+.fc-card:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0px 0px #2d3436 !important; }
+.fc-icon { font-size: 2.5rem; margin-bottom: 12px; display: inline-block; padding: 8px; border-radius: 12px; border: 2px solid #2d3436; }
+.fc-name { font-size: 1.2rem; font-weight: 700; display: block; }
+
+.fi-section { padding: 64px 48px; font-family: Outfit, system-ui, sans-serif; }
+.fi-inner { max-width: 1100px; margin: 0 auto; }
+.fi-heading { font-size: 2.5rem; font-weight: 900; margin: 0 0 32px; }
+.fi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+.fi-card { display: flex; flex-direction: row; background-color: #fff; border: 4px solid #2d3436; border-radius: 24px; overflow: hidden; transition: all 0.3s ease; }
+.fi-card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px 0px #2d3436 !important; }
+.fi-img-wrap { width: 180px; position: relative; border-right: 4px solid #2d3436; flex-shrink: 0; }
+.fi-img { width: 100%; height: 100%; object-fit: cover; }
+.fi-price { position: absolute; top: 12px; right: 12px; padding: 4px 12px; border-radius: 999px; font-weight: 900; color: #fff; border: 2px solid #2d3436; font-size: 1.1rem; }
+.fi-content { padding: 24px; display: flex; flex-direction: column; flex: 1; }
+.fi-name { font-size: 1.4rem; font-weight: 800; margin: 0 0 8px; }
+.fi-desc { color: #6b7280; font-size: 0.95rem; font-weight: 500; margin: 0 0 20px; flex: 1; }
+.fi-btn { align-self: flex-start; color: #fff; border: 3px solid #2d3436; border-radius: 12px; padding: 10px 20px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 8px; }
+.fi-btn:hover { background-color: #2d3436 !important; color: #fff !important; }
+.fi-btn:active { transform: translate(2px, 2px); box-shadow: none !important; }
+
+.ff-footer { padding: 64px 48px; font-family: Outfit, system-ui, sans-serif; }
+.ff-inner { max-width: 1100px; margin: 0 auto; border-radius: 24px; padding: 48px 64px; display: flex; justify-content: space-between; align-items: center; gap: 24px; color: #fff; }
+.ff-left { text-align: left; }
+.ff-brand-logo { height: 48px; object-fit: contain; margin-bottom: 12px; }
+.ff-brand-text { font-size: 2rem; font-weight: 900; margin: 0 0 8px; letter-spacing: -0.04em; }
+.ff-text { margin: 0 0 16px; font-size: 1.1rem; font-weight: 500; opacity: 0.9; }
+.ff-copy { margin: 0; font-size: 0.9rem; opacity: 0.6; }
+.ff-socials { display: flex; gap: 16px; }
+.ff-soc { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; transition: transform 0.2s; text-decoration: none; }
+.ff-soc:hover { transform: scale(1.1) rotate(5deg); }
+
+@media (max-width: 768px) {
+  .fc-section { padding: 40px 20px; }
+  
+  .fi-section { padding: 40px 20px; }
+  .fi-grid { grid-template-columns: 1fr; }
+  .fi-card { flex-direction: column; }
+  .fi-img-wrap { width: 100%; height: 200px; border-right: none; border-bottom: 4px solid #2d3436; }
+  
+  .ff-footer { padding: 40px 20px; }
+  .ff-inner { flex-direction: column; padding: 32px 24px; text-align: center; }
+  .ff-left { text-align: center; }
+}
+
+/* Make Navbar */
+.mkn-nav { padding: 20px 48px; display: flex; align-items: center; justify-content: space-between; font-family: system-ui, sans-serif; }
+.mkn-brand { font-size: 1.5rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+.mkn-logo { width: 24px; height: 24px; border-radius: 50%; }
+.mkn-links { display: flex; gap: 32px; }
+.mkn-link { color: inherit; text-decoration: none; font-weight: 500; font-size: 0.95rem; opacity: 0.8; transition: opacity 0.2s; }
+.mkn-link:hover { opacity: 1; }
+.mkn-actions { display: flex; gap: 16px; align-items: center; }
+.mkn-login { color: inherit; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+.mkn-btn { padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.95rem; }
+@media (max-width: 768px) { .mkn-links { display: none; } }
+
+/* Make Hero */
+.mkh-sec { padding: 80px 48px; position: relative; overflow: hidden; min-height: 600px; display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; }
+.mkh-glow { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 60%; height: 400px; filter: blur(60px); pointer-events: none; }
+.mkh-inner { max-width: 1000px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+.mkh-h1 { font-size: clamp(3rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 24px; margin-top: 0; }
+.mkh-desc { font-size: 1.25rem; color: #94a3b8; max-width: 700px; margin: 0 auto 40px; line-height: 1.6; }
+.mkh-btns { display: flex; gap: 16px; justify-content: center; margin-bottom: 64px; }
+.mkh-btn-1 { color: #fff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+.mkh-btn-2 { background: rgba(255,255,255,0.1); color: #fff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.2); }
+.mkh-img-wrap { position: relative; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+.mkh-browser-bar { position: absolute; top: 0; left: 0; right: 0; height: 40px; background: rgba(255,255,255,0.05); display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+.mkh-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mkh-img { width: 100%; display: block; margin-top: 40px; }
+@media (max-width: 768px) { .mkh-sec { padding: 40px 20px; } .mkh-btns { flex-direction: column; } }
+
+/* Make Features */
+.mf-sec { padding: 96px 48px; font-family: system-ui, sans-serif; }
+.mf-inner { max-width: 1200px; margin: 0 auto; }
+.mf-h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; text-align: center; margin-bottom: 64px; letter-spacing: -0.02em; margin-top: 0; }
+.mf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+.mf-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 40px 32px; transition: transform 0.2s; cursor: pointer; }
+.mf-card:hover { transform: translateY(-4px); }
+.mf-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 24px; }
+.mf-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; margin-top: 0; }
+.mf-desc { color: #94a3b8; font-size: 1.1rem; line-height: 1.6; margin: 0; }
+
+/* Make Integrations */
+.mi-sec { padding: 96px 48px; font-family: system-ui, sans-serif; position: relative; overflow: hidden; }
+.mi-glow { position: absolute; right: -10%; bottom: -10%; width: 500px; height: 500px; filter: blur(60px); pointer-events: none; }
+.mi-inner { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+.mi-h2 { font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 800; text-align: center; margin-bottom: 48px; letter-spacing: -0.02em; margin-top: 0; }
+.mi-grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; max-width: 800px; margin-bottom: 56px; }
+.mi-icon { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); }
+.mi-cta { text-decoration: none; font-weight: 700; font-size: 1.2rem; display: inline-flex; align-items: center; gap: 8px; }
+.mi-cta span { font-size: 1.5rem; }
+
+/* Make Pricing */
+.mp-sec { padding: 96px 48px; font-family: system-ui, sans-serif; }
+.mp-inner { max-width: 1200px; margin: 0 auto; }
+.mp-h2 { font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 800; text-align: center; margin-bottom: 64px; letter-spacing: -0.02em; margin-top: 0; }
+.mp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; align-items: center; }
+.mp-card { border: 1px solid; border-radius: 24px; padding: 48px 32px; position: relative; }
+.mp-popular { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); color: #fff; padding: 4px 16px; border-radius: 999px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+.mp-name { font-size: 1.5rem; font-weight: 600; margin: 0 0 8px; }
+.mp-desc { color: #94a3b8; font-size: 1rem; margin: 0 0 32px; }
+.mp-price { font-size: 3rem; font-weight: 900; margin-bottom: 32px; display: flex; align-items: baseline; gap: 4px; }
+.mp-price span { font-size: 1rem; color: #94a3b8; font-weight: 500; }
+.mp-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 32px; }
+.mp-feats { display: flex; flex-direction: column; gap: 16px; }
+.mp-feat { display: flex; align-items: center; gap: 12px; color: #cbd5e1; font-size: 0.95rem; }
+.mp-check { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; }
+
+/* Make Footer */
+.mft-sec { padding: 64px 48px; font-family: system-ui, sans-serif; border-top: 1px solid rgba(255,255,255,0.05); }
+.mft-inner { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.mft-brand { font-size: 1.8rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 12px; }
+.mft-logo { width: 32px; height: 32px; border-radius: 50%; }
+.mft-text { font-size: 1.1rem; margin: 0; text-align: center; }
+.mft-copy { font-size: 0.9rem; opacity: 0.6; margin: 24px 0 0; }
+
+@media (max-width: 768px) {
+  .mf-sec, .mi-sec, .mp-sec, .mft-sec { padding: 64px 24px; }
+  .mp-card { transform: none !important; }
+}
 `
 
 const BASE_JS = `// Generated by SiteForge

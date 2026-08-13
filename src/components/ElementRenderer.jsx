@@ -2643,7 +2643,8 @@ function FoodNavbar({ props, styles, activeHref, onLinkClick }) {
   const isTablet = viewportWidth === 'tablet'
   const isSmall = isMobile || isTablet
 
-  const brand = props.foodBrand || props.brand || 'Ideatefood'
+  const brand = props.foodBrand || props.brand || 'Ideatefood';
+  const logoUrl = props.foodLogoUrl;
   const accent = props.foodAccent || '#e67e22'
   const dark = props.foodDark || '#2d3436'
   const bg = styles?.backgroundColor || '#fff0eb'
@@ -2676,13 +2677,19 @@ function FoodNavbar({ props, styles, activeHref, onLinkClick }) {
 
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-        <div className="fn-logo-box" style={{ width: '42px', height: '42px', backgroundColor: accent, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark}`, flexShrink: 0 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
-            <line x1="6" y1="17" x2="18" y2="17" />
-          </svg>
-        </div>
-        <span style={{ fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.04em', color: dark }}>{brand}</span>
+        {logoUrl ? (
+          <img src={logoUrl} alt={brand} style={{ height: '42px', maxHeight: '42px', maxWidth: '140px', width: 'auto', objectFit: 'contain', display: 'block' }} />
+        ) : (
+          <>
+            <div className="fn-logo-box" style={{ width: '42px', height: '42px', backgroundColor: accent, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark}`, flexShrink: 0 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+                <line x1="6" y1="17" x2="18" y2="17" />
+              </svg>
+            </div>
+            <span style={{ fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.04em', color: dark }}>{brand}</span>
+          </>
+        )}
       </div>
 
       {/* Desktop links */}
@@ -3354,6 +3361,182 @@ function VelunoHero({ element }) {
         {props.vlTag3 && <span>{props.vlTag3}</span>}
       </div>
     </main>
+  )
+}
+
+
+function MakeNavbar({ props, styles, activeHref, onLinkClick }) {
+  const brand = props.brand || 'Make'
+  const accent = props.makeAccent || '#a855f7'
+  const links = props.links || []
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#ffffff'
+
+  return (
+    <nav style={{ backgroundColor: bg, color, padding: '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ fontSize: '1.5rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: `linear-gradient(135deg, ${accent}, #3b82f6)` }} />
+        {brand}
+      </div>
+      <div style={{ display: 'flex', gap: '32px' }}>
+        {links.map((l, i) => (
+          <a key={i} href={l.href} onClick={(e) => onLinkClick(e, l.href)} style={{ color, textDecoration: 'none', fontWeight: '500', fontSize: '0.95rem', opacity: activeHref === l.href ? 1 : 0.8 }}>
+            {l.text}
+          </a>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <a href="#" style={{ color, textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' }}>Log in</a>
+        <a href="#" style={{ background: color, color: bg, padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '0.95rem' }}>Get Started</a>
+      </div>
+    </nav>
+  )
+}
+
+function MakeHero({ element }) {
+  const { props, styles } = element
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#ffffff'
+  const accent = props.makeAccent || '#a855f7'
+
+  return (
+    <section style={{ backgroundColor: bg, color, padding: '80px 48px', position: 'relative', overflow: 'hidden', minHeight: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif' }}>
+      {/* Glow */}
+      <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: '60%', height: '400px', background: `radial-gradient(circle, ${accent}40 0%, transparent 70%)`, filter: 'blur(60px)', pointerEvents: 'none' }} />
+      
+      <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <h1 style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: '900', lineHeight: 1.1, letterSpacing: '-0.03em', marginBottom: '24px' }}>
+          {props.makeHeading}
+        </h1>
+        <p style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: '700px', margin: '0 auto 40px', lineHeight: 1.6 }}>
+          {props.makeDesc}
+        </p>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '64px' }}>
+          <a href="#" style={{ background: `linear-gradient(135deg, ${accent}, #3b82f6)`, color: '#fff', padding: '16px 32px', borderRadius: '12px', textDecoration: 'none', fontWeight: '700', fontSize: '1.1rem', boxShadow: `0 10px 30px ${accent}40` }}>
+            {props.makeCtaText}
+          </a>
+          <a href="#" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '16px 32px', borderRadius: '12px', textDecoration: 'none', fontWeight: '700', fontSize: '1.1rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+            {props.makeSecondaryCtaText}
+          </a>
+        </div>
+        
+        <div style={{ position: 'relative', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: '8px' }}>
+             <div style={{width: 12, height: 12, borderRadius: '50%', background: '#ef4444'}}></div>
+             <div style={{width: 12, height: 12, borderRadius: '50%', background: '#eab308'}}></div>
+             <div style={{width: 12, height: 12, borderRadius: '50%', background: '#22c55e'}}></div>
+          </div>
+          <img src={props.makeImage} alt="App Interface" style={{ width: '100%', display: 'block', marginTop: '40px' }} />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+
+function MakeFeatures({ element }) {
+  const { props, styles } = element
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#ffffff'
+  const accent = props.mfAccent || '#a855f7'
+
+  return (
+    <section style={{ backgroundColor: bg, color, padding: '96px 48px', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', textAlign: 'center', marginBottom: '64px', letterSpacing: '-0.02em' }}>{props.mfHeading}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+          {(props.mfFeatures || []).map((f, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', padding: '40px 32px', transition: 'transform 0.2s', cursor: 'pointer' }} onMouseEnter={(e)=>e.currentTarget.style.transform='translateY(-4px)'} onMouseLeave={(e)=>e.currentTarget.style.transform='none'}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: `linear-gradient(135deg, ${accent}40, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', marginBottom: '24px', border: `1px solid ${accent}40` }}>{f.icon}</div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '16px' }}>{f.title}</h3>
+              <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: '1.6', margin: 0 }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MakeIntegrations({ element }) {
+  const { props, styles } = element
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#ffffff'
+  const accent = props.miAccent || '#a855f7'
+
+  return (
+    <section style={{ backgroundColor: bg, color, padding: '96px 48px', fontFamily: 'system-ui, sans-serif', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', right: '-10%', bottom: '-10%', width: '500px', height: '500px', background: `radial-gradient(circle, ${accent}30 0%, transparent 70%)`, filter: 'blur(60px)', pointerEvents: 'none' }} />
+      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <h2 style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontWeight: '800', textAlign: 'center', marginBottom: '48px', letterSpacing: '-0.02em' }}>{props.miHeading}</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', maxWidth: '800px', marginBottom: '56px' }}>
+          {(props.miIcons || []).map((icon, i) => (
+            <div key={i} style={{ width: '80px', height: '80px', borderRadius: '20px', background: icon.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)' }}>
+              {icon.text}
+            </div>
+          ))}
+        </div>
+        <a href="#" style={{ color: accent, textDecoration: 'none', fontWeight: '700', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          {props.miCtaText} <span style={{fontSize:'1.5rem'}}>→</span>
+        </a>
+      </div>
+    </section>
+  )
+}
+
+function MakePricing({ element }) {
+  const { props, styles } = element
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#ffffff'
+  const accent = props.mpAccent || '#a855f7'
+
+  return (
+    <section style={{ backgroundColor: bg, color, padding: '96px 48px', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontWeight: '800', textAlign: 'center', marginBottom: '64px', letterSpacing: '-0.02em' }}>{props.mpHeading}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', alignItems: 'center' }}>
+          {(props.mpPlans || []).map((plan, i) => (
+            <div key={i} style={{ background: plan.highlight ? `linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))` : 'rgba(255,255,255,0.02)', border: `1px solid ${plan.highlight ? accent : 'rgba(255,255,255,0.1)'}`, borderRadius: '24px', padding: '48px 32px', position: 'relative', transform: plan.highlight ? 'scale(1.05)' : 'none', boxShadow: plan.highlight ? `0 20px 40px -10px ${accent}40` : 'none' }}>
+              {plan.highlight && <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: accent, color: '#fff', padding: '4px 16px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Most Popular</div>}
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', margin: '0 0 8px' }}>{plan.name}</h3>
+              <p style={{ color: '#94a3b8', fontSize: '1rem', margin: '0 0 32px' }}>{plan.desc}</p>
+              <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '32px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                {plan.price}<span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: '500' }}>/mo</span>
+              </div>
+              <button style={{ width: '100%', padding: '16px', borderRadius: '12px', border: 'none', background: plan.highlight ? accent : 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', marginBottom: '32px' }}>Get Started</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {(plan.features || []).map((feat, j) => (
+                  <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#cbd5e1', fontSize: '0.95rem' }}>
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: `${accent}30`, color: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>✓</div>
+                    {feat}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MakeFooter({ element }) {
+  const { props, styles } = element
+  const bg = styles?.backgroundColor || '#0f172a'
+  const color = styles?.color || '#94a3b8'
+  const accent = props.mftAccent || '#a855f7'
+
+  return (
+    <footer style={{ backgroundColor: bg, color, padding: '64px 48px', fontFamily: 'system-ui, sans-serif', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+        <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `linear-gradient(135deg, ${accent}, #3b82f6)` }} />
+          {props.mftBrand}
+        </div>
+        <p style={{ fontSize: '1.1rem', margin: 0, textAlign: 'center' }}>{props.mftText}</p>
+        <p style={{ fontSize: '0.9rem', opacity: 0.6, margin: '24px 0 0' }}>{props.mftCopy}</p>
+      </div>
+    </footer>
   )
 }
 
@@ -4425,6 +4608,132 @@ function LumoraFooter({ props, styles }) {
 }
 
 /* Renders an element by type with its props/styles */
+function FoodCategories({ element }) {
+  const { props, styles } = element
+  const { viewportWidth } = useBuilder()
+  const isSmall = viewportWidth === 'mobile' || viewportWidth === 'tablet'
+
+  const accent = props.foodAccent || '#e67e22'
+  const dark = props.foodDark || '#2d3436'
+  const bg = styles?.backgroundColor || '#fff0eb'
+  const title = props.foodCategoriesTitle || 'What are you craving?'
+  const categories = props.foodCategories || []
+
+  return (
+    <section style={{ backgroundColor: bg, padding: isSmall ? '32px 20px' : '48px 48px', fontFamily: 'Outfit, system-ui, sans-serif' }}>
+      <style>{`
+        .fc-card { transition: all 0.2s ease; cursor: pointer; }
+        .fc-card:hover { transform: translate(-4px,-4px); box-shadow: 8px 8px 0px 0px ${dark} !important; }
+      `}</style>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: isSmall ? '2rem' : '2.5rem', fontWeight: '900', color: dark, margin: '0 0 32px' }}>{title}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
+          {categories.map((cat, i) => (
+            <div key={i} className="fc-card" style={{ backgroundColor: '#fff', border: `3px solid ${dark}`, borderRadius: '16px', padding: '24px 16px', textAlign: 'center', boxShadow: `4px 4px 0px 0px ${dark}` }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>{cat.icon}</div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: dark, margin: 0 }}>{cat.name}</h3>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FoodItems({ element }) {
+  const { props, styles } = element
+  const { viewportWidth } = useBuilder()
+  const isSmall = viewportWidth === 'mobile' || viewportWidth === 'tablet'
+
+  const accent = props.foodAccent || '#e67e22'
+  const dark = props.foodDark || '#2d3436'
+  const bg = styles?.backgroundColor || '#fff0eb'
+  const title = props.foodItemsTitle || 'Popular Dishes'
+  const items = props.foodItems || []
+
+  return (
+    <section style={{ backgroundColor: bg, padding: isSmall ? '32px 20px' : '48px 48px', fontFamily: 'Outfit, system-ui, sans-serif' }}>
+      <style>{`
+        .fi-card { transition: all 0.3s ease; }
+        .fi-card:hover { transform: translate(-4px,-4px); box-shadow: 12px 12px 0px 0px ${dark} !important; }
+        .fi-btn { transition: all 0.15s ease; cursor: pointer; }
+        .fi-btn:hover { background-color: ${dark} !important; color: #fff !important; }
+        .fi-btn:active { transform: translate(2px,2px); box-shadow: none !important; }
+      `}</style>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: isSmall ? '2rem' : '2.5rem', fontWeight: '900', color: dark, margin: '0 0 32px' }}>{title}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : 'repeat(2, 1fr)', gap: '32px' }}>
+          {items.map((item, i) => (
+            <div key={i} className="fi-card" style={{ display: 'flex', flexDirection: isSmall ? 'column' : 'row', backgroundColor: '#fff', border: `4px solid ${dark}`, borderRadius: '24px', overflow: 'hidden', boxShadow: `6px 6px 0px 0px ${dark}` }}>
+              <img src={item.image} alt={item.name} style={{ width: isSmall ? '100%' : '180px', height: '180px', objectFit: 'cover', borderRight: isSmall ? 'none' : `4px solid ${dark}`, borderBottom: isSmall ? `4px solid ${dark}` : 'none' }} />
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: dark, margin: 0 }}>{item.name}</h3>
+                  <span style={{ fontSize: '1.2rem', fontWeight: '900', color: accent }}>{item.price}</span>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.95rem', fontWeight: '500', margin: '0 0 20px', flex: 1 }}>{item.desc}</p>
+                <button className="fi-btn" style={{ alignSelf: 'flex-start', backgroundColor: accent, color: '#fff', border: `3px solid ${dark}`, borderRadius: '12px', padding: '10px 20px', fontSize: '1rem', fontWeight: '800', boxShadow: `4px 4px 0px 0px ${dark}` }}>
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FoodFooter({ element }) {
+  const { props, styles } = element
+  const { viewportWidth } = useBuilder()
+  const isSmall = viewportWidth === 'mobile' || viewportWidth === 'tablet'
+
+  const accent = props.foodAccent || '#e67e22'
+  const dark = props.foodDark || '#2d3436'
+  const bg = styles?.backgroundColor || '#fff0eb'
+  const brand = props.foodFooterBrand || 'Ideatefood';
+  const logoUrl = props.foodFooterLogoUrl;
+  const text = props.foodFooterText || 'Delivering happiness to your door.'
+  const copyright = props.foodFooterCopyright || '© 2026 Ideatefood. All rights reserved.'
+
+  return (
+    <footer style={{ backgroundColor: bg, padding: isSmall ? '32px 20px' : '48px 48px', fontFamily: 'Outfit, system-ui, sans-serif' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', backgroundColor: dark, borderRadius: '24px', padding: isSmall ? '32px 24px' : '48px 64px', display: 'flex', flexDirection: isSmall ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', gap: '24px', color: '#fff' }}>
+        <div style={{ textAlign: isSmall ? 'center' : 'left' }}>
+          {logoUrl ? <img src={logoUrl} alt={brand} style={{ height: '48px', objectFit: 'contain', marginBottom: '12px' }} /> : <h2 style={{ fontSize: '2rem', fontWeight: '900', margin: '0 0 8px', letterSpacing: '-0.04em' }}>{brand}</h2>}
+          <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: '500', opacity: 0.9 }}>{text}</p>
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          {props.foodFbUrl && (
+            <a href={props.foodFbUrl} target="_blank" rel="noreferrer" style={{ width: '48px', height: '48px', backgroundColor: accent, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #fff', transition: 'transform 0.2s', textDecoration: 'none' }} onMouseOver={e=>e.currentTarget.style.transform='scale(1.1) rotate(5deg)'} onMouseOut={e=>e.currentTarget.style.transform='none'}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+            </a>
+          )}
+          {props.foodIgUrl && (
+            <a href={props.foodIgUrl} target="_blank" rel="noreferrer" style={{ width: '48px', height: '48px', backgroundColor: accent, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #fff', transition: 'transform 0.2s', textDecoration: 'none' }} onMouseOver={e=>e.currentTarget.style.transform='scale(1.1) rotate(5deg)'} onMouseOut={e=>e.currentTarget.style.transform='none'}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+          )}
+          {props.foodTwUrl && (
+            <a href={props.foodTwUrl} target="_blank" rel="noreferrer" style={{ width: '48px', height: '48px', backgroundColor: accent, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #fff', transition: 'transform 0.2s', textDecoration: 'none' }} onMouseOver={e=>e.currentTarget.style.transform='scale(1.1) rotate(5deg)'} onMouseOut={e=>e.currentTarget.style.transform='none'}>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+            </a>
+          )}
+          {(!props.foodFbUrl && !props.foodIgUrl && !props.foodTwUrl) && [1,2,3].map(i => (
+            <div key={i} style={{ width: '48px', height: '48px', backgroundColor: accent, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid #fff', transition: 'transform 0.2s' }} onMouseOver={e=>e.currentTarget.style.transform='scale(1.1) rotate(5deg)'} onMouseOut={e=>e.currentTarget.style.transform='none'}>
+              <div style={{ width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '24px' }}>
+        <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280', fontWeight: '600' }}>{copyright}</p>
+      </div>
+    </footer>
+  )
+}
+
 export default function ElementRenderer({ element, isPreview = false, childrenSlot = null, sidebarOnly = false }) {
   const { type, props, styles } = element
   const { state, switchPage, viewportWidth } = useBuilder()
@@ -4515,6 +4824,9 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
   if (type === 'moco-hero') return withAnchor(<MocoHero element={element} />)
   if (type === 'food-navbar') return withAnchor(<FoodNavbar props={props} styles={styles} activeHref={activeHref} onLinkClick={handleNavLinkClick} />)
   if (type === 'food-hero') return withAnchor(<FoodHero element={element} />)
+  if (type === 'food-categories') return withAnchor(<FoodCategories element={element} />)
+  if (type === 'food-items') return withAnchor(<FoodItems element={element} />)
+  if (type === 'food-footer') return withAnchor(<FoodFooter element={element} />)
   if (type === 'present-section') return withAnchor(<PresentSection element={element} />)
   if (type === 'puzzle-hero') return withAnchor(<PuzzleHero element={element} />)
   if (type === 'puzzle-navbar') return withAnchor(<PuzzleNavbar props={props} styles={styles} activeHref={activeHref} onLinkClick={handleNavLinkClick} />)
@@ -4755,6 +5067,15 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
     case 'food-hero': {
       return <FoodHero element={element} />
     }
+    case 'food-categories': {
+      return <FoodCategories element={element} />
+    }
+    case 'food-items': {
+      return <FoodItems element={element} />
+    }
+    case 'food-footer': {
+      return <FoodFooter element={element} />
+    }
 
     case 'puzzle-navbar': {
       return <PuzzleNavbar props={element.props} styles={element.styles} />
@@ -4779,6 +5100,18 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
     case 'trusted-brands': {
       return <TrustedBrands element={element} />
     }
+
+    
+    case 'make-navbar':
+      return <MakeNavbar props={element.props} styles={element.styles} activeHref={activeHref} onLinkClick={handleNavLinkClick} />
+    case 'make-hero':
+      return <MakeHero element={element} />
+
+    case 'make-features': return <MakeFeatures element={element} />
+    case 'make-integrations': return <MakeIntegrations element={element} />
+    case 'make-pricing': return <MakePricing element={element} />
+    case 'make-footer': return <MakeFooter element={element} />
+
 
     case 'skyline-hero': {
       return <SkylineHero element={element} />

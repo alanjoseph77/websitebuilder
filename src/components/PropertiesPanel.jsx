@@ -1325,9 +1325,8 @@ function ContentTab({ element, updateElement }) {
         <>
           <div style={S.section}>
             <div style={S.sectionTitle}>Food Navbar — Brand</div>
-            <Field label="Brand Name">
-              <input style={S.input} value={props.foodBrand || ''} onChange={(e) => up({ foodBrand: e.target.value })} placeholder="Ideatefood" />
-            </Field>
+            <Field label="Brand Name"><input style={S.input} value={props.foodBrand || ''} onChange={(e) => up({ foodBrand: e.target.value })} placeholder="Ideatefood" /></Field>
+            <ImageField label="Brand Logo URL" value={props.foodLogoUrl || ''} onChange={(url) => up({ foodLogoUrl: url })} />
             <ColorField label="Accent Color" value={props.foodAccent || '#e67e22'} onChange={(v) => up({ foodAccent: v })} />
             <ColorField label="Dark / Border Color" value={props.foodDark || '#2d3436'} onChange={(v) => up({ foodDark: v })} />
           </div>
@@ -1414,6 +1413,111 @@ function ContentTab({ element, updateElement }) {
             <ColorField label="Dark Color" value={props.foodDark || '#2d3436'} onChange={(v) => up({ foodDark: v })} />
             <ColorField label="Background" value={styles?.backgroundColor || '#ffffff'} onChange={(v) => us({ backgroundColor: v })} />
             <ColorField label="Text Color" value={styles?.color || '#1e293b'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+
+        case 'food-categories':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Food Categories — Title</div>
+            <Field label="Title">
+              <input style={S.input} value={props.foodCategoriesTitle || ''} onChange={(e) => up({ foodCategoriesTitle: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Categories</div>
+            {(props.foodCategories || []).map((cat, i) => (
+              <div key={i} style={{ background: '#f9fafb', borderRadius: '6px', padding: '10px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: '700' }}>Category {i + 1}</span>
+                  <button onClick={() => up({ foodCategories: props.foodCategories.filter((_, j) => j !== i) })} style={S.removeBtn}>×</button>
+                </div>
+                <Field label="Icon"><input style={S.input} value={cat.icon} onChange={(e) => { const lp = [...props.foodCategories]; lp[i].icon = e.target.value; up({ foodCategories: lp }) }} /></Field>
+                <Field label="Name"><input style={S.input} value={cat.name} onChange={(e) => { const lp = [...props.foodCategories]; lp[i].name = e.target.value; up({ foodCategories: lp }) }} /></Field>
+              </div>
+            ))}
+            <button style={S.addBtn} onClick={() => up({ foodCategories: [...(props.foodCategories || []), { icon: '🍔', name: 'New Category' }] })}>
+              + Add Category
+            </button>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.foodAccent || '#e67e22'} onChange={(v) => up({ foodAccent: v })} />
+            <ColorField label="Dark Color" value={props.foodDark || '#2d3436'} onChange={(v) => up({ foodDark: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#fff0eb'} onChange={(v) => us({ backgroundColor: v })} />
+          </div>
+        </>
+      )
+
+    case 'food-items':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Food Items — Title</div>
+            <Field label="Title">
+              <input style={S.input} value={props.foodItemsTitle || ''} onChange={(e) => up({ foodItemsTitle: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Items</div>
+            {(props.foodItems || []).map((item, i) => (
+              <div key={i} style={{ background: '#f9fafb', borderRadius: '6px', padding: '10px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: '700' }}>Item {i + 1}</span>
+                  <button onClick={() => up({ foodItems: props.foodItems.filter((_, j) => j !== i) })} style={S.removeBtn}>×</button>
+                </div>
+                <Field label="Name"><input style={S.input} value={item.name} onChange={(e) => { const lp = [...props.foodItems]; lp[i].name = e.target.value; up({ foodItems: lp }) }} /></Field>
+                <Field label="Price"><input style={S.input} value={item.price} onChange={(e) => { const lp = [...props.foodItems]; lp[i].price = e.target.value; up({ foodItems: lp }) }} /></Field>
+                <Field label="Description"><textarea style={S.textarea} rows={2} value={item.desc} onChange={(e) => { const lp = [...props.foodItems]; lp[i].desc = e.target.value; up({ foodItems: lp }) }} /></Field>
+                <ImageField label="Image URL" value={item.image} onChange={(url) => { const lp = [...props.foodItems]; lp[i].image = url; up({ foodItems: lp }) }} />
+              </div>
+            ))}
+            <button style={S.addBtn} onClick={() => up({ foodItems: [...(props.foodItems || []), { image: 'https://placehold.co/400', name: 'New Item', price: '$0.00', desc: 'Description' }] })}>
+              + Add Item
+            </button>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.foodAccent || '#e67e22'} onChange={(v) => up({ foodAccent: v })} />
+            <ColorField label="Dark Color" value={props.foodDark || '#2d3436'} onChange={(v) => up({ foodDark: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#fff0eb'} onChange={(v) => us({ backgroundColor: v })} />
+          </div>
+        </>
+      )
+
+    case 'food-footer':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Food Footer — Content</div>
+            <Field label="Brand Name"><input style={S.input} value={props.foodFooterBrand || ''} onChange={(e) => up({ foodFooterBrand: e.target.value })} /></Field>
+            <ImageField label="Footer Logo URL" value={props.foodFooterLogoUrl || ''} onChange={(url) => up({ foodFooterLogoUrl: url })} />
+            <Field label="Text">
+              <input style={S.input} value={props.foodFooterText || ''} onChange={(e) => up({ foodFooterText: e.target.value })} />
+            </Field>
+            <Field label="Copyright">
+              <input style={S.input} value={props.foodFooterCopyright || ''} onChange={(e) => up({ foodFooterCopyright: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Social Links</div>
+            <Field label="Facebook URL">
+              <input style={S.input} value={props.foodFbUrl || ''} onChange={(e) => up({ foodFbUrl: e.target.value })} placeholder="https://..." />
+            </Field>
+            <Field label="Instagram URL">
+              <input style={S.input} value={props.foodIgUrl || ''} onChange={(e) => up({ foodIgUrl: e.target.value })} placeholder="https://..." />
+            </Field>
+            <Field label="Twitter URL">
+              <input style={S.input} value={props.foodTwUrl || ''} onChange={(e) => up({ foodTwUrl: e.target.value })} placeholder="https://..." />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.foodAccent || '#e67e22'} onChange={(v) => up({ foodAccent: v })} />
+            <ColorField label="Dark Color" value={props.foodDark || '#2d3436'} onChange={(v) => up({ foodDark: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#fff0eb'} onChange={(v) => us({ backgroundColor: v })} />
           </div>
         </>
       )
@@ -1528,6 +1632,137 @@ function ContentTab({ element, updateElement }) {
           </div>
         </>
       )
+
+    
+    case 'make-navbar':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Brand</div>
+            <Field label="Brand Name">
+              <input style={S.input} value={props.brand || ''} onChange={(e) => up({ brand: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.makeAccent || '#a855f7'} onChange={(v) => up({ makeAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#ffffff'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+    case 'make-hero':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Content</div>
+            <Field label="Heading">
+              <textarea style={S.textarea} rows={3} value={props.makeHeading || ''} onChange={(e) => up({ makeHeading: e.target.value })} />
+            </Field>
+            <Field label="Description">
+              <textarea style={S.textarea} rows={3} value={props.makeDesc || ''} onChange={(e) => up({ makeDesc: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Actions</div>
+            <Field label="Primary Button Text">
+              <input style={S.input} value={props.makeCtaText || ''} onChange={(e) => up({ makeCtaText: e.target.value })} />
+            </Field>
+            <Field label="Secondary Button Text">
+              <input style={S.input} value={props.makeSecondaryCtaText || ''} onChange={(e) => up({ makeSecondaryCtaText: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Media</div>
+            <ImageField label="Interface Image" value={props.makeImage} onChange={(url) => up({ makeImage: url })} />
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.makeAccent || '#a855f7'} onChange={(v) => up({ makeAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#ffffff'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+
+    case 'make-features':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Content</div>
+            <Field label="Heading">
+              <textarea style={S.textarea} rows={2} value={props.mfHeading || ''} onChange={(e) => up({ mfHeading: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.mfAccent || '#a855f7'} onChange={(v) => up({ mfAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#ffffff'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+    case 'make-integrations':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Content</div>
+            <Field label="Heading">
+              <textarea style={S.textarea} rows={2} value={props.miHeading || ''} onChange={(e) => up({ miHeading: e.target.value })} />
+            </Field>
+            <Field label="CTA Text">
+              <input style={S.input} value={props.miCtaText || ''} onChange={(e) => up({ miCtaText: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.miAccent || '#a855f7'} onChange={(v) => up({ miAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#ffffff'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+    case 'make-pricing':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Content</div>
+            <Field label="Heading">
+              <textarea style={S.textarea} rows={2} value={props.mpHeading || ''} onChange={(e) => up({ mpHeading: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.mpAccent || '#a855f7'} onChange={(v) => up({ mpAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#ffffff'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+    case 'make-footer':
+      return (
+        <>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Content</div>
+            <Field label="Brand">
+              <input style={S.input} value={props.mftBrand || ''} onChange={(e) => up({ mftBrand: e.target.value })} />
+            </Field>
+            <Field label="Text">
+              <textarea style={S.textarea} rows={2} value={props.mftText || ''} onChange={(e) => up({ mftText: e.target.value })} />
+            </Field>
+            <Field label="Copyright">
+              <input style={S.input} value={props.mftCopy || ''} onChange={(e) => up({ mftCopy: e.target.value })} />
+            </Field>
+          </div>
+          <div style={S.section}>
+            <div style={S.sectionTitle}>Colors</div>
+            <ColorField label="Accent Color" value={props.mftAccent || '#a855f7'} onChange={(v) => up({ mftAccent: v })} />
+            <ColorField label="Background" value={styles?.backgroundColor || '#0f172a'} onChange={(v) => us({ backgroundColor: v })} />
+            <ColorField label="Text" value={styles?.color || '#94a3b8'} onChange={(v) => us({ color: v })} />
+          </div>
+        </>
+      )
+
 
     case 'skyline-hero':
       return (
@@ -3246,7 +3481,7 @@ function StyleTab({ element, updateElement }) {
 }
 
 export default function PropertiesPanel() {
-  const { selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings } = useBuilder()
+  const { selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, deleteElement, deleteChildElement } = useBuilder()
   const [activeTab, setActiveTab] = useState('content')
 
   // Determine what is selected: child element takes priority
@@ -3293,13 +3528,30 @@ export default function PropertiesPanel() {
     )
   }
 
+  const handleDelete = () => {
+    if (isChild && selectedChildInfo) {
+      deleteChildElement(selectedChildInfo.parentId, selectedChildInfo.childId)
+    } else if (selectedElement) {
+      deleteElement(selectedElement.id)
+    }
+  }
+
   return (
     <div style={S.panel}>
       <div style={S.header}>
         <span>{isChild ? 'Child Element' : 'Properties'}</span>
-        <span style={{ fontSize: '0.68rem', background: isChild ? '#f0fdf4' : '#eff6ff', color: isChild ? '#16a34a' : '#4f6ef7', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
-          {activeElement.type}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.68rem', background: isChild ? '#f0fdf4' : '#eff6ff', color: isChild ? '#16a34a' : '#4f6ef7', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+            {activeElement.type}
+          </span>
+          <button
+            onClick={handleDelete}
+            title="Delete element"
+            style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '3px 8px', fontSize: '0.72rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+          >
+            🗑 Delete
+          </button>
+        </div>
       </div>
 
       {/* Full-width span toggle — only shown for children inside a grid section */}
