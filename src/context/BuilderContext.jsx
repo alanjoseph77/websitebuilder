@@ -97,15 +97,113 @@ const initialState = {
       ],
     },
   ],
+  theme: {
+    colors: {
+      primary: '#4f6ef7',
+      secondary: '#1a1a2e',
+      background: '#ffffff',
+      surface: '#f3f4f6',
+      text: '#111827',
+      muted: '#9ca3af',
+      border: '#e5e7eb',
+      accent: '#f59e0b',
+    },
+    typography: {
+      heading: 'system-ui, -apple-system, sans-serif',
+      body: 'system-ui, -apple-system, sans-serif',
+      caption: 'system-ui, -apple-system, sans-serif',
+      button: 'system-ui, -apple-system, sans-serif',
+    },
+    spacing: {
+      xs: '4px',
+      sm: '8px',
+      md: '16px',
+      lg: '24px',
+      xl: '32px',
+      '2xl': '48px',
+    },
+    radius: {
+      small: '4px',
+      medium: '8px',
+      large: '16px',
+      full: '9999px',
+    },
+  },
   currentPageId: 'page-home',
   selectedElementId: null,
   selectedChildInfo: null, // { parentId, childId }
 }
 
+// ── Recursive Tree Helpers ──
+function removeNode(nodes, idToRemove) {
+  let removedNode = null;
+  const filterNodes = (list) => {
+    return list.filter(node => {
+      if (node.id === idToRemove) {
+        removedNode = node;
+        return false;
+      }
+      if (node.children) {
+        node.children = filterNodes(node.children);
+      }
+      return true;
+    });
+  };
+  const newNodes = filterNodes(JSON.parse(JSON.stringify(nodes)));
+  return { newNodes, removedNode };
+}
+
+function insertNode(nodes, targetParentId, insertIndex, nodeToInsert) {
+  if (!targetParentId) {
+    const newNodes = [...nodes];
+    if (insertIndex !== undefined && insertIndex >= 0) {
+      newNodes.splice(insertIndex, 0, nodeToInsert);
+    } else {
+      newNodes.push(nodeToInsert);
+    }
+    return newNodes;
+  }
+
+  const mapNodes = (list) => {
+    return list.map(node => {
+      if (node.id === targetParentId) {
+        const newChildren = [...(node.children || [])];
+        if (insertIndex !== undefined && insertIndex >= 0) {
+          newChildren.splice(insertIndex, 0, nodeToInsert);
+        } else {
+          newChildren.push(nodeToInsert);
+        }
+        return { ...node, children: newChildren };
+      }
+      if (node.children) {
+        return { ...node, children: mapNodes(node.children) };
+      }
+      return node;
+    });
+  };
+  return mapNodes(nodes);
+}
+
+function updateNodeDeep(nodes, idToUpdate, updates) {
+  return nodes.map(node => {
+    if (node.id === idToUpdate) {
+      return {
+        ...node,
+        props: updates.props ? { ...node.props, ...updates.props } : node.props,
+        styles: updates.styles ? { ...node.styles, ...updates.styles } : node.styles,
+      };
+    }
+    if (node.children) {
+      return { ...node, children: updateNodeDeep(node.children, idToUpdate, updates) };
+    }
+    return node;
+  });
+}
+
 function builderReducer(state, action) {
   switch (action.type) {
     case 'ADD_ELEMENT': {
-      const { element, insertIndex } = action.payload
+      const { element, insertIndex, targetParentId } = action.payload
       const assignIds = (el) => ({
         ...el,
         id: uuidv4(),
@@ -114,51 +212,43 @@ function builderReducer(state, action) {
         children: (el.children || []).map(assignIds)
       })
       const newElement = assignIds(element)
+      
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
-        const elements = [...page.elements]
-        let addedToChild = false
+        
+        let parentToInsert = targetParentId
+        let indexToInsert = insertIndex
 
-        // Feature for Mobile: If a section is selected, auto-add to its children
-        if (state.selectedElementId) {
-          const targetIndex = elements.findIndex(el => el.id === state.selectedElementId)
-          if (targetIndex !== -1) {
-            const targetEl = elements[targetIndex]
-            if (targetEl.type === 'section' || targetEl.type === 'columns') {
-              elements[targetIndex] = {
-                ...targetEl,
-                children: [...(targetEl.children || []), newElement]
+        // Feature for Mobile: If a section is selected and no explicit target is given, auto-add to its children
+        if (!parentToInsert && state.selectedElementId) {
+          const findEl = (list, id) => {
+            for (let el of list) {
+              if (el.id === id) return el
+              if (el.children) {
+                const found = findEl(el.children, id)
+                if (found) return found
               }
-              addedToChild = true
             }
+            return null
+          }
+          const targetEl = findEl(page.elements, state.selectedElementId)
+          if (targetEl && ['section', 'columns', 'container', 'flex', 'grid'].includes(targetEl.type)) {
+            parentToInsert = targetEl.id
+            indexToInsert = -1 // append
           }
         }
 
-        if (!addedToChild) {
-          if (insertIndex !== undefined && insertIndex >= 0) {
-            elements.splice(insertIndex, 0, newElement)
-          } else {
-            elements.push(newElement)
-          }
-        }
+        const elements = insertNode(page.elements, parentToInsert, indexToInsert, newElement)
         return { ...page, elements }
       })
-      return { ...state, pages, selectedElementId: newElement.id }
+      return { ...state, pages, selectedElementId: newElement.id, selectedChildInfo: null }
     }
 
     case 'UPDATE_ELEMENT': {
       const { id, updates } = action.payload
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
-        const elements = page.elements.map((el) => {
-          if (el.id !== id) return el
-          return {
-            ...el,
-            props: updates.props ? { ...el.props, ...updates.props } : el.props,
-            styles: updates.styles ? { ...el.styles, ...updates.styles } : el.styles,
-          }
-        })
-        return { ...page, elements }
+        return { ...page, elements: updateNodeDeep(page.elements, id, updates) }
       })
       return { ...state, pages }
     }
@@ -166,20 +256,63 @@ function builderReducer(state, action) {
     case 'DELETE_ELEMENT': {
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
-        return { ...page, elements: page.elements.filter((el) => el.id !== action.payload) }
+        const { newNodes } = removeNode(page.elements, action.payload)
+        return { ...page, elements: newNodes }
       })
-      return { ...state, pages, selectedElementId: null }
+      return { ...state, pages, selectedElementId: null, selectedChildInfo: null }
     }
 
     case 'DUPLICATE_ELEMENT': {
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
-        const idx = page.elements.findIndex((el) => el.id === action.payload)
-        if (idx === -1) return page
-        const original = page.elements[idx]
-        const copy = { ...original, id: uuidv4(), props: { ...original.props }, styles: { ...original.styles } }
-        const elements = [...page.elements]
-        elements.splice(idx + 1, 0, copy)
+        
+        let nodeToDuplicate = null
+        let parentId = null
+        let indexInParent = -1
+
+        // Find node to duplicate
+        const findNode = (list, parent) => {
+          for (let i = 0; i < list.length; i++) {
+            if (list[i].id === action.payload) {
+              nodeToDuplicate = list[i]
+              parentId = parent ? parent.id : null
+              indexInParent = i
+              return true
+            }
+            if (list[i].children && findNode(list[i].children, list[i])) return true
+          }
+          return false
+        }
+        findNode(page.elements, null)
+
+        if (!nodeToDuplicate) return page
+
+        const assignIds = (el) => ({
+          ...el,
+          id: uuidv4(),
+          props: { ...(el.props || {}) },
+          styles: { ...(el.styles || {}) },
+          children: (el.children || []).map(assignIds)
+        })
+
+        const copy = assignIds(nodeToDuplicate)
+        const elements = insertNode(page.elements, parentId, indexInParent + 1, copy)
+        return { ...page, elements }
+      })
+      return { ...state, pages }
+    }
+
+    case 'MOVE_NODE': {
+      const { sourceId, targetParentId, insertIndex } = action.payload
+      if (sourceId === targetParentId) return state
+      
+      const pages = state.pages.map((page) => {
+        if (page.id !== state.currentPageId) return page
+        // 1. Remove node from old location
+        const { newNodes, removedNode } = removeNode(page.elements, sourceId)
+        if (!removedNode) return page
+        // 2. Insert into new location
+        const elements = insertNode(newNodes, targetParentId, insertIndex, removedNode)
         return { ...page, elements }
       })
       return { ...state, pages }
@@ -205,8 +338,8 @@ function builderReducer(state, action) {
 
     case 'ADD_PAGE': {
       const newPage = {
-        id: `page-${uuidv4()}`,
-        name: action.payload || 'New Page',
+        id: action.payload.id || `page-${uuidv4()}`,
+        name: action.payload.name || 'New Page',
         elements: [],
       }
       return { ...state, pages: [...state.pages, newPage], currentPageId: newPage.id, selectedElementId: null }
@@ -219,6 +352,30 @@ function builderReducer(state, action) {
       const { id, name } = action.payload
       const pages = state.pages.map((p) => (p.id === id ? { ...p, name } : p))
       return { ...state, pages }
+    }
+
+    case 'UPDATE_PAGE_BG': {
+      return {
+        ...state,
+        pages: state.pages.map(page =>
+          page.id === state.currentPageId
+            ? { ...page, canvasBg: action.payload.bg }
+            : page
+        )
+      }
+    }
+
+    case 'UPDATE_THEME': {
+      return {
+        ...state,
+        theme: {
+          ...state.theme,
+          [action.payload.category]: {
+            ...state.theme[action.payload.category],
+            [action.payload.key]: action.payload.value
+          }
+        }
+      }
     }
 
     case 'LOAD_TEMPLATE': {
@@ -337,10 +494,12 @@ function builderReducer(state, action) {
 const NON_HISTORY_ACTIONS = new Set(['SELECT_ELEMENT', 'SELECT_CHILD', 'SWITCH_PAGE'])
 const MAX_HISTORY = 50
 
-function useUndoReducer(reducer, initialSt) {
+function useUndoReducer(reducer, initialSt, projectId) {
+  const storageKey = projectId ? `siteforge_project_${projectId}` : 'siteforge_state'
+  
   const [history, setHistory] = React.useState(() => {
     try {
-      const saved = localStorage.getItem('siteforge_state')
+      const saved = localStorage.getItem(storageKey)
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed && parsed.pages && parsed.currentPageId) {
@@ -348,7 +507,7 @@ function useUndoReducer(reducer, initialSt) {
         }
       }
     } catch (e) {
-      console.warn("Failed to parse local storage siteforge_state", e)
+      console.warn(`Failed to parse local storage ${storageKey}`, e)
     }
     return { past: [], present: initialSt, future: [] }
   })
@@ -383,20 +542,30 @@ function useUndoReducer(reducer, initialSt) {
   return [history.present, dispatch, history.past.length > 0, history.future.length > 0]
 }
 
-export function BuilderProvider({ children }) {
-  const [state, dispatch, canUndo, canRedo] = useUndoReducer(builderReducer, initialState)
+export function BuilderProvider({ children, projectId }) {
+  const [state, dispatch, canUndo, canRedo] = useUndoReducer(builderReducer, initialState, projectId)
   const [previewMode, setPreviewMode] = useState(false)
   const [viewportWidth, setViewportWidth] = useState('desktop')
 
   // Save state to local storage whenever it changes
   React.useEffect(() => {
+    if (!projectId) return
     try {
+      const storageKey = `siteforge_project_${projectId}`
       const toSave = { pages: state.pages, currentPageId: state.currentPageId }
-      localStorage.setItem('siteforge_state', JSON.stringify(toSave))
+      localStorage.setItem(storageKey, JSON.stringify(toSave))
+
+      // Also update the updated_at timestamp in the project registry
+      const registrySaved = localStorage.getItem('siteforge_projects')
+      if (registrySaved) {
+        const registry = JSON.parse(registrySaved)
+        const updated = registry.map(p => p.id === projectId ? { ...p, updatedAt: Date.now() } : p)
+        localStorage.setItem('siteforge_projects', JSON.stringify(updated))
+      }
     } catch (e) {
-      console.warn("Failed to save siteforge_state to local storage", e)
+      console.warn("Failed to save to local storage", e)
     }
-  }, [state.pages, state.currentPageId])
+  }, [state.pages, state.currentPageId, projectId])
 
   // ── Keyboard shortcuts: Ctrl+Z / Ctrl+Y ──
   React.useEffect(() => {
@@ -437,8 +606,8 @@ export function BuilderProvider({ children }) {
         ?.children?.find((c) => c.id === state.selectedChildInfo.childId) || null
     : null
 
-  const addElement = useCallback((element, insertIndex) => {
-    dispatch({ type: 'ADD_ELEMENT', payload: { element, insertIndex } })
+  const addElement = useCallback((element, insertIndex, targetParentId = null) => {
+    dispatch({ type: 'ADD_ELEMENT', payload: { element, insertIndex, targetParentId } })
   }, [dispatch])
 
   const updateElement = useCallback((id, updates) => {
@@ -461,6 +630,14 @@ export function BuilderProvider({ children }) {
     dispatch({ type: 'REORDER_ELEMENTS', payload: { fromIndex, toIndex } })
   }, [dispatch])
 
+  const updateTheme = useCallback((category, key, value) => {
+    dispatch({ type: 'UPDATE_THEME', payload: { category, key, value } })
+  }, [])
+
+  const moveNode = useCallback((sourceId, targetParentId, insertIndex) => {
+    dispatch({ type: 'MOVE_NODE', payload: { sourceId, targetParentId, insertIndex } })
+  }, [dispatch])
+
   const moveElementUp = useCallback((id) => {
     dispatch({ type: 'MOVE_ELEMENT_UP', payload: id })
   }, [dispatch])
@@ -479,6 +656,14 @@ export function BuilderProvider({ children }) {
 
   const switchPage = useCallback((pageId) => {
     dispatch({ type: 'SWITCH_PAGE', payload: pageId })
+  }, [dispatch])
+
+  const addPage = useCallback((payload) => {
+    dispatch({ type: 'ADD_PAGE', payload })
+  }, [dispatch])
+
+  const deletePage = useCallback((id) => {
+    dispatch({ type: 'DELETE_PAGE', payload: id })
   }, [dispatch])
 
   const selectChild = useCallback((parentId, childId) => {
@@ -522,6 +707,10 @@ export function BuilderProvider({ children }) {
         duplicateElement,
         selectElement,
         reorderElements,
+        updateTheme,
+        moveNode,
+        addPage,
+        deletePage,
         moveElementUp,
         moveElementDown,
         switchPage,

@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { BuilderProvider, useBuilder } from './context/BuilderContext'
 import Toolbar from './components/Toolbar'
 import ElementsPanel from './components/ElementsPanel'
+import PagesPanel from './components/PagesPanel'
+import LayersPanel from './components/LayersPanel'
 import Canvas from './components/Canvas'
 import PropertiesPanel from './components/PropertiesPanel'
 import LandingPage from './components/LandingPage'
-import { LayoutGrid, Sliders } from 'lucide-react'
+import ProjectDashboard from './components/ProjectDashboard'
+import { LayoutGrid, Sliders, ArrowLeft } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { ELEMENT_CATEGORIES } from './data/elementTypes'
+import { generateCSSForElements, generateThemeCSS } from './utils/styleUtils'
 
 const appStyles = {
   display: 'flex',
@@ -88,7 +92,6 @@ function TemplateLoader({ templateId }) {
     } else if (templateId === 'food') {
       loadTemplate([
         createElement('food-navbar'),
-        createElement('food-hero'),
         createElement('food-categories'),
         createElement('food-items'),
         createElement('food-footer')
@@ -99,12 +102,29 @@ function TemplateLoader({ templateId }) {
   return null
 }
 
+function GlobalStyles() {
+  const { state } = useBuilder()
+  const [css, setCss] = useState('')
+
+  useEffect(() => {
+    // Collect all elements from all pages
+    const allElements = state.pages.reduce((acc, page) => [...acc, ...page.elements], [])
+    const themeCSS = generateThemeCSS(state.theme)
+    const elementsCSS = generateCSSForElements(allElements)
+    setCss(themeCSS + '\n' + elementsCSS)
+  }, [state.pages, state.theme])
+
+  return <style>{css}</style>
+}
+
 export default function App() {
+  const [activeProjectId, setActiveProjectId] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
-  const [isMobile, setIsMobile] = useState(false)
-  const [leftOpen, setLeftOpen] = useState(false)
-  const [rightOpen, setRightOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [leftOpen, setLeftOpen] = useState(!isMobile)
+  const [rightOpen, setRightOpen] = useState(!isMobile)
+  const [leftTab, setLeftTab] = useState('elements') // 'elements' or 'pages'
 
   useEffect(() => {
     const handleResize = () => {
@@ -124,21 +144,51 @@ export default function App() {
   }, [])
 
   if (!showEditor) {
+    // If they have projects, default to dashboard. Else, landing page.
+    const hasProjects = localStorage.getItem('siteforge_projects')
+    if (hasProjects && hasProjects !== '[]') {
+      return <ProjectDashboard onOpenProject={(id) => {
+        setActiveProjectId(id)
+        setShowEditor(true)
+      }} />
+    }
+
     return <LandingPage onGetStarted={(template) => {
+      // Instead of just opening editor, we create a new project
+      const newProjects = JSON.parse(localStorage.getItem('siteforge_projects') || '[]')
+      const newId = uuidv4()
+      newProjects.push({ id: newId, name: 'My Website', updatedAt: Date.now(), createdAt: Date.now() })
+      localStorage.setItem('siteforge_projects', JSON.stringify(newProjects))
+
       if (template) setSelectedTemplate(template)
+      setActiveProjectId(newId)
       setShowEditor(true)
     }} />
   }
 
   return (
-    <BuilderProvider>
+    <BuilderProvider key={activeProjectId} projectId={activeProjectId}>
+      <GlobalStyles />
       {selectedTemplate && <TemplateLoader templateId={selectedTemplate} />}
       <div style={appStyles}>
+        {/* Simple top bar override to add "Back to Projects" button */}
+        <div style={{ position: 'absolute', top: 12, left: 16, zIndex: 1000, display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={() => { setShowEditor(false); setActiveProjectId(null) }}
+            style={{ 
+              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', 
+              padding: '6px 12px', fontSize: '0.8rem', fontWeight: '600', color: '#374151',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}
+          >
+            <ArrowLeft size={14} /> Projects
+          </button>
+        </div>
         <Toolbar />
         <div style={bodyStyles}>
-          {/* Elements Panel (Left) */}
           <div style={{
             display: leftOpen ? 'flex' : 'none',
+            flexDirection: 'column',
             position: isMobile ? 'absolute' : 'relative',
             zIndex: isMobile ? 100 : 1,
             height: '100%',
@@ -147,11 +197,33 @@ export default function App() {
             boxShadow: isMobile ? '4px 0 16px rgba(0,0,0,0.15)' : 'none',
             backgroundColor: '#fff',
           }}>
-            <ElementsPanel />
+            <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+              <button 
+                onClick={() => setLeftTab('elements')} 
+                style={{ outline: 'none', flex: 1, padding: '12px', background: 'none', border: 'none', borderBottom: leftTab === 'elements' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'elements' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'elements' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Elements
+              </button>
+              <button 
+                onClick={() => setLeftTab('pages')} 
+                style={{ outline: 'none', flex: 1, padding: '12px', background: 'none', border: 'none', borderBottom: leftTab === 'pages' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'pages' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'pages' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Pages
+              </button>
+              <button 
+                onClick={() => setLeftTab('layers')} 
+                style={{ outline: 'none', flex: 1, padding: '12px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'layers' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'layers' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'layers' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Layers
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {leftTab === 'elements' ? <ElementsPanel /> : leftTab === 'layers' ? <LayersPanel /> : <PagesPanel />}
+            </div>
             {isMobile && leftOpen && (
                <button onClick={() => setLeftOpen(false)} style={{
                  position: 'absolute', top: 12, right: -40, background: '#1a1a2e', color: 'white', border: 'none', padding: '8px 12px', cursor: 'pointer', zIndex: 101, borderRadius: '0 6px 6px 0', fontSize: '1rem'
-               }} title="Close Elements">✕</button>
+               }} title="Close Sidebar">✕</button>
             )}
           </div>
 

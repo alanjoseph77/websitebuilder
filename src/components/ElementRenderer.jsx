@@ -4735,7 +4735,11 @@ function FoodFooter({ element }) {
 }
 
 export default function ElementRenderer({ element, isPreview = false, childrenSlot = null, sidebarOnly = false }) {
-  const { type, props, styles } = element
+  const { type, props } = element
+  
+  const isNewStyleFormat = element.styles && (element.styles.desktop || element.styles.mobile || element.styles.tablet || element.styles.hover)
+  const styles = isNewStyleFormat ? {} : (element.styles || {})
+  const styleClass = isNewStyleFormat ? `el-${element.id}` : ''
   const { state, switchPage, viewportWidth } = useBuilder()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeHref, setActiveHref] = useState(() => element?.props?.links?.[0]?.href || null)
@@ -4869,7 +4873,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
       }
 
       const linkColor = styles.color || '#ccc'
-      const navBg = styles.backgroundColor || '#1a1a2e'
+      const navBg = styles.backgroundColor || 'var(--color-secondary)'
       const links = props.links || []
       const layout = props.navLayout || 'classic'
       const linkStyle = props.navLinkStyle || 'plain'
@@ -4879,14 +4883,14 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
       const effectStyles = effect === 'glass'
         ? { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.15)' }
         : effect === 'bold'
-          ? { borderBottom: '3px solid #4f6ef7' }
+          ? { borderBottom: '3px solid var(--color-primary)' }
           : {}
 
       // ── Effect: brand renderer (bold adds icon) ──
       const Brand = ({ centerStyle = {} }) => (
         effect === 'bold' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', ...centerStyle }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '9px', backgroundColor: '#4f6ef7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1rem', color: '#fff', flexShrink: 0 }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '9px', backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1rem', color: '#fff', flexShrink: 0 }}>
               {(props.brand || 'B')[0].toUpperCase()}
             </div>
             <span style={{ fontWeight: '800', fontSize: '1.2rem', color: linkColor, letterSpacing: '-0.02em' }}>{props.brand}</span>
@@ -4901,7 +4905,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
         const isActive = link.href === activeHref
         const base = { textDecoration: 'none', cursor: 'pointer', display: 'block', color: linkColor }
         if (linkStyle === 'pill') return (
-          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.85rem', fontWeight: '600', padding: '7px 18px', borderRadius: '999px', color: isActive ? '#fff' : linkColor, backgroundColor: isActive ? '#4f6ef7' : 'rgba(255,255,255,0.12)', border: isActive ? 'none' : '1px solid rgba(255,255,255,0.2)', opacity: 1 }}>{link.text}</a>
+          <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.85rem', fontWeight: '600', padding: '7px 18px', borderRadius: '999px', color: isActive ? '#fff' : linkColor, backgroundColor: isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.12)', border: isActive ? 'none' : '1px solid rgba(255,255,255,0.2)', opacity: 1 }}>{link.text}</a>
         )
         if (linkStyle === 'ghost') return (
           <a href={link.href || '#'} onClick={(e) => handleNavLinkClick(link, e)} style={{ ...base, fontSize: '0.87rem', fontWeight: '500', padding: '6px 14px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.25)', opacity: isActive ? 1 : 0.85, backgroundColor: isActive ? 'rgba(255,255,255,0.15)' : 'transparent' }}>{link.text}</a>
@@ -5019,7 +5023,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
                 style={{
                   padding: '14px 32px',
                   borderRadius: '8px',
-                  backgroundColor: '#4f6ef7',
+                  backgroundColor: 'var(--color-primary)',
                   color: '#fff',
                   textDecoration: 'none',
                   fontWeight: '600',
@@ -5221,7 +5225,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'container': {
       return (
-        <div id={props.sectionId || element.id} style={{ ...styles, maxWidth: props.maxWidth || '1200px', margin: '0 auto', width: '100%' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, maxWidth: props.maxWidth || '1200px', margin: '0 auto', width: '100%' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5235,7 +5239,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'flex': {
       return (
-        <div id={props.sectionId || element.id} style={{ ...styles, display: 'flex', flexDirection: props.direction || 'row', justifyContent: props.justify || 'flex-start', alignItems: props.align || 'stretch', gap: props.gap || '20px', flexWrap: 'wrap' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, display: 'flex', flexDirection: props.direction || 'row', justifyContent: props.justify || 'flex-start', alignItems: props.align || 'stretch', gap: props.gap || '20px', flexWrap: 'wrap' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5249,7 +5253,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'grid': {
       return (
-        <div id={props.sectionId || element.id} style={{ ...styles, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (props.columns || 'repeat(3, 1fr)'), gap: props.gap || '24px' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (props.columns || 'repeat(3, 1fr)'), gap: props.gap || '24px' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5276,7 +5280,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
         : {}
 
       return (
-        <section id={props.sectionId || element.id} style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
+        <section id={props.sectionId || element.id} className={styleClass} style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
           {props.title && (
             <h2 style={{ fontSize: isMobile ? '1.5rem' : isTablet ? '1.75rem' : '2rem', fontWeight: '700', marginBottom: '12px' }}>{props.title}</h2>
           )}
@@ -5310,7 +5314,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'columns': {
       return (
-        <section style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
+        <section className={styleClass} style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
           <style>{`.sf-col { transition: transform 0.25s ease, box-shadow 0.25s ease; border-radius: 16px; } .sf-col:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }`}</style>
           <div style={{ display: 'flex', gap: isMobile ? '20px' : '32px', flexWrap: 'wrap', justifyContent: 'center' }}>
             {(props.columns || []).map((col, i) => (
@@ -5327,7 +5331,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'footer': {
       return (
-        <footer style={styles}>
+        <footer className={styleClass} style={styles}>
           <div style={{ marginBottom: '12px', fontWeight: '700', fontSize: '1.2rem', color: styles.color }}>
             {props.brand}
           </div>
@@ -5355,15 +5359,15 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'heading': {
       const Tag = props.level || 'h2'
-      return <Tag style={styles}>{props.text}</Tag>
+      return <Tag className={styleClass} style={styles}>{props.text}</Tag>
     }
 
     case 'paragraph':
-      return <p style={styles}>{props.text}</p>
+      return <p className={styleClass} style={styles}>{props.text}</p>
 
     case 'quote':
       return (
-        <blockquote style={styles}>
+        <blockquote className={styleClass} style={styles}>
           <p style={{ marginBottom: '12px' }}>{props.text}</p>
           {props.author && (
             <cite style={{ fontSize: '0.9rem', fontStyle: 'normal', opacity: 0.6 }}>{props.author}</cite>
@@ -5373,7 +5377,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'image':
       return (
-        <div style={styles}>
+        <div className={styleClass} style={styles}>
           <img
             src={props.src}
             alt={props.alt || ''}
@@ -5387,7 +5391,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'video':
       return (
-        <div style={styles}>
+        <div className={styleClass} style={styles}>
           <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '800px', margin: '0 auto', borderRadius: '8px' }}>
             <iframe
               src={props.src}
@@ -5404,12 +5408,12 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
     case 'button': {
       const btnVariantStyle =
         props.variant === 'outline'
-          ? { backgroundColor: 'transparent', border: '2px solid #4f6ef7', color: '#4f6ef7' }
+          ? { backgroundColor: 'transparent', border: '2px solid var(--color-primary)', color: 'var(--color-primary)' }
           : props.variant === 'ghost'
-            ? { backgroundColor: 'transparent', border: 'none', color: '#4f6ef7' }
-            : { backgroundColor: '#4f6ef7', border: 'none', color: '#fff' }
+            ? { backgroundColor: 'transparent', border: 'none', color: 'var(--color-primary)' }
+            : { backgroundColor: 'var(--color-primary)', border: 'none', color: '#fff' }
       return (
-        <div style={styles}>
+        <div className={styleClass} style={styles}>
           <a
             href={isPreview ? props.href : '#'}
             onClick={isPreview ? undefined : (e) => e.preventDefault()}
@@ -5446,13 +5450,13 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
               <img src={props.image} alt={props.title} style={{ width: '100%', display: 'block', height: '200px', objectFit: 'cover' }} />
             )}
             <div style={{ padding: '20px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: '#1a1a2e' }}>{props.title}</h3>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--color-secondary)' }}>{props.title}</h3>
               <p style={{ fontSize: '0.9rem', color: '#666', lineHeight: 1.6, marginBottom: '16px' }}>{props.text}</p>
               {props.buttonText && (
                 <a
                   href={isPreview ? props.buttonHref : '#'}
                   onClick={isPreview ? undefined : (e) => e.preventDefault()}
-                  style={{ color: '#4f6ef7', fontWeight: '600', textDecoration: 'none', fontSize: '0.9rem' }}
+                  style={{ color: 'var(--color-primary)', fontWeight: '600', textDecoration: 'none', fontSize: '0.9rem' }}
                 >
                   {props.buttonText} →
                 </a>
@@ -5477,7 +5481,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
       return (
         <section style={styles}>
           {props.title && (
-            <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '12px', color: '#1a1a2e' }}>{props.title}</h2>
+            <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '12px', color: 'var(--color-secondary)' }}>{props.title}</h2>
           )}
           {props.subtitle && (
             <p style={{ opacity: 0.6, marginBottom: '32px', fontSize: '1rem' }}>{props.subtitle}</p>
@@ -5535,7 +5539,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#4f6ef7',
+                backgroundColor: 'var(--color-primary)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '8px',
@@ -5588,7 +5592,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
             "{props.text}"
           </p>
           <div>
-            <div style={{ fontWeight: '700', color: '#1a1a2e', fontSize: '0.95rem' }}>{props.author}</div>
+            <div style={{ fontWeight: '700', color: 'var(--color-secondary)', fontSize: '0.95rem' }}>{props.author}</div>
             {props.role && <div style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '2px' }}>{props.role}</div>}
           </div>
         </section>

@@ -1,8 +1,11 @@
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { generatePageHTML, getPageFilename, BASE_CSS, BASE_JS } from './codeGenerator'
+import { generateCSSForElements, generateThemeCSS } from './styleUtils'
 
-export async function downloadSite(pages, uploadedImages = []) {
+export async function downloadSite(state, uploadedImages = []) {
+  const pages = state.pages || []
+  const theme = state.theme || null
   const zip = new JSZip()
 
   // Build a map from blob objectUrl → { name, file } for quick lookup
@@ -30,7 +33,10 @@ export async function downloadSite(pages, uploadedImages = []) {
   }
 
   // Add shared CSS and JS
-  zip.file('styles.css', BASE_CSS)
+  const allElements = resolvedPages.reduce((acc, page) => [...acc, ...page.elements], [])
+  const themeCSS = generateThemeCSS(theme)
+  const dynamicCSS = generateCSSForElements(allElements)
+  zip.file('styles.css', BASE_CSS + '\n/* Theme Variables */\n' + themeCSS + '\n/* Generated Styles */\n' + dynamicCSS)
   zip.file('script.js', BASE_JS)
 
   // Add README

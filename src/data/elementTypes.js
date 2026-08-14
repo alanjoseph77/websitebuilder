@@ -39,7 +39,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'make-navbar',
-        label: 'Make Navbar',
+        label: 'Standard Navbar',
         icon: '🟣',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Automation platform navbar with dark sleek look and gradient buttons',
@@ -57,7 +57,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'make-hero',
-        label: 'Make Hero',
+        label: 'Split Hero',
         icon: '🟣',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Automation platform hero with dark background and glowing blobs',
@@ -74,7 +74,7 @@ export const ELEMENT_CATEGORIES = [
 
       {
         type: 'make-features',
-        label: 'Make Features',
+        label: 'Grid Features',
         icon: '⚡',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Automation features grid with sleek dark cards',
@@ -91,7 +91,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'make-integrations',
-        label: 'Make Integrations',
+        label: 'Integrations Section',
         icon: '🔗',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Integrations showcase with floating app icons',
@@ -112,7 +112,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'make-pricing',
-        label: 'Make Pricing',
+        label: 'Pricing Section',
         icon: '💳',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Sleek dark mode pricing cards',
@@ -129,7 +129,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'make-footer',
-        label: 'Make Footer',
+        label: 'Standard Footer',
         icon: '🦶',
         thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400',
         description: 'Dark minimal footer',
@@ -143,7 +143,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'puzzle-navbar',
-        label: 'Puzzle Navbar',
+        label: 'SaaS Navbar',
         icon: '🧩',
         thumbnail: 'https://images.unsplash.com/photo-1586717791821-3f44a563dc4c?auto=format&fit=crop&q=80&w=400',
         description: 'Game / app landing navbar with puzzle logo',
@@ -163,7 +163,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'trend-navbar',
-        label: 'Trend Navbar',
+        label: 'Fashion Navbar',
         icon: '💄',
         thumbnail: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=400',
         description: 'Skincare / e-commerce navbar with search pill',
@@ -235,7 +235,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'lumora-navbar',
-        label: 'Lumora Navbar',
+        label: 'App Navbar',
         icon: '🧴',
         thumbnail: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=400',
         description: 'Premium skincare navbar with serif logo and shopping bag',
@@ -253,7 +253,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'lumora-hero',
-        label: 'Lumora Hero',
+        label: 'App Showcase Hero',
         icon: '🧴',
         thumbnail: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=400',
         description: 'Minimalist skincare hero with split layout and floating card',
@@ -285,7 +285,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'lumora-story',
-        label: 'Lumora Story',
+        label: 'Story Section',
         icon: '📖',
         thumbnail: 'https://images.unsplash.com/photo-1590156221122-c2946766d1b6?auto=format&fit=crop&q=80&w=400',
         description: 'Brand story section with offset images and serif typography',
@@ -302,7 +302,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'lumora-products',
-        label: 'Lumora Products',
+        label: 'App Features',
         icon: '🛍️',
         thumbnail: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=400',
         description: 'Skincare product grid with scalloped edges and buy buttons',
@@ -349,7 +349,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'lumora-footer',
-        label: 'Lumora Footer',
+        label: 'App Footer',
         icon: '🦶',
         thumbnail: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=400',
         description: 'Minimalist skincare footer with serif logo and clean links',
@@ -367,7 +367,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'food-navbar',
-        label: 'Food Navbar',
+        label: 'Restaurant Navbar',
         icon: '🍔',
         thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400',
         description: 'Neo-brutalist food delivery navbar',
@@ -388,7 +388,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'food-hero',
-        label: 'Food Hero',
+        label: 'Image Grid Hero',
         icon: '🍽️',
         thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400',
         description: 'Neo-brutalist food delivery hero with big title & image',
@@ -410,7 +410,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'food-categories',
-        label: 'Food Categories',
+        label: 'Menu Categories',
         icon: '🍕',
         thumbnail: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=400',
         description: 'Neo-brutalist horizontal category cards grid',
@@ -450,7 +450,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'food-footer',
-        label: 'Food Footer',
+        label: 'Restaurant Footer',
         icon: '📱',
         thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400',
         description: 'Neo-brutalist simple app footer',
@@ -465,7 +465,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'moco-navbar',
-        label: 'Moco Navbar',
+        label: 'Minimal Navbar',
         icon: '🌑',
         thumbnail: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=400',
         description: 'Dark minimal navbar with orange accent and fullscreen mobile overlay',
@@ -485,7 +485,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'moco-hero',
-        label: 'Moco Hero',
+        label: 'Minimal Hero',
         icon: '✦',
         thumbnail: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=400',
         description: 'Dark hero with 4-card bento grid and wavy-underline heading',
@@ -581,7 +581,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'homehero-navbar',
-        label: 'HomeHero Navbar',
+        label: 'Transparent Navbar',
         icon: '🏠',
         thumbnail: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400',
         description: 'Sticky badge-logo navbar with fullscreen mobile slide-in overlay',
@@ -601,7 +601,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'homehero-hero',
-        label: 'HomeHero Hero',
+        label: 'Gradient Hero',
         icon: '🏠',
         thumbnail: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=400',
         description: 'Centered hero with floating portrait photos, phone mockup and email CTA',
@@ -627,7 +627,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'creative-navbar',
-        label: 'Creative Navbar',
+        label: 'Centered Navbar',
         icon: '🎨',
         thumbnail: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=400',
         description: 'Portfolio navbar with brand, desktop links, and mobile fullscreen slide-in overlay',
@@ -644,7 +644,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'creative-hero',
-        label: 'Creative Hero',
+        label: 'Centered Hero',
         icon: '🎨',
         thumbnail: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400',
         description: 'Full-viewport hero with auto-cycling background slideshow and dot indicators',
@@ -662,7 +662,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'creative-projects',
-        label: 'Creative Projects',
+        label: 'Portfolio Grid',
         icon: '🎨',
         thumbnail: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=400',
         description: '4-column project card grid with hover zoom image and View Project button',
@@ -679,7 +679,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'creative-footer',
-        label: 'Creative Footer',
+        label: 'Minimal Footer',
         icon: '🎨',
         thumbnail: 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?auto=format&fit=crop&q=80&w=400',
         description: 'Minimal portfolio footer with copyright text and social icons',
@@ -693,7 +693,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'solemate-navbar',
-        label: 'SoleMate Navbar',
+        label: 'E-Commerce Navbar',
         icon: '👟',
         thumbnail: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
         description: 'Shoe store sticky navbar — search left, centered brand + links, cart icon',
@@ -711,7 +711,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'solemate-hero',
-        label: 'SoleMate Hero',
+        label: 'Product Hero',
         icon: '👟',
         thumbnail: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
         description: '5-panel image hero with "Shop Now" hover overlay on each panel',
@@ -729,7 +729,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'solemate-categories',
-        label: 'SoleMate Categories',
+        label: 'Category Grid',
         icon: '👟',
         thumbnail: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=400',
         description: "Tab-switchable category image grid (Men's / Women's / New Arrivals / Sale)",
@@ -772,7 +772,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'solemate-products',
-        label: 'SoleMate Products',
+        label: 'Product Carousel',
         icon: '👟',
         thumbnail: 'https://images.unsplash.com/photo-1595341888016-a392ef81b7de?auto=format&fit=crop&q=80&w=400',
         description: '6-card featured products grid — image, name, price, Add to Cart',
@@ -792,7 +792,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'solemate-footer',
-        label: 'SoleMate Footer',
+        label: 'Dark Footer',
         icon: '👟',
         thumbnail: 'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?auto=format&fit=crop&q=80&w=400',
         description: 'Black footer with nav links and social icons (Twitter, Instagram, Facebook)',
@@ -839,7 +839,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'qi-navbar',
-        label: 'Qi Navbar',
+        label: 'Store Navbar',
         icon: '🌸',
         thumbnail: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=400',
         description: 'Center-logo luxury navbar with fullscreen mobile overlay',
@@ -860,7 +860,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'qi-hero',
-        label: 'Qi Hero',
+        label: 'E-Commerce Hero',
         icon: '🌸',
         thumbnail: 'https://images.unsplash.com/photo-1591871937573-748af0941cf2?auto=format&fit=crop&q=80&w=400',
         description: 'Overlapping giant serif text with portrait image',
@@ -932,7 +932,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'agensea-hero',
-        label: 'Agensea Hero',
+        label: 'Corporate Hero',
         icon: '🌊',
         thumbnail: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&fit=crop&q=80&w=400',
         description: 'Giant split-typography hero with pill images and rotating badge',
@@ -972,7 +972,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'skyline-hero',
-        label: 'Skyline Hero',
+        label: 'Video Hero',
         icon: '🏠',
         thumbnail: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=400',
         description: 'Luxury housing hero with oval image, testimonials and stats',
@@ -1018,7 +1018,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'veluno-hero',
-        label: 'Veluno Hero',
+        label: 'Bold Typography Hero',
         icon: '✨',
         thumbnail: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&q=80&w=400',
         description: 'Split hero section with film grain, dynamic text, parallax images',
@@ -1056,7 +1056,7 @@ export const ELEMENT_CATEGORIES = [
       },
       {
         type: 'winzy-hero',
-        label: 'Winzy Hero',
+        label: 'Waitlist Hero',
         icon: '🏕️',
         thumbnail: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=400',
         description: 'Immersive travel hero with background and destination card',
@@ -1132,7 +1132,7 @@ export const ELEMENT_CATEGORIES = [
           ],
         },
         styles: {
-          backgroundColor: '#1a1a2e',
+          backgroundColor: 'var(--color-secondary)',
           color: '#ffffff',
           padding: '16px 40px',
           fontSize: '1rem',
@@ -1153,7 +1153,7 @@ export const ELEMENT_CATEGORIES = [
           buttonSecondaryHref: '#about',
         },
         styles: {
-          backgroundColor: '#1a1a2e',
+          backgroundColor: 'var(--color-secondary)',
           color: '#ffffff',
           padding: '100px 40px',
           textAlign: 'center',
@@ -1193,7 +1193,7 @@ export const ELEMENT_CATEGORIES = [
           ],
         },
         styles: {
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--color-surface)',
           color: '#333333',
           padding: '60px 40px',
         },
@@ -1215,7 +1215,7 @@ export const ELEMENT_CATEGORIES = [
           ],
         },
         styles: {
-          backgroundColor: '#1a1a2e',
+          backgroundColor: 'var(--color-secondary)',
           color: '#cccccc',
           padding: '40px',
           textAlign: 'center',
@@ -1235,7 +1235,7 @@ export const ELEMENT_CATEGORIES = [
         description: 'Title heading',
         props: { text: 'Your Heading Here', level: 'h2' },
         styles: {
-          color: '#1a1a2e',
+          color: 'var(--color-secondary)',
           fontSize: '2rem',
           fontWeight: '700',
           textAlign: 'left',
@@ -1272,9 +1272,9 @@ export const ELEMENT_CATEGORIES = [
         },
         styles: {
           backgroundColor: '#f0f4ff',
-          color: '#1a1a2e',
+          color: 'var(--color-secondary)',
           padding: '30px 50px',
-          borderLeft: '4px solid #4f6ef7',
+          borderLeft: '4px solid var(--color-primary)',
           fontStyle: 'italic',
           fontSize: '1.2rem',
           margin: '20px 40px',
@@ -1356,7 +1356,7 @@ export const ELEMENT_CATEGORIES = [
         },
         styles: {
           padding: '20px 40px',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--color-surface)',
         },
       },
       {
@@ -1388,7 +1388,7 @@ export const ELEMENT_CATEGORIES = [
           submitText: 'Send Message',
         },
         styles: {
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--color-surface)',
           padding: '60px 40px',
           textAlign: 'center',
         },
@@ -1429,7 +1429,7 @@ export const ELEMENT_CATEGORIES = [
           ],
         },
         styles: {
-          backgroundColor: '#4f6ef7',
+          backgroundColor: 'var(--color-primary)',
           color: '#ffffff',
           padding: '60px 40px',
           textAlign: 'center',
@@ -1448,7 +1448,7 @@ export const ELEMENT_CATEGORIES = [
           avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
         },
         styles: {
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--color-surface)',
           padding: '60px 40px',
           textAlign: 'center',
         },

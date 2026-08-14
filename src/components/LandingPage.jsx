@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Play, X, CheckCircle, Layout, Code, Globe, Star, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, Play, X, CheckCircle, Layout, Code, Globe, Star, ArrowUpRight, ArrowDown, Download, FileJson, FileCode2, Image as ImageIcon } from 'lucide-react';
 
 export default function LandingPage({ onGetStarted }) {
   const scrollTo = (id) => {
@@ -205,78 +205,64 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </div>
 
-      {/* About Us / Impact Section */}
-      <div id="about" className="lp-padding" style={{ background: '#ffffff' }}>
-        <div className="lp-about-container">
-          <div className="lp-about-text">
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: '#ffffff', borderRadius: '30px', border: '1px solid #e5e7eb', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', color: '#111827' }}>
-              <div style={{ width: '8px', height: '8px', background: '#ea580c', borderRadius: '50%' }}></div>
-              About SiteForge
-            </div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', lineHeight: '1.1', letterSpacing: '-0.02em', marginBottom: '24px', color: '#111827' }}>
-              SiteForge Creates Impactful Digital Strategies For Growth
-            </h2>
-            <p style={{ fontSize: '1.1rem', color: '#4b5563', marginBottom: '40px', lineHeight: '1.6' }}>
-              We're not just another site builder. Our design tools, responsive elements, and clean code export help businesses grow with data-driven insights and bold creativity.
-            </p>
-            <button 
-              onClick={onGetStarted}
-              onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(234, 88, 12, 0.3)'; }}
-              onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(234, 88, 12, 0.2)'; }}
-              style={{ padding: '8px 8px 8px 24px', background: '#ea580c', color: 'white', border: 'none', borderRadius: '30px', fontSize: '1.05rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease', boxShadow: '0 4px 10px rgba(234, 88, 12, 0.2)' }}
-            >
-              About Our Story
-              <div style={{ width: '36px', height: '36px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ArrowRight size={18} color="#ea580c" />
-              </div>
-            </button>
-          </div>
+      {/* Killer Feature: Download Code */}
+      <div id="about" className="lp-padding" style={{ background: '#ffffff', textAlign: 'center' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           
-          <div className="lp-stats-grid">
-            <div className="lp-stat-center-badge">
-              <div style={{ width: '12px', height: '12px', background: '#ea580c', borderRadius: '2px', transform: 'rotate(45deg)' }}></div>
+          <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: '800', lineHeight: '1', color: '#111827', marginBottom: '20px' }}>
+            BUILD VISUALLY
+          </h2>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+            <ArrowDown size={40} color="#ea580c" />
+          </div>
+
+          <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: '800', lineHeight: '1', color: '#111827', marginBottom: '40px' }}>
+            DOWNLOAD CODE
+          </h2>
+
+          <div style={{ 
+            background: '#111827', borderRadius: '24px', padding: '40px', 
+            maxWidth: '500px', margin: '0 auto 40px auto', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)', textAlign: 'left',
+            fontFamily: '"Fira Code", monospace', color: '#e5e7eb'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <Download size={24} color="#ea580c" />
+              <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#fff' }}>website.zip</span>
             </div>
             
-            <div style={{ padding: '32px 24px', background: '#f9fafb', borderRadius: '20px', border: '1px solid #f3f4f6', transition: 'transform 0.3s ease', cursor: 'default' }}
-                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div style={{ marginBottom: '16px', background: '#ffffff', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-                <Layout size={20} className="text-orange-500" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '1.1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: '#4b5563' }}>├──</span>
+                <FileCode2 size={20} color="#3b82f6" />
+                <span>index.html</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '8px', color: '#111827' }}>Drag & Drop UI</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', fontWeight: '500', lineHeight: '1.5' }}>Build layouts visually. Drop pre-made high quality components instantly.</p>
-            </div>
-            
-            <div style={{ padding: '32px 24px', background: '#f9fafb', borderRadius: '20px', border: '1px solid #f3f4f6', transition: 'transform 0.3s ease', cursor: 'default' }}
-                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div style={{ marginBottom: '16px', background: '#ffffff', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-                <Code size={20} className="text-orange-500" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: '#4b5563' }}>├──</span>
+                <FileJson size={20} color="#8b5cf6" />
+                <span>styles.css</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '8px', color: '#111827' }}>Export Code</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', fontWeight: '500', lineHeight: '1.5' }}>Download perfect, production-ready React JSX or HTML/CSS code in one click.</p>
-            </div>
-
-            <div style={{ padding: '32px 24px', background: '#f9fafb', borderRadius: '20px', border: '1px solid #f3f4f6', transition: 'transform 0.3s ease', cursor: 'default' }}
-                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div style={{ marginBottom: '16px', background: '#ffffff', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-                <Globe size={20} className="text-orange-500" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: '#4b5563' }}>├──</span>
+                <FileCode2 size={20} color="#eab308" />
+                <span>script.js</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '8px', color: '#111827' }}>Fully Responsive</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', fontWeight: '500', lineHeight: '1.5' }}>Your generated designs will automatically look perfect on mobile devices.</p>
-            </div>
-
-            <div style={{ padding: '32px 24px', background: '#f9fafb', borderRadius: '20px', border: '1px solid #f3f4f6', transition: 'transform 0.3s ease', cursor: 'default' }}
-                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div style={{ marginBottom: '16px', background: '#ffffff', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-                <Star size={20} className="text-orange-500" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: '#4b5563' }}>└──</span>
+                <ImageIcon size={20} color="#10b981" />
+                <span>images/</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '8px', color: '#111827' }}>Premium Templates</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.95rem', fontWeight: '500', lineHeight: '1.5' }}>Start instantly using our breathtaking and expertly crafted base templates.</p>
             </div>
           </div>
+
+          <h3 style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
+            No lock-in. Your website belongs to you.
+          </h3>
+          <p style={{ fontSize: '1.2rem', color: '#4b5563', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
+            Unlike other visual builders that hold your site hostage, SiteForge gives you production-ready, clean code that you can host anywhere, modify anytime, and own forever.
+          </p>
+
         </div>
       </div>
 

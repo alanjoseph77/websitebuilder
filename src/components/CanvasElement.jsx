@@ -3,7 +3,8 @@ import { useBuilder } from '../context/BuilderContext'
 import { getElementDefault } from '../data/elementTypes'
 import ElementRenderer from './ElementRenderer'
 
-function SectionInnerDropZone({ parentId, addChildElement }) {
+function SectionInnerDropZone({ parentId }) {
+  const { addElement, moveNode } = useBuilder()
   const [over, setOver] = useState(false)
 
   const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); setOver(true) }
@@ -13,12 +14,15 @@ function SectionInnerDropZone({ parentId, addChildElement }) {
     e.stopPropagation()
     setOver(false)
     const elementType = e.dataTransfer.getData('application/x-element-type')
+    const elementId = e.dataTransfer.getData('application/x-element-id')
+    
     if (elementType) {
       const def = getElementDefault(elementType)
-      if (def) addChildElement(parentId, { type: def.type, props: { ...def.props }, styles: { ...def.styles } })
+      if (def) addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, -1, parentId)
+    } else if (elementId) {
+      moveNode(elementId, parentId, -1)
     }
   }
-
 
   return (
     <div
@@ -39,7 +43,7 @@ function SectionInnerDropZone({ parentId, addChildElement }) {
         userSelect: 'none',
       }}
     >
-      {over ? '+ Drop here' : '+ Drag elements here to add inside section'}
+      {over ? '+ Drop here' : '+ Drag elements here to add inside'}
     </div>
   )
 }
@@ -58,15 +62,12 @@ const OVERLAY_BTN = (color = '#4f6ef7') => ({
   gap: '3px',
 })
 
-export default function CanvasElement({ element, index, totalCount, sidebarOnly = false }) {
-  const { state, selectElement, deleteElement, duplicateElement, moveElementUp, moveElementDown, reorderElements, addElement, addChildElement, deleteChildElement, selectChild, selectedChildInfo, viewportWidth } = useBuilder()
-  const isMobile = viewportWidth === 'mobile'
-  const isTablet = viewportWidth === 'tablet'
+export default function CanvasElement({ element, index, parentId = null, totalCount, sidebarOnly = false }) {
+  const { state, selectElement, deleteElement, duplicateElement, moveElementUp, moveElementDown, moveNode, addElement } = useBuilder()
   const isSelected = state.selectedElementId === element.id
   const [hovered, setHovered] = useState(false)
   const [dragging, setDragging] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
-  const dragIndexRef = useRef(null)
+  const [dragOverPos, setDragOverPos] = useState(null) // 'top' or 'bottom'
 
   const handleClick = (e) => {
     e.stopPropagation()
@@ -77,45 +78,57 @@ export default function CanvasElement({ element, index, totalCount, sidebarOnly 
   const handleDragStart = (e) => {
     e.stopPropagation()
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('application/x-canvas-index', String(index))
-    dragIndexRef.current = index
+    e.dataTransfer.setData('application/x-element-id', element.id)
     setDragging(true)
   }
 
   const handleDragEnd = () => {
     setDragging(false)
-    setDragOver(false)
+    setDragOverPos(null)
   }
 
   const handleDragOver = (e) => {
     e.preventDefault()
+    e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
-    setDragOver(true)
+    
+    // Determine drop position (top or bottom half)
+    const rect = e.currentTarget.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    if (y < rect.height / 2) {
+      setDragOverPos('top')
+    } else {
+      setDragOverPos('bottom')
+    }
   }
 
-  const handleDragLeave = () => setDragOver(false)
+  const handleDragLeave = (e) => {
+    e.stopPropagation()
+    setDragOverPos(null)
+  }
 
   const handleDrop = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    setDragOver(false)
-    // Reorder existing canvas element
-    const fromIndex = parseInt(e.dataTransfer.getData('application/x-canvas-index'), 10)
-    if (!isNaN(fromIndex) && fromIndex !== index) {
-      reorderElements(fromIndex, index)
-      return
-    }
-    // New element dragged from panel — insert after this element
+    const pos = dragOverPos
+    setDragOverPos(null)
+    
+    const insertIdx = pos === 'top' ? index : index + 1
     const elementType = e.dataTransfer.getData('application/x-element-type')
+    const elementId = e.dataTransfer.getData('application/x-element-id')
+
     if (elementType) {
       const def = getElementDefault(elementType)
       if (def) {
-        addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, index + 1)
+        addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, insertIdx, parentId)
       }
+    } else if (elementId && elementId !== element.id) {
+      moveNode(elementId, parentId, insertIdx)
     }
   }
 
   const visible = isSelected || hovered
+  const canHaveChildren = ['section', 'container', 'flex', 'grid', 'columns'].includes(element.type)
 
   return (
     <div
@@ -132,7 +145,10 @@ export default function CanvasElement({ element, index, totalCount, sidebarOnly 
         outlineOffset: isSelected ? '2px' : '0px',
         borderRadius: '2px',
         transition: 'outline 0.1s',
-        borderTop: dragOver ? '3px solid #4f6ef7' : '3px solid transparent',
+        borderTop: dragOverPos === 'top' ? '4px solid #4f6ef7' : '4px solid transparent',
+        borderBottom: dragOverPos === 'bottom' ? '4px solid #4f6ef7' : '4px solid transparent',
+        marginTop: dragOverPos === 'top' ? '-4px' : '0',
+        marginBottom: dragOverPos === 'bottom' ? '-4px' : '0',
         cursor: 'pointer',
       }}
     >
@@ -141,13 +157,17 @@ export default function CanvasElement({ element, index, totalCount, sidebarOnly 
         <div
           style={{
             position: 'absolute',
-            top: index === 0 ? '6px' : (isSelected ? '-32px' : '-26px'),
-            left: index === 0 ? 'auto' : 0,
-            right: index === 0 ? '6px' : 'auto',
+            top: parentId ? '0px' : (index === 0 ? '6px' : (isSelected ? '-32px' : '-26px')),
+            left: (!parentId && index === 0) ? 'auto' : 0,
+            right: (!parentId && index === 0) ? '6px' : 'auto',
             zIndex: 30,
             display: 'flex',
             gap: '4px',
             alignItems: 'center',
+            background: parentId ? 'rgba(255,255,255,0.9)' : 'transparent',
+            padding: parentId ? '2px' : '0',
+            borderRadius: parentId ? '4px' : '0',
+            boxShadow: parentId ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -156,128 +176,52 @@ export default function CanvasElement({ element, index, totalCount, sidebarOnly 
             draggable
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            style={{
-              ...OVERLAY_BTN('#6b7280'),
-              cursor: 'grab',
-            }}
+            style={{ ...OVERLAY_BTN('#6b7280'), cursor: 'grab' }}
             title="Drag to reorder"
           >
             ⠿
           </div>
           <div
             style={{
-              background: '#1a1a2e',
-              color: '#9ca3af',
-              borderRadius: '4px',
-              padding: '4px 8px',
-              fontSize: '0.68rem',
-              fontWeight: '600',
-              letterSpacing: '0.05em',
+              background: '#1a1a2e', color: '#9ca3af', borderRadius: '4px',
+              padding: '4px 8px', fontSize: '0.68rem', fontWeight: '600', letterSpacing: '0.05em',
             }}
           >
             {element.type.toUpperCase()}
           </div>
-          <button style={OVERLAY_BTN('#6b7280')} onClick={() => moveElementUp(element.id)} disabled={index === 0} title="Move up">
-            ↑
-          </button>
-          <button style={OVERLAY_BTN('#6b7280')} onClick={() => moveElementDown(element.id)} disabled={index === totalCount - 1} title="Move down">
-            ↓
-          </button>
-          <button style={OVERLAY_BTN('#10b981')} onClick={() => duplicateElement(element.id)} title="Duplicate">
-            ⧉ Copy
-          </button>
-          <button style={OVERLAY_BTN('#ef4444')} onClick={() => deleteElement(element.id)} title="Delete element">
-            🗑 Delete
-          </button>
+          {!parentId && (
+            <>
+              <button style={OVERLAY_BTN('#6b7280')} onClick={() => moveElementUp(element.id)} disabled={index === 0} title="Move up">↑</button>
+              <button style={OVERLAY_BTN('#6b7280')} onClick={() => moveElementDown(element.id)} disabled={index === totalCount - 1} title="Move down">↓</button>
+            </>
+          )}
+          <button style={OVERLAY_BTN('#10b981')} onClick={() => duplicateElement(element.id)} title="Duplicate">⧉ Copy</button>
+          <button style={OVERLAY_BTN('#ef4444')} onClick={() => deleteElement(element.id)} title="Delete">🗑 Delete</button>
         </div>
       )}
 
       {/* Element content */}
       {(() => {
-        if (element.type !== 'section') {
-          return <ElementRenderer element={element} isPreview={false} childrenSlot={null} sidebarOnly={sidebarOnly} />
+        let childrenSlot = null;
+        if (canHaveChildren) {
+          childrenSlot = (
+            <React.Fragment>
+              {(element.children || []).map((child, i) => (
+                <CanvasElement 
+                  key={child.id} 
+                  element={child} 
+                  index={i} 
+                  parentId={element.id} 
+                  totalCount={(element.children || []).length} 
+                  sidebarOnly={sidebarOnly} 
+                />
+              ))}
+              <SectionInnerDropZone parentId={element.id} />
+            </React.Fragment>
+          );
         }
 
-        const sectionLayout = element.props?.layout || 'stack'
-        const sectionGap = element.props?.gap || '24px'
-        const gridCols = {
-          '2-col': isMobile ? '1fr' : 'repeat(2, 1fr)',
-          '3-col': isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-          '4-col': isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-        }[sectionLayout]
-        const hasHeader = element.props?.title || element.props?.subtitle
-
-        const renderChild = (child) => {
-          const isChildSelected = selectedChildInfo?.parentId === element.id && selectedChildInfo?.childId === child.id
-          const isFullSpan = gridCols && child.props?.gridSpan === 'full'
-          return (
-            <div
-              key={child.id}
-              onClick={(e) => { e.stopPropagation(); selectChild(element.id, child.id) }}
-              style={{
-                position: 'relative',
-                outline: isChildSelected ? '2px solid #4f6ef7' : '1px dashed #e5e7eb',
-                outlineOffset: '2px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                minHeight: gridCols ? '60px' : undefined,
-                gridColumn: isFullSpan ? '1 / -1' : undefined,
-              }}
-            >
-              <ElementRenderer element={child} isPreview={false} />
-              {isChildSelected && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteChildElement(element.id, child.id) }}
-                  style={{
-                    position: 'absolute', top: '6px', right: '6px',
-                    background: '#ef4444', color: '#fff', border: 'none',
-                    borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem',
-                    cursor: 'pointer', zIndex: 10,
-                  }}
-                >
-                  × Remove
-                </button>
-              )}
-            </div>
-          )
-        }
-
-        const childrenSlot = (
-          <div onClick={(e) => e.stopPropagation()}>
-            {gridCols ? (
-              <>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: gridCols,
-                  gap: sectionGap,
-                  alignItems: 'start',
-                  marginTop: hasHeader ? '16px' : '0',
-                }}>
-                  {(element.children || []).map(renderChild)}
-                  {(element.children || []).length === 0 && Array.from({ length: { '2-col': 2, '3-col': 3, '4-col': 4 }[sectionLayout] }).map((_, i) => (
-                    <div key={i} style={{ border: '2px dashed #e5e7eb', borderRadius: '6px', padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: '0.75rem', minHeight: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      Column {i + 1}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: '8px' }}>
-                  <SectionInnerDropZone parentId={element.id} addChildElement={addChildElement} />
-                </div>
-              </>
-            ) : (
-              <>
-                {(element.children || []).map((child) => (
-                  <div key={child.id} style={{ marginTop: '8px' }}>
-                    {renderChild(child)}
-                  </div>
-                ))}
-                <SectionInnerDropZone parentId={element.id} addChildElement={addChildElement} />
-              </>
-            )}
-          </div>
-        )
-
-        return <ElementRenderer element={element} isPreview={false} childrenSlot={childrenSlot} />
+        return <ElementRenderer element={element} isPreview={false} childrenSlot={childrenSlot} sidebarOnly={sidebarOnly} />
       })()}
     </div>
   )

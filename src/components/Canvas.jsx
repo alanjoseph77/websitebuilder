@@ -101,7 +101,7 @@ function DropZone({ onDrop, compact = false }) {
 }
 
 export default function Canvas() {
-  const { currentPage, addElement, selectElement, previewMode, viewportWidth, state } = useBuilder()
+  const { currentPage, addElement, selectElement, previewMode, viewportWidth, state, moveNode } = useBuilder()
   const [canvasDragOver, setCanvasDragOver] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
@@ -127,9 +127,12 @@ export default function Canvas() {
 
   const handleDropAtIndex = (e, index) => {
     const elementType = e.dataTransfer.getData('application/x-element-type')
+    const elementId = e.dataTransfer.getData('application/x-element-id')
     if (elementType) {
       const def = getElementDefault(elementType)
       if (def) addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } }, index)
+    } else if (elementId) {
+      moveNode(elementId, null, index)
     }
   }
 
@@ -137,9 +140,12 @@ export default function Canvas() {
     e.preventDefault()
     setCanvasDragOver(false)
     const elementType = e.dataTransfer.getData('application/x-element-type')
+    const elementId = e.dataTransfer.getData('application/x-element-id')
     if (elementType) {
       const def = getElementDefault(elementType)
       if (def) addElement({ type: def.type, props: { ...def.props }, styles: { ...def.styles } })
+    } else if (elementId) {
+      moveNode(elementId, null, -1)
     }
   }
 

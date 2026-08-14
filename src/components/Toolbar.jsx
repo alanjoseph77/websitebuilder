@@ -173,7 +173,7 @@ export default function Toolbar() {
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      await downloadSite(state.pages, uploadedImages)
+      await downloadSite(state, uploadedImages)
     } catch (err) {
       alert('Download failed: ' + err.message)
     }
@@ -188,49 +188,8 @@ export default function Toolbar() {
         Site<span style={S.logoSpan}>Forge</span>
       </div>
 
-      {/* Page tabs */}
-      <div style={S.pages}>
-        {state.pages.map((page) => (
-          <button
-            key={page.id}
-            style={S.pageTab(page.id === state.currentPageId)}
-            onClick={() => dispatch({ type: 'SWITCH_PAGE', payload: page.id })}
-            onDoubleClick={(e) => handleRenameStart(page, e)}
-            title="Double-click to rename"
-          >
-            {renamingId === page.id ? (
-              <input
-                style={S.pageInput}
-                value={renameVal}
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setRenameVal(e.target.value)}
-                onBlur={handleRenameCommit}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRenameCommit()
-                  if (e.key === 'Escape') setRenamingId(null)
-                }}
-              />
-            ) : (
-              <>
-                {page.name}
-                {state.pages.length > 1 && (
-                  <span
-                    onClick={(e) => handleDeletePage(page.id, e)}
-                    style={{ marginLeft: '4px', opacity: 0.5, fontSize: '0.75rem' }}
-                    title="Delete page"
-                  >
-                    ×
-                  </span>
-                )}
-              </>
-            )}
-          </button>
-        ))}
-        <button style={S.addPageBtn} onClick={handleAddPage} title="Add new page">
-          +
-        </button>
-      </div>
+      {/* Spacer */}
+      <div style={{ flex: 1 }}></div>
 
       {/* Actions */}
       <div style={S.actions}>
@@ -254,33 +213,28 @@ export default function Toolbar() {
           </button>
         </div>
         {/* Viewport size toggle */}
-        <div style={S.viewportGroup}>
-          {VIEWPORTS.map((v) => (
-            <button
-              key={v.key}
-              style={S.viewportBtn(viewportWidth === v.key)}
-              onClick={() => setViewportWidth(v.key)}
-              title={v.label}
-            >
-              <v.Icon size={14} />
-            </button>
-          ))}
+        <div style={S.actions}>
+          <div style={S.viewportGroup}>
+            <button style={S.viewportBtn(viewportWidth === 'mobile')} onClick={() => setViewportWidth('mobile')} title="Mobile"><Smartphone size={15} /></button>
+            <button style={S.viewportBtn(viewportWidth === 'tablet')} onClick={() => setViewportWidth('tablet')} title="Tablet"><Tablet size={15} /></button>
+            <button style={S.viewportBtn(viewportWidth === 'desktop')} onClick={() => setViewportWidth('desktop')} title="Desktop"><Monitor size={15} /></button>
+          </div>
+          
+          <button style={S.btn('secondary', isMobile)} onClick={() => setPreviewMode(!previewMode)} title="Preview Mode">
+            {previewMode ? <Pencil size={15} /> : <Eye size={15} />}
+            {!isMobile && (previewMode ? ' Edit' : ' Preview')}
+          </button>
+          
+          <button 
+            style={S.btn('primary', isMobile)} 
+            onClick={handleDownload}
+            disabled={downloading}
+            title="Download Code"
+          >
+            {downloading ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
+            {!isMobile && (downloading ? ' Exporting...' : ' Export')}
+          </button>
         </div>
-        <button
-          style={S.btn(previewMode ? 'primary' : 'secondary', isMobile)}
-          onClick={() => setPreviewMode(!previewMode)}
-          title={previewMode ? 'Back to editor' : 'Preview your site'}
-        >
-          {previewMode ? <><Pencil size={15} /> {!isMobile && 'Edit'}</> : <><Eye size={15} /> {!isMobile && 'Preview'}</>}
-        </button>
-        <button
-          style={S.btn('success', isMobile)}
-          onClick={handleDownload}
-          disabled={downloading}
-          title="Download source code as ZIP"
-        >
-          {downloading ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> {!isMobile && 'Packing...'}</> : <><Download size={15} /> {!isMobile && 'Download Code'}</>}
-        </button>
       </div>
     </div>
   )

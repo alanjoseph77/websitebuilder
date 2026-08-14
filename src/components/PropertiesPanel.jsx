@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import {
-  FileText, Palette,
+  FileText, Palette, Box, Monitor, Zap, Settings,
   Menu, Circle, AlignLeft, Layers, ShoppingCart, PanelLeft, LayoutDashboard, TrendingUp, Puzzle, Utensils,
   AlignCenter, AlignJustify, Minus, Square, Underline, CaseSensitive, SlidersHorizontal, Bold,
   Rows3, Columns2, Columns3, LayoutGrid,
@@ -3481,8 +3481,9 @@ function StyleTab({ element, updateElement }) {
 }
 
 export default function PropertiesPanel() {
-  const { selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, deleteElement, deleteChildElement } = useBuilder()
+  const { state, selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, updateTheme, deleteElement, deleteChildElement } = useBuilder()
   const [activeTab, setActiveTab] = useState('content')
+  const [globalTab, setGlobalTab] = useState('page')
 
   // Determine what is selected: child element takes priority
   const activeElement = selectedChildElement || selectedElement
@@ -3502,27 +3503,89 @@ export default function PropertiesPanel() {
     return (
       <div style={S.panel}>
         <div style={S.header}>
-          <span>Page Settings</span>
+          <span>Global Settings</span>
           <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#16a34a', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
             {currentPage?.name || 'Page'}
           </span>
         </div>
-        <div style={S.section}>
-          <div style={S.sectionTitle}>Canvas Background</div>
-          <ColorField
-            label="Background Color"
-            value={currentPage?.canvasBg || '#ffffff'}
-            onChange={(v) => updatePageSettings(currentPage.id, { canvasBg: v })}
-          />
-          <p style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '4px', lineHeight: 1.4 }}>
-            Sets the page background color behind all elements.
-          </p>
+
+        <div style={S.tabs}>
+          <button style={S.tab(globalTab === 'page')} onClick={() => setGlobalTab('page')}>Page</button>
+          <button style={S.tab(globalTab === 'theme')} onClick={() => setGlobalTab('theme')}>Theme</button>
         </div>
-        <div style={{ ...S.empty, flex: 'none', paddingTop: '16px', paddingBottom: '16px', borderTop: '1px solid #f3f4f6', minHeight: 'unset' }}>
-          <div style={{ fontSize: '1.6rem' }}>🖱️</div>
-          <div style={{ fontSize: '0.78rem', color: '#9ca3af', maxWidth: '180px', lineHeight: 1.5 }}>
-            Click any element to edit its properties
-          </div>
+
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {globalTab === 'page' ? (
+            <>
+              <div style={S.section}>
+                <div style={S.sectionTitle}>Canvas Background</div>
+                <ColorField
+                  label="Background Color"
+                  value={currentPage?.canvasBg || '#ffffff'}
+                  onChange={(v) => updatePageSettings(currentPage.id, { canvasBg: v })}
+                />
+                <p style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '4px', lineHeight: 1.4 }}>
+                  Sets the page background color behind all elements.
+                </p>
+              </div>
+              <div style={{ ...S.empty, flex: 'none', paddingTop: '16px', paddingBottom: '16px', borderTop: '1px solid #f3f4f6', minHeight: 'unset' }}>
+                <div style={{ fontSize: '1.6rem' }}>🖱️</div>
+                <div style={{ fontSize: '0.78rem', color: '#9ca3af', maxWidth: '180px', lineHeight: 1.5 }}>
+                  Click any element to edit its properties
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={S.section}>
+                <div style={S.sectionTitle}>Colors</div>
+                {Object.entries(state.theme?.colors || {}).map(([key, value]) => (
+                  <ColorField
+                    key={`color-${key}`}
+                    label={key.charAt(0).toUpperCase() + key.slice(1)}
+                    value={value}
+                    onChange={(v) => updateTheme('colors', key, v)}
+                  />
+                ))}
+              </div>
+              <div style={S.section}>
+                <div style={S.sectionTitle}>Typography</div>
+                {Object.entries(state.theme?.typography || {}).map(([key, value]) => (
+                  <Field key={`typo-${key}`} label={key.charAt(0).toUpperCase() + key.slice(1)}>
+                    <input
+                      style={S.input}
+                      value={value}
+                      onChange={(e) => updateTheme('typography', key, e.target.value)}
+                    />
+                  </Field>
+                ))}
+              </div>
+              <div style={S.section}>
+                <div style={S.sectionTitle}>Border Radius</div>
+                {Object.entries(state.theme?.radius || {}).map(([key, value]) => (
+                  <Field key={`radius-${key}`} label={key.charAt(0).toUpperCase() + key.slice(1)}>
+                    <input
+                      style={S.input}
+                      value={value}
+                      onChange={(e) => updateTheme('radius', key, e.target.value)}
+                    />
+                  </Field>
+                ))}
+              </div>
+              <div style={S.section}>
+                <div style={S.sectionTitle}>Spacing</div>
+                {Object.entries(state.theme?.spacing || {}).map(([key, value]) => (
+                  <Field key={`spacing-${key}`} label={key.toUpperCase()}>
+                    <input
+                      style={S.input}
+                      value={value}
+                      onChange={(e) => updateTheme('spacing', key, e.target.value)}
+                    />
+                  </Field>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     )
@@ -3584,18 +3647,55 @@ export default function PropertiesPanel() {
       )}
 
       <div style={S.tabs}>
-        {['content', 'style'].map((tab) => (
-          <button key={tab} style={S.tab(activeTab === tab)} onClick={() => setActiveTab(tab)}>
-            {tab === 'content' ? <><FileText size={12} /> Content</> : <><Palette size={12} /> Style</>}
+        {[
+          { id: 'content', icon: <FileText size={16} />, label: 'Content' },
+          { id: 'style', icon: <Palette size={16} />, label: 'Style' },
+          { id: 'layout', icon: <Box size={16} />, label: 'Layout' },
+          { id: 'responsive', icon: <Monitor size={16} />, label: 'Responsive' },
+          { id: 'animation', icon: <Zap size={16} />, label: 'Animation' },
+          { id: 'advanced', icon: <Settings size={16} />, label: 'Advanced' }
+        ].map((tab) => (
+          <button 
+            key={tab.id} 
+            style={{...S.tab(activeTab === tab.id), display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 4px', fontSize: '0.65rem' }} 
+            onClick={() => setActiveTab(tab.id)}
+            title={tab.label}
+          >
+            {tab.icon}
           </button>
         ))}
       </div>
 
       <div style={{ overflowY: 'auto', flex: 1 }}>
-        {activeTab === 'content' ? (
-          <ContentTab element={activeElement} updateElement={activeUpdateElement} />
-        ) : (
-          <StyleTab element={activeElement} updateElement={activeUpdateElement} />
+        {activeTab === 'content' && <ContentTab element={activeElement} updateElement={activeUpdateElement} />}
+        {activeTab === 'style' && <StyleTab element={activeElement} updateElement={activeUpdateElement} />}
+        {activeTab === 'layout' && (
+          <div style={{ padding: '16px', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>
+            <Box size={24} style={{ margin: '0 auto 8px', color: '#9ca3af' }} />
+            <p style={{ fontWeight: '600', marginBottom: '4px' }}>Layout Properties</p>
+            <p>Width, Height, Padding, Margin, Display settings will go here.</p>
+          </div>
+        )}
+        {activeTab === 'responsive' && (
+          <div style={{ padding: '16px', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>
+            <Monitor size={24} style={{ margin: '0 auto 8px', color: '#9ca3af' }} />
+            <p style={{ fontWeight: '600', marginBottom: '4px' }}>Responsive Overrides</p>
+            <p>Desktop, Tablet, Mobile breakpoints.</p>
+          </div>
+        )}
+        {activeTab === 'animation' && (
+          <div style={{ padding: '16px', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>
+            <Zap size={24} style={{ margin: '0 auto 8px', color: '#9ca3af' }} />
+            <p style={{ fontWeight: '600', marginBottom: '4px' }}>Animation & States</p>
+            <p>Hover, Entrance, Scroll effects.</p>
+          </div>
+        )}
+        {activeTab === 'advanced' && (
+          <div style={{ padding: '16px', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>
+            <Settings size={24} style={{ margin: '0 auto 8px', color: '#9ca3af' }} />
+            <p style={{ fontWeight: '600', marginBottom: '4px' }}>Advanced Settings</p>
+            <p>Custom Classes, IDs, and Visibility rules.</p>
+          </div>
         )}
       </div>
     </div>
