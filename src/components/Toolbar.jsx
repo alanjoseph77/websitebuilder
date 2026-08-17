@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import { downloadSite } from '../utils/downloadCode'
-import { Flame, Smartphone, Tablet, Monitor, Eye, Pencil, Download, Loader2, Undo2, Redo2 } from 'lucide-react'
+import { Flame, Smartphone, Tablet, Monitor, Eye, Pencil, Download, Loader2, Undo2, Redo2, ArrowLeft } from 'lucide-react'
 
 const S = {
   toolbar: {
@@ -129,7 +129,7 @@ const VIEWPORTS = [
   { key: 'desktop', Icon: Monitor, label: 'Desktop (960px)' },
 ]
 
-export default function Toolbar() {
+export default function Toolbar({ onBack }) {
   const { state, dispatch, previewMode, setPreviewMode, viewportWidth, setViewportWidth, undo, redo, canUndo, canRedo } = useBuilder()
   const [renamingId, setRenamingId] = useState(null)
   const [renameVal, setRenameVal] = useState('')
@@ -182,10 +182,29 @@ export default function Toolbar() {
 
   return (
     <div style={S.toolbar}>
-      {/* Logo */}
-      <div style={S.logo}>
-        <Flame size={18} style={{ color: '#dc2626' }} />
-        Site<span style={S.logoSpan}>Forge</span>
+      {/* Group Logo and Back button */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {onBack && (
+          <button 
+            onClick={onBack}
+            style={{ 
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', 
+              padding: '6px 12px', fontSize: '0.8rem', fontWeight: '600', color: '#ffffff',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+          >
+            <ArrowLeft size={14} /> Projects
+          </button>
+        )}
+        
+        {/* Logo */}
+        <div style={S.logo}>
+          <Flame size={18} style={{ color: '#dc2626' }} />
+          Site<span style={S.logoSpan}>Forge</span>
+        </div>
       </div>
 
       {/* Spacer */}

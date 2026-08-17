@@ -171,20 +171,7 @@ export default function App() {
       <GlobalStyles />
       {selectedTemplate && <TemplateLoader templateId={selectedTemplate} />}
       <div style={appStyles}>
-        {/* Simple top bar override to add "Back to Projects" button */}
-        <div style={{ position: 'absolute', top: 12, left: 16, zIndex: 1000, display: 'flex', gap: '8px' }}>
-          <button 
-            onClick={() => { setShowEditor(false); setActiveProjectId(null) }}
-            style={{ 
-              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', 
-              padding: '6px 12px', fontSize: '0.8rem', fontWeight: '600', color: '#374151',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-            }}
-          >
-            <ArrowLeft size={14} /> Projects
-          </button>
-        </div>
-        <Toolbar />
+        <Toolbar onBack={() => { setShowEditor(false); setActiveProjectId(null) }} />
         <div style={bodyStyles}>
           <div style={{
             display: leftOpen ? 'flex' : 'none',
@@ -192,10 +179,14 @@ export default function App() {
             position: isMobile ? 'absolute' : 'relative',
             zIndex: isMobile ? 100 : 1,
             height: '100%',
+            width: isMobile ? '300px' : '280px',
+            maxWidth: '85vw',
+            flexShrink: 0,
             left: 0,
             top: 0,
             boxShadow: isMobile ? '4px 0 16px rgba(0,0,0,0.15)' : 'none',
             backgroundColor: '#fff',
+            borderRight: '1px solid #e5e7eb',
           }}>
             <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
               <button 

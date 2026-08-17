@@ -5,15 +5,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 const S = {
   panel: {
-    width: '260px',
+    width: '100%',
+    height: '100%',
     flexShrink: 0,
     minHeight: 0,
     backgroundColor: '#ffffff',
-    borderRight: '1px solid #e5e7eb',
     display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
-    boxShadow: '4px 0 16px rgba(0,0,0,0.03)',
   },
   header: {
     padding: '14px 16px 10px',
