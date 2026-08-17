@@ -235,6 +235,31 @@ export default function PagesPanel() {
           )
         })}
       </div>
+
+      {state.components && state.components.length > 0 && (
+        <>
+          <div style={{ ...S.header, marginTop: '10px' }}>
+            <span>Components</span>
+          </div>
+          <div style={S.list}>
+            {state.components.map(comp => {
+              const isActive = state.currentPageId === comp.id
+              return (
+                <div 
+                  key={comp.id}
+                  style={S.pageItem(isActive)} 
+                  onClick={() => switchPage(comp.id)}
+                >
+                  <div style={S.iconText}>
+                    <span style={{color:'#10b981', display:'flex'}}><File size={14} /></span>
+                    <span style={{color: isActive ? '#059669' : '#10b981'}}>{comp.name}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }

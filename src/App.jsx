@@ -4,11 +4,12 @@ import Toolbar from './components/Toolbar'
 import ElementsPanel from './components/ElementsPanel'
 import PagesPanel from './components/PagesPanel'
 import LayersPanel from './components/LayersPanel'
+import AssetsPanel from './components/AssetsPanel'
 import Canvas from './components/Canvas'
 import PropertiesPanel from './components/PropertiesPanel'
 import LandingPage from './components/LandingPage'
 import ProjectDashboard from './components/ProjectDashboard'
-import { LayoutGrid, Sliders, ArrowLeft } from 'lucide-react'
+import { LayoutGrid, Sliders, ArrowLeft, Undo, Redo } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { ELEMENT_CATEGORIES } from './data/elementTypes'
 import { generateCSSForElements, generateThemeCSS } from './utils/styleUtils'
@@ -102,29 +103,14 @@ function TemplateLoader({ templateId }) {
   return null
 }
 
-function GlobalStyles() {
-  const { state } = useBuilder()
-  const [css, setCss] = useState('')
 
-  useEffect(() => {
-    // Collect all elements from all pages
-    const allElements = state.pages.reduce((acc, page) => [...acc, ...page.elements], [])
-    const themeCSS = generateThemeCSS(state.theme)
-    const elementsCSS = generateCSSForElements(allElements)
-    setCss(themeCSS + '\n' + elementsCSS)
-  }, [state.pages, state.theme])
 
-  return <style>{css}</style>
-}
-
-export default function App() {
-  const [activeProjectId, setActiveProjectId] = useState(null)
-  const [showEditor, setShowEditor] = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState(null)
+function BuilderUI({ setActiveProjectId, setShowEditor }) {
+  const { previewMode, setPreviewMode } = useBuilder()
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [leftOpen, setLeftOpen] = useState(!isMobile)
   const [rightOpen, setRightOpen] = useState(!isMobile)
-  const [leftTab, setLeftTab] = useState('elements') // 'elements' or 'pages'
+  const [leftTab, setLeftTab] = useState('elements')
 
   useEffect(() => {
     const handleResize = () => {
@@ -143,43 +129,18 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  if (!showEditor) {
-    // If they have projects, default to dashboard. Else, landing page.
-    const hasProjects = localStorage.getItem('siteforge_projects')
-    if (hasProjects && hasProjects !== '[]') {
-      return <ProjectDashboard onOpenProject={(id) => {
-        setActiveProjectId(id)
-        setShowEditor(true)
-      }} />
-    }
-
-    return <LandingPage onGetStarted={(template) => {
-      // Instead of just opening editor, we create a new project
-      const newProjects = JSON.parse(localStorage.getItem('siteforge_projects') || '[]')
-      const newId = uuidv4()
-      newProjects.push({ id: newId, name: 'My Website', updatedAt: Date.now(), createdAt: Date.now() })
-      localStorage.setItem('siteforge_projects', JSON.stringify(newProjects))
-
-      if (template) setSelectedTemplate(template)
-      setActiveProjectId(newId)
-      setShowEditor(true)
-    }} />
-  }
-
   return (
-    <BuilderProvider key={activeProjectId} projectId={activeProjectId}>
-      <GlobalStyles />
-      {selectedTemplate && <TemplateLoader templateId={selectedTemplate} />}
-      <div style={appStyles}>
-        <Toolbar onBack={() => { setShowEditor(false); setActiveProjectId(null) }} />
-        <div style={bodyStyles}>
-          <div style={{
-            display: leftOpen ? 'flex' : 'none',
-            flexDirection: 'column',
-            position: isMobile ? 'absolute' : 'relative',
-            zIndex: isMobile ? 100 : 1,
-            height: '100%',
-            width: isMobile ? '300px' : '280px',
+    <div style={appStyles}>
+      {!previewMode && <Toolbar onBack={() => { setShowEditor(false); setActiveProjectId(null) }} />}
+      <div style={bodyStyles}>
+        {/* Left Panel */}
+        <div style={{
+          display: (leftOpen && !previewMode) ? 'flex' : 'none',
+          flexDirection: 'column',
+          position: isMobile ? 'absolute' : 'relative',
+          zIndex: isMobile ? 100 : 1,
+          height: '100%',
+          width: isMobile ? '300px' : '280px',
             maxWidth: '85vw',
             flexShrink: 0,
             left: 0,
@@ -188,28 +149,43 @@ export default function App() {
             backgroundColor: '#fff',
             borderRight: '1px solid #e5e7eb',
           }}>
-            <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', padding: '0 8px', gap: '4px' }}>
               <button 
                 onClick={() => setLeftTab('elements')} 
-                style={{ outline: 'none', flex: 1, padding: '12px', background: 'none', border: 'none', borderBottom: leftTab === 'elements' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'elements' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'elements' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'elements' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'elements' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'elements' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
               >
                 Elements
               </button>
               <button 
                 onClick={() => setLeftTab('pages')} 
-                style={{ outline: 'none', flex: 1, padding: '12px', background: 'none', border: 'none', borderBottom: leftTab === 'pages' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'pages' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'pages' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'pages' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'pages' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'pages' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
               >
                 Pages
               </button>
               <button 
                 onClick={() => setLeftTab('layers')} 
-                style={{ outline: 'none', flex: 1, padding: '12px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'layers' ? '2px solid #4f6ef7' : '2px solid transparent', color: leftTab === 'layers' ? '#4f6ef7' : '#6b7280', fontWeight: leftTab === 'layers' ? '700' : '500', cursor: 'pointer', fontSize: '0.8rem' }}
+                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'layers' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'layers' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'layers' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
               >
                 Layers
               </button>
+              <button 
+                onClick={() => setLeftTab('assets')} 
+                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'assets' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'assets' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'assets' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
+              >
+                Assets
+              </button>
             </div>
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {leftTab === 'elements' ? <ElementsPanel /> : leftTab === 'layers' ? <LayersPanel /> : <PagesPanel />}
+              {leftTab === 'elements' ? <ElementsPanel /> : leftTab === 'layers' ? <LayersPanel /> : leftTab === 'assets' ? <AssetsPanel /> : <PagesPanel />}
+            </div>
+            {/* Left Sidebar Footer */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid #e5e7eb', fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <Undo size={14} style={{ cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.undo?.()} /> Undo <span style={{ opacity: 0.6 }}>⌘Z</span>
+               </div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <Redo size={14} style={{ cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.redo?.()} /> Redo <span style={{ opacity: 0.6 }}>⇧⌘Z</span>
+               </div>
             </div>
             {isMobile && leftOpen && (
                <button onClick={() => setLeftOpen(false)} style={{
@@ -219,12 +195,29 @@ export default function App() {
           </div>
 
           {/* Canvas Area */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <Canvas />
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            <Canvas 
+              leftOpen={leftOpen} setLeftOpen={setLeftOpen}
+              rightOpen={rightOpen} setRightOpen={setRightOpen}
+              leftTab={leftTab} setLeftTab={setLeftTab}
+            />
+            {previewMode && (
+              <button 
+                onClick={() => setPreviewMode(false)}
+                style={{
+                  position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+                  background: '#1a1a2e', color: 'white', padding: '12px 24px', borderRadius: '30px',
+                  border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', cursor: 'pointer',
+                  fontWeight: '600', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '8px'
+                }}
+              >
+                Exit Full Screen Preview
+              </button>
+            )}
           </div>
 
           {/* Mobile Backdrops */}
-          {isMobile && (leftOpen || rightOpen) && (
+          {isMobile && (leftOpen || rightOpen) && !previewMode && (
             <div 
               onClick={() => { setLeftOpen(false); setRightOpen(false) }}
               style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 90, transition: 'opacity 0.2s' }} 
@@ -232,7 +225,7 @@ export default function App() {
           )}
 
           {/* Floating Mobile Buttons */}
-          {isMobile && !leftOpen && (
+          {isMobile && !leftOpen && !previewMode && (
             <button 
               onClick={() => { setLeftOpen(true); setRightOpen(false); }}
               style={{ position: 'fixed', bottom: 20, left: 20, zIndex: 1000, background: '#4f6ef7', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '30px', boxShadow: '0 4px 14px rgba(79,110,247,0.3)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -240,7 +233,7 @@ export default function App() {
             </button>
           )}
 
-          {isMobile && !rightOpen && (
+          {isMobile && !rightOpen && !previewMode && (
             <button 
               onClick={() => { setRightOpen(true); setLeftOpen(false); }}
               style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000, background: '#1a1a2e', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '30px', boxShadow: '0 4px 14px rgba(0,0,0,0.2)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -250,7 +243,7 @@ export default function App() {
 
           {/* Properties Panel (Right) */}
           <div style={{
-            display: rightOpen ? 'flex' : 'none',
+            display: (rightOpen && !previewMode) ? 'flex' : 'none',
             position: isMobile ? 'absolute' : 'relative',
             zIndex: isMobile ? 100 : 1,
             height: '100%',
@@ -268,6 +261,59 @@ export default function App() {
           </div>
         </div>
       </div>
+  )
+}
+
+export default function App() {
+  const [activeProjectId, setActiveProjectId] = useState(null)
+  const [showEditor, setShowEditor] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [forceLanding, setForceLanding] = useState(false)
+  const [dbProjects, setDbProjects] = useState(null)
+
+  useEffect(() => {
+    if (!showEditor) {
+      import('./utils/db').then(({ getProjects }) => {
+        getProjects().then(setDbProjects).catch(() => setDbProjects([]))
+      })
+    }
+  }, [showEditor])
+
+  if (!showEditor) {
+    if (dbProjects === null) return null // Wait for DB load
+    const hasProjects = dbProjects.length > 0
+    
+    if (!forceLanding && hasProjects) {
+      return <ProjectDashboard 
+        onOpenProject={(id) => {
+          setActiveProjectId(id)
+          setShowEditor(true)
+        }} 
+        onGoHome={() => setForceLanding(true)}
+      />
+    }
+
+    return <LandingPage 
+      onGetStarted={async (template) => {
+        const { saveProject } = await import('./utils/db')
+        const newId = uuidv4()
+        const newProject = { id: newId, name: 'My Website', updatedAt: Date.now(), createdAt: Date.now() }
+        await saveProject(newProject)
+
+        if (template) setSelectedTemplate(template)
+        setActiveProjectId(newId)
+        setForceLanding(false)
+        setShowEditor(true)
+      }} 
+      onGoDashboard={() => setForceLanding(false)}
+      hasProjects={hasProjects}
+    />
+  }
+
+  return (
+    <BuilderProvider key={activeProjectId} projectId={activeProjectId}>
+      {selectedTemplate && <TemplateLoader templateId={selectedTemplate} />}
+      <BuilderUI setActiveProjectId={setActiveProjectId} setShowEditor={setShowEditor} />
     </BuilderProvider>
   )
 }

@@ -3385,43 +3385,126 @@ function ContentTab({ element, updateElement }) {
 }
 
 function StyleTab({ element, updateElement }) {
-  const { styles } = element
-  const us = (styleUpdates) => updateElement(element.id, { styles: styleUpdates })
+  const { viewportWidth } = useBuilder()
+  const isNewStyleFormat = element.styles && (element.styles.desktop || element.styles.mobile || element.styles.tablet || element.styles.hover)
+  
+  // Read from the active viewport if responsive styles are enabled
+  const currentStyles = isNewStyleFormat ? (element.styles[viewportWidth] || {}) : (element.styles || {})
+
+  const us = (styleUpdates) => {
+    if (isNewStyleFormat) {
+      updateElement(element.id, {
+        styles: {
+          ...element.styles,
+          [viewportWidth]: { ...(element.styles[viewportWidth] || {}), ...styleUpdates }
+        }
+      })
+    } else {
+      updateElement(element.id, { styles: styleUpdates })
+    }
+  }
+
   const up = (propUpdates) => updateElement(element.id, { props: propUpdates })
+
+  const enableResponsive = () => {
+    updateElement(element.id, {
+      styles: {
+        desktop: { ...element.styles },
+        tablet: {},
+        mobile: {},
+        hover: {}
+      }
+    })
+  }
 
   return (
     <>
+      {!isNewStyleFormat && (
+        <div style={{ padding: '12px 14px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #dcfce3' }}>
+          <p style={{ margin: '0 0 8px', fontSize: '0.75rem', color: '#166534', lineHeight: 1.4 }}>
+            Enable responsive styles to set different properties for Desktop, Tablet, and Mobile.
+          </p>
+          <button 
+            onClick={enableResponsive}
+            style={{ width: '100%', padding: '6px', backgroundColor: '#22c55e', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}
+          >
+            Enable Responsive Styles
+          </button>
+        </div>
+      )}
+      
+      {isNewStyleFormat && (
+        <div style={{ padding: '12px 14px', backgroundColor: '#eff6ff', borderBottom: '1px solid #dbeafe', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Monitor size={14} color="#2563eb" />
+          <span style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: '600' }}>
+            Editing {viewportWidth.charAt(0).toUpperCase() + viewportWidth.slice(1)} Styles
+          </span>
+        </div>
+      )}
+
       <div style={S.section}>
         <div style={S.sectionTitle}>Colors</div>
-        <ColorField label="Background Color" value={styles.backgroundColor} onChange={(v) => us({ backgroundColor: v })} />
-        <ColorField label="Text Color" value={styles.color} onChange={(v) => us({ color: v })} />
-        {styles.borderLeft !== undefined && (
-          <ColorField label="Accent Color" value={styles.borderLeft?.split(' ').pop()} onChange={(v) => us({ borderLeft: `4px solid ${v}` })} />
+        <ColorField label="Background Color" value={currentStyles.backgroundColor || ''} onChange={(v) => us({ backgroundColor: v })} />
+        <ColorField label="Text Color" value={currentStyles.color || ''} onChange={(v) => us({ color: v })} />
+        {currentStyles.borderLeft !== undefined && (
+          <ColorField label="Accent Color" value={currentStyles.borderLeft?.split(' ').pop() || ''} onChange={(v) => us({ borderLeft: `4px solid ${v}` })} />
+        )}
+      </div>
+
+      <div style={S.section}>
+        <div style={S.sectionTitle}>Background Image</div>
+        <ImageField label="Image URL" value={currentStyles.backgroundImage?.replace(/url\(|\)|'|"/g, '') || ''} onChange={(v) => us({ backgroundImage: v ? `url(${v})` : '' })} />
+        {currentStyles.backgroundImage && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+            <Field label="Size">
+              <select style={S.input} value={currentStyles.backgroundSize || 'cover'} onChange={(e) => us({ backgroundSize: e.target.value })}>
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="auto">Auto</option>
+                <option value="100% 100%">Stretch</option>
+              </select>
+            </Field>
+            <Field label="Position">
+              <select style={S.input} value={currentStyles.backgroundPosition || 'center'} onChange={(e) => us({ backgroundPosition: e.target.value })}>
+                <option value="center">Center</option>
+                <option value="top left">Top Left</option>
+                <option value="top center">Top Center</option>
+                <option value="top right">Top Right</option>
+                <option value="bottom center">Bottom Center</option>
+              </select>
+            </Field>
+            <Field label="Repeat">
+              <select style={S.input} value={currentStyles.backgroundRepeat || 'no-repeat'} onChange={(e) => us({ backgroundRepeat: e.target.value })}>
+                <option value="no-repeat">No Repeat</option>
+                <option value="repeat">Repeat</option>
+                <option value="repeat-x">Repeat X</option>
+                <option value="repeat-y">Repeat Y</option>
+              </select>
+            </Field>
+          </div>
         )}
       </div>
 
       <div style={S.section}>
         <div style={S.sectionTitle}>Spacing</div>
         <Field label="Padding">
-          <input style={S.input} value={styles.padding || ''} onChange={(e) => us({ padding: e.target.value })} placeholder="e.g. 40px 20px" />
+          <input style={S.input} value={currentStyles.padding || ''} onChange={(e) => us({ padding: e.target.value })} placeholder="e.g. 40px 20px" />
         </Field>
         <Field label="Margin">
-          <input style={S.input} value={styles.margin || ''} onChange={(e) => us({ margin: e.target.value })} placeholder="e.g. 0 auto" />
+          <input style={S.input} value={currentStyles.margin || ''} onChange={(e) => us({ margin: e.target.value })} placeholder="e.g. 0 auto" />
         </Field>
-        {styles.minHeight !== undefined && (
-          <Field label="Min Height">
-            <input style={S.input} value={styles.minHeight || ''} onChange={(e) => us({ minHeight: e.target.value })} placeholder="e.g. 400px" />
-          </Field>
-        )}
+        <Field label="Min Height">
+          <input style={S.input} value={currentStyles.minHeight || ''} onChange={(e) => us({ minHeight: e.target.value })} placeholder="e.g. 400px" />
+        </Field>
       </div>
 
       <div style={S.section}>
         <div style={S.sectionTitle}>Typography</div>
         <Field label="Font Size">
-          <input style={S.input} value={styles.fontSize || ''} onChange={(e) => us({ fontSize: e.target.value })} placeholder="e.g. 1rem" />
+          <input style={S.input} value={currentStyles.fontSize || ''} onChange={(e) => us({ fontSize: e.target.value })} placeholder="e.g. 1rem" />
         </Field>
         <Field label="Font Weight">
-          <select style={S.select} value={styles.fontWeight || ''} onChange={(e) => us({ fontWeight: e.target.value })}>
+          <select style={S.select} value={currentStyles.fontWeight || ''} onChange={(e) => us({ fontWeight: e.target.value })}>
             <option value="">Default</option>
             <option value="400">Normal (400)</option>
             <option value="500">Medium (500)</option>
@@ -3431,7 +3514,7 @@ function StyleTab({ element, updateElement }) {
           </select>
         </Field>
         <Field label="Text Align">
-          <select style={S.select} value={styles.textAlign || ''} onChange={(e) => us({ textAlign: e.target.value })}>
+          <select style={S.select} value={currentStyles.textAlign || ''} onChange={(e) => us({ textAlign: e.target.value })}>
             <option value="">Default</option>
             <option value="left">Left</option>
             <option value="center">Center</option>
@@ -3439,17 +3522,30 @@ function StyleTab({ element, updateElement }) {
           </select>
         </Field>
         <Field label="Line Height">
-          <input style={S.input} value={styles.lineHeight || ''} onChange={(e) => us({ lineHeight: e.target.value })} placeholder="e.g. 1.6" />
+          <input style={S.input} value={currentStyles.lineHeight || ''} onChange={(e) => us({ lineHeight: e.target.value })} placeholder="e.g. 1.6" />
         </Field>
       </div>
 
       <div style={S.section}>
         <div style={S.sectionTitle}>Border</div>
         <Field label="Border Radius">
-          <input style={S.input} value={styles.borderRadius || ''} onChange={(e) => us({ borderRadius: e.target.value })} placeholder="e.g. 8px" />
+          <input style={S.input} value={currentStyles.borderRadius || ''} onChange={(e) => us({ borderRadius: e.target.value })} placeholder="e.g. 8px" />
         </Field>
         <Field label="Border">
-          <input style={S.input} value={styles.border || ''} onChange={(e) => us({ border: e.target.value })} placeholder="e.g. 1px solid #ccc" />
+          <input style={S.input} value={currentStyles.border || ''} onChange={(e) => us({ border: e.target.value })} placeholder="e.g. 1px solid #ccc" />
+        </Field>
+      </div>
+
+      <div style={S.section}>
+        <div style={S.sectionTitle}>Layout Options</div>
+        <Field label="Display">
+          <input style={S.input} value={currentStyles.display || ''} onChange={(e) => us({ display: e.target.value })} placeholder="e.g. flex, grid, block" />
+        </Field>
+        <Field label="Flex Direction">
+          <input style={S.input} value={currentStyles.flexDirection || ''} onChange={(e) => us({ flexDirection: e.target.value })} placeholder="e.g. column" />
+        </Field>
+        <Field label="Gap">
+          <input style={S.input} value={currentStyles.gap || ''} onChange={(e) => us({ gap: e.target.value })} placeholder="e.g. 16px" />
         </Field>
       </div>
 
@@ -3481,7 +3577,7 @@ function StyleTab({ element, updateElement }) {
 }
 
 export default function PropertiesPanel() {
-  const { state, selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, updateTheme, deleteElement, deleteChildElement } = useBuilder()
+  const { state, selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, updateTheme, deleteElement, deleteChildElement, createComponent, deleteComponent, switchPage } = useBuilder()
   const [activeTab, setActiveTab] = useState('content')
   const [globalTab, setGlobalTab] = useState('page')
 
@@ -3489,9 +3585,7 @@ export default function PropertiesPanel() {
   const activeElement = selectedChildElement || selectedElement
   const isChild = !!selectedChildElement
 
-  const activeUpdateElement = isChild
-    ? (id, updates) => updateChildElement(selectedChildInfo.parentId, id, updates)
-    : updateElement
+  const activeUpdateElement = updateElement
 
   // Detect if the selected child is inside a grid-layout section
   const parentElement = isChild && selectedChildInfo
@@ -3500,6 +3594,7 @@ export default function PropertiesPanel() {
   const parentIsGrid = parentElement?.props?.layout && parentElement.props.layout !== 'stack'
 
   if (!activeElement) {
+    const isEditingComponent = (state.components || []).some(c => c.id === state.currentPageId);
     return (
       <div style={S.panel}>
         <div style={S.header}>
@@ -3528,6 +3623,36 @@ export default function PropertiesPanel() {
                   Sets the page background color behind all elements.
                 </p>
               </div>
+              
+              {isEditingComponent && (
+                <div style={{ ...S.section, marginTop: 'auto', borderTop: '1px solid #f3f4f6', paddingTop: '16px' }}>
+                  <button
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete this Master Component? Instances on other pages will become empty.')) {
+                        deleteComponent(currentPage.id)
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      backgroundColor: '#fee2e2',
+                      color: '#ef4444',
+                      border: '1px solid #fca5a5',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🗑 Delete Master Component
+                  </button>
+                </div>
+              )}
               <div style={{ ...S.empty, flex: 'none', paddingTop: '16px', paddingBottom: '16px', borderTop: '1px solid #f3f4f6', minHeight: 'unset' }}>
                 <div style={{ fontSize: '1.6rem' }}>🖱️</div>
                 <div style={{ fontSize: '0.78rem', color: '#9ca3af', maxWidth: '180px', lineHeight: 1.5 }}>
@@ -3592,10 +3717,8 @@ export default function PropertiesPanel() {
   }
 
   const handleDelete = () => {
-    if (isChild && selectedChildInfo) {
-      deleteChildElement(selectedChildInfo.parentId, selectedChildInfo.childId)
-    } else if (selectedElement) {
-      deleteElement(selectedElement.id)
+    if (activeElement) {
+      deleteElement(activeElement.id)
     }
   }
 
@@ -3616,6 +3739,39 @@ export default function PropertiesPanel() {
           </button>
         </div>
       </div>
+
+      {!isChild && activeElement.type !== 'component-instance' && (
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Component</span>
+          <button
+            onClick={() => {
+              const name = prompt('Component Name:', activeElement.type.charAt(0).toUpperCase() + activeElement.type.slice(1) + ' Component');
+              if (name) createComponent(activeElement.id, name);
+            }}
+            style={{ padding: '4px 10px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer', border: '1px solid #4f6ef7', backgroundColor: '#eff6ff', color: '#4f6ef7', transition: 'all 0.15s' }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#4f6ef7'; e.currentTarget.style.color = '#fff' }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; e.currentTarget.style.color = '#4f6ef7' }}
+          >
+            Create Master
+          </button>
+        </div>
+      )}
+
+      {!isChild && activeElement.type === 'component-instance' && (
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Component Instance</span>
+          <button
+            onClick={() => {
+              switchPage(activeElement.componentId);
+            }}
+            style={{ padding: '4px 10px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: '600', cursor: 'pointer', border: '1px solid #10b981', backgroundColor: '#ecfdf5', color: '#10b981', transition: 'all 0.15s' }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.color = '#fff' }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ecfdf5'; e.currentTarget.style.color = '#10b981' }}
+          >
+            Edit Master
+          </button>
+        </div>
+      )}
 
       {/* Full-width span toggle — only shown for children inside a grid section */}
       {isChild && parentIsGrid && (
@@ -3678,9 +3834,16 @@ export default function PropertiesPanel() {
         )}
         {activeTab === 'responsive' && (
           <div style={{ padding: '16px', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>
-            <Monitor size={24} style={{ margin: '0 auto 8px', color: '#9ca3af' }} />
-            <p style={{ fontWeight: '600', marginBottom: '4px' }}>Responsive Overrides</p>
-            <p>Desktop, Tablet, Mobile breakpoints.</p>
+            <Monitor size={24} style={{ margin: '0 auto 8px', color: '#4f6ef7' }} />
+            <p style={{ fontWeight: '600', marginBottom: '8px', color: '#374151' }}>Responsive Design</p>
+            <p style={{ marginBottom: '12px' }}>You can now edit styles for Desktop, Tablet, and Mobile directly from the <strong>Style</strong> tab.</p>
+            <p style={{ fontSize: '0.75rem' }}>1. Go to the Style tab<br/>2. Click "Enable Responsive Styles"<br/>3. Switch viewports in the top toolbar to set overrides</p>
+            <button
+              onClick={() => setActiveTab('style')}
+              style={{ marginTop: '16px', padding: '6px 16px', backgroundColor: '#4f6ef7', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
+            >
+              Go to Style Tab
+            </button>
           </div>
         )}
         {activeTab === 'animation' && (

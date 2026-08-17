@@ -124,6 +124,7 @@ ${linksHTML}
 }
 
 export function generateElementHTML(el, idx) {
+  if (el.props?.hidden) return '';
   const { type, props, styles } = el
   const inlineStyle = stylesToInline(styles)
   const sAttr = inlineStyle ? ` style="${inlineStyle}"` : ''

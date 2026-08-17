@@ -33,10 +33,11 @@ function objectToCssString(obj) {
     .join(' ')
 }
 
-export function generateCSSForElements(elements) {
+export function generateCSSForElements(elements, components = []) {
   let desktopCSS = ''
   let tabletCSS = ''
   let mobileCSS = ''
+  const visitedComponents = new Set()
 
   const traverse = (el) => {
     const { desktop, tablet, mobile, hover } = normalizeStyles(el.styles)
@@ -57,6 +58,17 @@ export function generateCSSForElements(elements) {
     // Mobile styles
     const mStyles = objectToCssString(mobile)
     if (mStyles) mobileCSS += `${className} { ${mStyles} }\n`
+
+    if (el.type === 'component-instance' && el.componentId) {
+      if (!visitedComponents.has(el.componentId)) {
+        visitedComponents.add(el.componentId)
+        const master = components.find(c => c.id === el.componentId)
+        if (master && master.elements) {
+          master.elements.forEach(traverse)
+        }
+        visitedComponents.delete(el.componentId)
+      }
+    }
 
     if (el.children) {
       el.children.forEach(traverse)

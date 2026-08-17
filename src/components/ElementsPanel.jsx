@@ -129,28 +129,21 @@ const S = {
     flexDirection: 'column',
     overflowY: 'auto',
   },
-  header: {
-    padding: '14px 16px 10px',
-    fontSize: '0.7rem',
-    fontWeight: '700',
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    borderBottom: '1px solid #f0f0f0',
-    backgroundColor: '#fafafa',
-  },
   searchBox: {
-    padding: '10px 12px',
+    padding: '12px',
     borderBottom: '1px solid #f0f0f0',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
   },
   searchInput: {
     width: '100%',
-    padding: '7px 10px',
+    padding: '8px 10px 8px 32px',
     borderRadius: '6px',
     border: '1px solid #e0e0e0',
-    fontSize: '0.82rem',
+    fontSize: '0.8rem',
     outline: 'none',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ffffff',
     color: '#333',
   },
   categoryHeader: () => ({
@@ -245,6 +238,9 @@ function ElementCard({ element, onAddClick, isLarge, previewHeight = 180 }) {
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'copy'
     e.dataTransfer.setData('application/x-element-type', element.type)
+    if (element.componentId) {
+      e.dataTransfer.setData('application/x-component-id', element.componentId)
+    }
   }
 
   return (
@@ -380,7 +376,7 @@ function ElementCard({ element, onAddClick, isLarge, previewHeight = 180 }) {
 }
 
 export default function ElementsPanel() {
-  const { addElement } = useBuilder()
+  const { addElement, state } = useBuilder()
   const [search, setSearch] = useState('')
   const [openCategories, setOpenCategories] = useState(() =>
     DISPLAY_CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat.name]: true }), {})
@@ -390,50 +386,72 @@ export default function ElementsPanel() {
     setOpenCategories((prev) => ({ ...prev, [name]: !prev[name] }))
 
   const handleAddClick = (elementDef) => {
-    addElement({ type: elementDef.type, props: { ...elementDef.props }, styles: { ...elementDef.styles } })
+    if (elementDef.type === 'component-instance' && elementDef.componentId === state.currentPageId) {
+      alert("Cannot insert a component into itself.");
+      return;
+    }
+    const el = { type: elementDef.type, props: { ...elementDef.props }, styles: { ...elementDef.styles } }
+    if (elementDef.componentId) el.componentId = elementDef.componentId
+    addElement(el)
   }
+
+  const userComponentsCategory = state.components && state.components.length > 0 ? [{
+    name: 'My Components',
+    isLarge: true,
+    previewHeight: 180,
+    elements: state.components.map(c => ({
+       type: 'component-instance',
+       componentId: c.id,
+       label: c.name,
+       description: 'Master Component Instance'
+    }))
+  }] : []
+
+  const ALL_CATEGORIES = [...userComponentsCategory, ...DISPLAY_CATEGORIES]
 
   const filteredCategories = search.trim()
     ? [
       {
         name: 'Search Results',
         isLarge: true,
-        elements: DISPLAY_CATEGORIES.flatMap((cat) => cat.elements).filter(
+        elements: ALL_CATEGORIES.flatMap((cat) => cat.elements).filter(
           (el) =>
             el.label.toLowerCase().includes(search.toLowerCase()) ||
             (el.description || '').toLowerCase().includes(search.toLowerCase())
         ),
       },
     ]
-    : DISPLAY_CATEGORIES
+    : ALL_CATEGORIES
 
   return (
     <div style={S.panel}>
-      <div style={S.header}>Elements</div>
-
       <div style={S.searchBox}>
+        <Search size={14} color="#9ca3af" style={{ position: 'absolute', left: '22px' }} />
         <input
           style={S.searchInput}
           placeholder="Search elements..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div style={{ position: 'absolute', right: '22px', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px', fontSize: '0.65rem', color: '#6b7280', fontWeight: '500' }}>
+          ⌘ /
+        </div>
       </div>
 
       {filteredCategories.map((cat) => (
         <div key={cat.name}>
           <div
-            style={S.categoryHeader(openCategories[cat.name])}
+            style={S.categoryHeader(openCategories[cat.name] ?? true)}
             onClick={() => toggleCategory(cat.name)}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {(() => { const CatIcon = CATEGORY_ICONS[cat.name]; return CatIcon ? <CatIcon size={13} strokeWidth={2} style={{ color: '#6b7280' }} /> : null })()}
+              {(() => { const CatIcon = CATEGORY_ICONS[cat.name] || Puzzle; return CatIcon ? <CatIcon size={13} strokeWidth={2} style={{ color: '#6b7280' }} /> : null })()}
               {cat.name}
             </span>
-            <ChevronRight size={13} style={{ color: '#9ca3af', transform: openCategories[cat.name] ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+            <ChevronRight size={13} style={{ color: '#9ca3af', transform: (openCategories[cat.name] ?? true) ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
           </div>
 
-          {openCategories[cat.name] !== false && (
+          {(openCategories[cat.name] ?? true) !== false && (
             <>
               {cat.elements.length === 0 ? (
                 <div style={S.emptySearch}>No elements found</div>
@@ -441,7 +459,7 @@ export default function ElementsPanel() {
                 <div style={S.elementsGrid(cat.isLarge)}>
                   {cat.elements.map((el) => (
                     <ElementCard 
-                      key={el.type} 
+                      key={el.componentId || el.type} 
                       element={el} 
                       onAddClick={handleAddClick} 
                       isLarge={cat.isLarge}

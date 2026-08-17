@@ -73,6 +73,7 @@ import { lumoraMarquee } from './lumora-marquee';
 import { lumoraStory } from './lumora-story';
 import { lumoraProducts } from './lumora-products';
 import { lumoraFooter } from './lumora-footer';
+import { componentInstance } from './component-instance';
 
 export const htmlGenerators = {
   'navbar': navbar,
@@ -147,4 +148,5 @@ export const htmlGenerators = {
   'lumora-story': lumoraStory,
   'lumora-products': lumoraProducts,
   'lumora-footer': lumoraFooter,
+  'component-instance': componentInstance,
 };

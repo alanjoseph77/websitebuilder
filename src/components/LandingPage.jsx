@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Play, X, CheckCircle, Layout, Code, Globe, Star, ArrowUpRight, ArrowDown, Download, FileJson, FileCode2, Image as ImageIcon } from 'lucide-react';
 
-export default function LandingPage({ onGetStarted }) {
+export default function LandingPage({ onGetStarted, onGoDashboard, hasProjects }) {
   const scrollTo = (id) => {
     const container = document.querySelector('.lp-scroll-container');
     if (!container) return;
@@ -30,8 +30,10 @@ export default function LandingPage({ onGetStarted }) {
     <div className="lp-scroll-container" style={{ position: 'relative', fontFamily: '"Inter", "Plus Jakarta Sans", sans-serif', backgroundColor: '#ffffff', color: '#111827', height: '100dvh', overflowY: 'auto', overflowX: 'hidden' }}>
       
       <style dangerouslySetInnerHTML={{__html: `
+        .lp-navbar { padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; position: absolute; top: 0; left: 0; right: 0; z-index: 50; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .lp-nav-links { display: flex; gap: 32px; font-weight: 500; font-size: 0.95rem; color: #4b5563; }
-        @media (max-width: 768px) { .lp-nav-links { display: none; } }
+        @media (max-width: 960px) { .lp-navbar { padding: 16px 20px; } .lp-nav-links { display: none; } }
+        @media (max-width: 480px) { .lp-brand-tag { display: none; } }
 
         .lp-hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 80px; padding: 0 20px; }
         @media (max-width: 1024px) { .lp-hero-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -103,12 +105,12 @@ export default function LandingPage({ onGetStarted }) {
       `}} />
 
       {/* Navbar */}
-      <nav style={{ padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+      <nav className="lp-navbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '1.4rem', color: '#111827', letterSpacing: '-0.5px' }}>
           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: '8px', height: '8px', background: '#fff', borderRadius: '50%' }}></div>
           </div>
-          SiteForge <span style={{ fontSize: '0.8rem', fontWeight: '500', color: '#6b7280', letterSpacing: 'normal', marginTop: '4px' }}>by OTAGA</span>
+          SiteForge <span className="lp-brand-tag" style={{ fontSize: '0.8rem', fontWeight: '500', color: '#6b7280', letterSpacing: 'normal', marginTop: '4px' }}>by OTAGA</span>
         </div>
         
         <div className="lp-nav-links">
@@ -118,15 +120,25 @@ export default function LandingPage({ onGetStarted }) {
           <span onClick={() => scrollTo('features')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>Features</span>
         </div>
 
-        <button 
-          onClick={onGetStarted}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#111827', color: '#fff', border: 'none', borderRadius: '30px', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.3s ease' }}
-        >
-          Open Editor 
-          <div style={{ width: '24px', height: '24px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ArrowRight size={14} color="#111827" />
-          </div>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {hasProjects && (
+            <button 
+              onClick={onGoDashboard}
+              style={{ padding: '10px 16px', background: '#f3f4f6', color: '#111827', border: '1px solid #d1d5db', borderRadius: '30px', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.3s ease' }}
+            >
+              Dashboard
+            </button>
+          )}
+          <button 
+            onClick={onGetStarted}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#111827', color: '#fff', border: 'none', borderRadius: '30px', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.3s ease' }}
+          >
+            Open Editor 
+            <div style={{ width: '24px', height: '24px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ArrowRight size={14} color="#111827" />
+            </div>
+          </button>
+        </div>
       </nav>
 
       {/* Hero Section */}

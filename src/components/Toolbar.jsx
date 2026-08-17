@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import { downloadSite } from '../utils/downloadCode'
-import { Flame, Smartphone, Tablet, Monitor, Eye, Pencil, Download, Loader2, Undo2, Redo2, ArrowLeft } from 'lucide-react'
+import { Flame, Smartphone, Tablet, Monitor, Eye, Pencil, Download, Loader2, Undo2, Redo2, ArrowLeft, ChevronDown } from 'lucide-react'
 
 const S = {
   toolbar: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#111827',
     color: '#ffffff',
     padding: '0 16px',
     height: '52px',
@@ -142,32 +142,6 @@ export default function Toolbar({ onBack }) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const handleAddPage = () => {
-    const name = `Page ${state.pages.length + 1}`
-    dispatch({ type: 'ADD_PAGE', payload: name })
-  }
-
-  const handleRenameStart = (page, e) => {
-    e.stopPropagation()
-    setRenamingId(page.id)
-    setRenameVal(page.name)
-  }
-
-  const handleRenameCommit = () => {
-    if (renamingId && renameVal.trim()) {
-      dispatch({ type: 'RENAME_PAGE', payload: { id: renamingId, name: renameVal.trim() } })
-    }
-    setRenamingId(null)
-  }
-
-  const handleDeletePage = (id, e) => {
-    e.stopPropagation()
-    if (state.pages.length === 1) return alert('Cannot delete the only page.')
-    if (confirm('Delete this page?')) {
-      dispatch({ type: 'DELETE_PAGE', payload: id })
-    }
-  }
-
   const { uploadedImages } = useBuilder()
 
   const handleDownload = async () => {
@@ -180,21 +154,22 @@ export default function Toolbar({ onBack }) {
     setDownloading(false)
   }
 
+  const viewportWidthPx = viewportWidth === 'mobile' ? '375px' : viewportWidth === 'tablet' ? '768px' : '1280px';
+
   return (
     <div style={S.toolbar}>
       {/* Group Logo and Back button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
         {onBack && (
           <button 
             onClick={onBack}
             style={{ 
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', 
-              padding: '6px 12px', fontSize: '0.8rem', fontWeight: '600', color: '#ffffff',
+              background: 'transparent', border: 'none',
+              padding: '6px 0', fontSize: '0.8rem', fontWeight: '500', color: '#9ca3af',
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={e => e.currentTarget.style.color = '#ffffff'}
+            onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
           >
             <ArrowLeft size={14} /> Projects
           </button>
@@ -202,58 +177,69 @@ export default function Toolbar({ onBack }) {
         
         {/* Logo */}
         <div style={S.logo}>
-          <Flame size={18} style={{ color: '#dc2626' }} />
+          <Flame size={18} style={{ color: '#ef4444' }} />
           Site<span style={S.logoSpan}>Forge</span>
         </div>
       </div>
 
-      {/* Spacer */}
-      <div style={{ flex: 1 }}></div>
+      {/* Center: Viewport Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, justifyContent: 'center' }}>
+        <div style={{...S.viewportGroup, background: 'transparent'}}>
+          <button 
+            style={{...S.viewportBtn(viewportWidth === 'desktop'), background: viewportWidth === 'desktop' ? 'rgba(255,255,255,0.1)' : 'transparent', border: viewportWidth === 'desktop' ? '1px solid rgba(255,255,255,0.2)' : 'none', padding: '4px 12px', width: 'auto'}} 
+            onClick={() => setViewportWidth('desktop')} 
+            title="Desktop"
+          >
+            <Monitor size={15} style={{marginRight: '6px'}} /> {viewportWidth === 'desktop' ? 'Desktop' : ''}
+          </button>
+          <button style={S.viewportBtn(viewportWidth === 'mobile')} onClick={() => setViewportWidth('mobile')} title="Mobile"><Smartphone size={15} /></button>
+          <button style={S.viewportBtn(viewportWidth === 'tablet')} onClick={() => setViewportWidth('tablet')} title="Tablet"><Tablet size={15} /></button>
+        </div>
+        
+        <div style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span>{viewportWidthPx}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>100% <ChevronDown size={12} /></span>
+        </div>
+      </div>
 
-      {/* Actions */}
-      <div style={S.actions}>
+      {/* Right: Actions */}
+      <div style={{ ...S.actions, flex: 1, justifyContent: 'flex-end', gap: '16px' }}>
         {/* Undo / Redo */}
-        <div style={{ display: 'flex', gap: '2px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            style={{ ...S.viewportBtn(false), opacity: canUndo ? 1 : 0.3, cursor: canUndo ? 'pointer' : 'default' }}
+            style={{ ...S.viewportBtn(false), opacity: canUndo ? 1 : 0.4, cursor: canUndo ? 'pointer' : 'default', color: '#fff' }}
             onClick={undo}
             disabled={!canUndo}
             title="Undo (Ctrl+Z)"
           >
-            <Undo2 size={15} />
+            <Undo2 size={16} />
           </button>
           <button
-            style={{ ...S.viewportBtn(false), opacity: canRedo ? 1 : 0.3, cursor: canRedo ? 'pointer' : 'default' }}
+            style={{ ...S.viewportBtn(false), opacity: canRedo ? 1 : 0.4, cursor: canRedo ? 'pointer' : 'default', color: '#fff' }}
             onClick={redo}
             disabled={!canRedo}
             title="Redo (Ctrl+Y)"
           >
-            <Redo2 size={15} />
+            <Redo2 size={16} />
           </button>
         </div>
-        {/* Viewport size toggle */}
-        <div style={S.actions}>
-          <div style={S.viewportGroup}>
-            <button style={S.viewportBtn(viewportWidth === 'mobile')} onClick={() => setViewportWidth('mobile')} title="Mobile"><Smartphone size={15} /></button>
-            <button style={S.viewportBtn(viewportWidth === 'tablet')} onClick={() => setViewportWidth('tablet')} title="Tablet"><Tablet size={15} /></button>
-            <button style={S.viewportBtn(viewportWidth === 'desktop')} onClick={() => setViewportWidth('desktop')} title="Desktop"><Monitor size={15} /></button>
-          </div>
-          
-          <button style={S.btn('secondary', isMobile)} onClick={() => setPreviewMode(!previewMode)} title="Preview Mode">
-            {previewMode ? <Pencil size={15} /> : <Eye size={15} />}
-            {!isMobile && (previewMode ? ' Edit' : ' Preview')}
-          </button>
-          
-          <button 
-            style={S.btn('primary', isMobile)} 
-            onClick={handleDownload}
-            disabled={downloading}
-            title="Download Code"
-          >
-            {downloading ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
-            {!isMobile && (downloading ? ' Exporting...' : ' Export')}
-          </button>
-        </div>
+        
+        <div style={{ width: '1px', height: '24px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+        
+        <button style={{...S.btn('secondary', isMobile), background: 'transparent', border: '1px solid rgba(255,255,255,0.2)'}} onClick={() => setPreviewMode(!previewMode)} title="Preview Mode">
+          {previewMode ? <Pencil size={15} /> : <Eye size={15} />}
+          {!isMobile && (previewMode ? ' Edit' : ' Preview')}
+        </button>
+        
+        <button 
+          style={{...S.btn('primary', isMobile), background: '#3b82f6'}} 
+          onClick={handleDownload}
+          disabled={downloading}
+          title="Download Code"
+        >
+          {downloading ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
+          {!isMobile && (downloading ? ' Exporting...' : ' Export')}
+        </button>
       </div>
     </div>
   )

@@ -132,9 +132,26 @@ const initialState = {
   currentPageId: 'page-home',
   selectedElementId: null,
   selectedChildInfo: null, // { parentId, childId }
+  components: [],
 }
 
 // ── Recursive Tree Helpers ──
+function findNodeWithContext(elements, id, parentId = null, index = 0) {
+  for (let i = 0; i < elements.length; i++) {
+    if (elements[i].id === id) return { node: elements[i], parentId, index: i };
+    if (elements[i].children) {
+      const found = findNodeWithContext(elements[i].children, id, elements[i].id, 0);
+      if (found) {
+        if (found.node.id === id) {
+          found.index = elements[i].children.findIndex(c => c.id === id);
+        }
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
 function removeNode(nodes, idToRemove) {
   let removedNode = null;
   const filterNodes = (list) => {
@@ -202,50 +219,119 @@ function updateNodeDeep(nodes, idToUpdate, updates) {
 
 function builderReducer(state, action) {
   switch (action.type) {
-    case 'ADD_ELEMENT': {
-      const { element, insertIndex, targetParentId } = action.payload
-      const assignIds = (el) => ({
-        ...el,
-        id: uuidv4(),
-        props: { ...(el.props || {}) },
-        styles: { ...(el.styles || {}) },
-        children: (el.children || []).map(assignIds)
-      })
-      const newElement = assignIds(element)
+    case 'CREATE_COMPONENT': {
+      const { elementId, name } = action.payload;
       
-      const pages = state.pages.map((page) => {
-        if (page.id !== state.currentPageId) return page
-        
-        let parentToInsert = targetParentId
-        let indexToInsert = insertIndex
-
-        // Feature for Mobile: If a section is selected and no explicit target is given, auto-add to its children
-        if (!parentToInsert && state.selectedElementId) {
-          const findEl = (list, id) => {
-            for (let el of list) {
-              if (el.id === id) return el
-              if (el.children) {
-                const found = findEl(el.children, id)
-                if (found) return found
-              }
-            }
-            return null
-          }
-          const targetEl = findEl(page.elements, state.selectedElementId)
-          if (targetEl && ['section', 'columns', 'container', 'flex', 'grid'].includes(targetEl.type)) {
-            parentToInsert = targetEl.id
-            indexToInsert = -1 // append
+      let nodeToExtract = null;
+      let parentId = null;
+      let indexInParent = -1;
+      let sourceCanvasId = null;
+      let isSourceComp = false;
+      
+      // Search pages
+      for (const page of state.pages) {
+        const found = findNodeWithContext(page.elements, elementId);
+        if (found) {
+          nodeToExtract = found.node;
+          parentId = found.parentId;
+          indexInParent = found.index;
+          sourceCanvasId = page.id;
+          break;
+        }
+      }
+      
+      // Search components
+      if (!nodeToExtract && state.components) {
+        for (const comp of state.components) {
+          const found = findNodeWithContext(comp.elements, elementId);
+          if (found) {
+            nodeToExtract = found.node;
+            parentId = found.parentId;
+            indexInParent = found.index;
+            sourceCanvasId = comp.id;
+            isSourceComp = true;
+            break;
           }
         }
+      }
+      
+      if (!nodeToExtract) return state;
+      
+      const componentId = 'comp-' + uuidv4();
+      const newComponent = {
+        id: componentId,
+        name: name,
+        elements: [JSON.parse(JSON.stringify(nodeToExtract))]
+      };
+      
+      const instanceNode = {
+        id: uuidv4(),
+        type: 'component-instance',
+        componentId: componentId,
+        props: {},
+        styles: {},
+        children: []
+      };
+      
+      let newPages = state.pages;
+      let newComponents = state.components || [];
+      
+      if (isSourceComp) {
+        newComponents = newComponents.map(c => {
+          if (c.id !== sourceCanvasId) return c;
+          const { newNodes } = removeNode(c.elements, elementId);
+          return { ...c, elements: insertNode(newNodes, parentId, indexInParent, instanceNode) };
+        });
+        newComponents.push(newComponent);
+      } else {
+        newPages = newPages.map(page => {
+          if (page.id !== sourceCanvasId) return page;
+          const { newNodes } = removeNode(page.elements, elementId);
+          return { ...page, elements: insertNode(newNodes, parentId, indexInParent, instanceNode) };
+        });
+        newComponents = [...newComponents, newComponent];
+      }
+      
+      return { 
+        ...state, 
+        pages: newPages, 
+        components: newComponents,
+        selectedElementId: instanceNode.id 
+      };
+    }
+    case 'ADD_ELEMENT': {
+      const { element, insertIndex, targetParentId } = action.payload
+      const newElement = element
+      const isComp = (state.components || []).some(c => c.id === state.currentPageId);
+      
+      const insertInCanvas = (canvas) => {
+        let parentToInsert = targetParentId
+        let indexToInsert = insertIndex
+        if (!parentToInsert && state.selectedElementId) {
+          const found = findNodeWithContext(canvas.elements, state.selectedElementId)
+          if (found && found.node && ['section', 'columns', 'container', 'flex', 'grid'].includes(found.node.type)) {
+            parentToInsert = found.node.id
+            indexToInsert = -1
+          }
+        }
+        return insertNode(canvas.elements, parentToInsert, indexToInsert, newElement)
+      };
 
-        const elements = insertNode(page.elements, parentToInsert, indexToInsert, newElement)
-        return { ...page, elements }
-      })
+      if (isComp) {
+        const components = state.components.map(c => c.id === state.currentPageId ? { ...c, elements: insertInCanvas(c) } : c)
+        return { ...state, components, selectedElementId: newElement.id, selectedChildInfo: null }
+      }
+      
+      const pages = state.pages.map(page => page.id === state.currentPageId ? { ...page, elements: insertInCanvas(page) } : page)
       return { ...state, pages, selectedElementId: newElement.id, selectedChildInfo: null }
     }
 
     case 'UPDATE_ELEMENT': {
       const { id, updates } = action.payload
+      const isComp = (state.components || []).some(c => c.id === state.currentPageId);
+      if (isComp) {
+        return { ...state, components: state.components.map(c => c.id === state.currentPageId ? { ...c, elements: updateNodeDeep(c.elements, id, updates) } : c) }
+      }
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
         return { ...page, elements: updateNodeDeep(page.elements, id, updates) }
@@ -254,6 +340,10 @@ function builderReducer(state, action) {
     }
 
     case 'DELETE_ELEMENT': {
+      const isComp = (state.components || []).some(c => c.id === state.currentPageId);
+      if (isComp) {
+        return { ...state, components: state.components.map(c => c.id === state.currentPageId ? { ...c, elements: removeNode(c.elements, action.payload).newNodes } : c), selectedElementId: null, selectedChildInfo: null }
+      }
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
         const { newNodes } = removeNode(page.elements, action.payload)
@@ -262,42 +352,12 @@ function builderReducer(state, action) {
       return { ...state, pages, selectedElementId: null, selectedChildInfo: null }
     }
 
-    case 'DUPLICATE_ELEMENT': {
-      const pages = state.pages.map((page) => {
-        if (page.id !== state.currentPageId) return page
-        
-        let nodeToDuplicate = null
-        let parentId = null
-        let indexInParent = -1
-
-        // Find node to duplicate
-        const findNode = (list, parent) => {
-          for (let i = 0; i < list.length; i++) {
-            if (list[i].id === action.payload) {
-              nodeToDuplicate = list[i]
-              parentId = parent ? parent.id : null
-              indexInParent = i
-              return true
-            }
-            if (list[i].children && findNode(list[i].children, list[i])) return true
-          }
-          return false
-        }
-        findNode(page.elements, null)
-
-        if (!nodeToDuplicate) return page
-
-        const assignIds = (el) => ({
-          ...el,
-          id: uuidv4(),
-          props: { ...(el.props || {}) },
-          styles: { ...(el.styles || {}) },
-          children: (el.children || []).map(assignIds)
-        })
-
-        const copy = assignIds(nodeToDuplicate)
-        const elements = insertNode(page.elements, parentId, indexInParent + 1, copy)
-        return { ...page, elements }
+    case 'RESTORE_ELEMENT': {
+      const { element, targetParentId, insertIndex, pageId } = action.payload
+      const pages = state.pages.map(page => {
+         if (page.id !== pageId) return page;
+         const elements = insertNode(page.elements, targetParentId, insertIndex, element)
+         return { ...page, elements }
       })
       return { ...state, pages }
     }
@@ -402,6 +462,12 @@ function builderReducer(state, action) {
       return { ...state, pages, currentPageId, selectedElementId: null }
     }
 
+    case 'DELETE_COMPONENT': {
+      const components = (state.components || []).filter(c => c.id !== action.payload)
+      const currentPageId = action.payload === state.currentPageId ? state.pages[0].id : state.currentPageId
+      return { ...state, components, currentPageId, selectedElementId: null }
+    }
+
     case 'MOVE_ELEMENT_UP': {
       const pages = state.pages.map((page) => {
         if (page.id !== state.currentPageId) return page
@@ -491,81 +557,185 @@ function builderReducer(state, action) {
 }
 
 // ── Actions that should NOT be recorded in undo history ──
-const NON_HISTORY_ACTIONS = new Set(['SELECT_ELEMENT', 'SELECT_CHILD', 'SWITCH_PAGE'])
+const NON_HISTORY_ACTIONS = new Set([
+  'SELECT_ELEMENT',
+  'SELECT_CHILD',
+  'ADD_PAGE',
+  'SWITCH_PAGE',
+  'RENAME_PAGE',
+  'DELETE_PAGE',
+  'LOAD_TEMPLATE',
+  'CREATE_COMPONENT'
+])
 const MAX_HISTORY = 50
 
-function useUndoReducer(reducer, initialSt, projectId) {
-  const storageKey = projectId ? `siteforge_project_${projectId}` : 'siteforge_state'
-  
-  const [history, setHistory] = React.useState(() => {
-    try {
-      const saved = localStorage.getItem(storageKey)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (parsed && parsed.pages && parsed.currentPageId) {
-          return { past: [], present: { ...initialSt, ...parsed, selectedElementId: null, selectedChildInfo: null }, future: [] }
-        }
+// ── Operation-based History System ──
+function getUndoAction(state, action) {
+  switch (action.type) {
+    case 'UPDATE_ELEMENT': {
+      const { id, updates } = action.payload;
+      let el = null;
+      for (const p of state.pages) {
+        const found = findNodeWithContext(p.elements, id);
+        if (found) { el = found.node; break; }
       }
-    } catch (e) {
-      console.warn(`Failed to parse local storage ${storageKey}`, e)
+      if (!el) return null;
+      const undoUpdates = { props: {}, styles: {} };
+      if (updates.props) {
+        for (const k in updates.props) undoUpdates.props[k] = el.props[k] !== undefined ? el.props[k] : null;
+      }
+      if (updates.styles) {
+        for (const k in updates.styles) undoUpdates.styles[k] = el.styles[k] !== undefined ? el.styles[k] : null;
+      }
+      return { type: 'UPDATE_ELEMENT', payload: { id, updates: undoUpdates } };
     }
-    return { past: [], present: initialSt, future: [] }
-  })
+    case 'DELETE_ELEMENT': {
+      let pageId, found;
+      for (const p of state.pages) {
+        found = findNodeWithContext(p.elements, action.payload);
+        if (found) { pageId = p.id; break; }
+      }
+      if (!found) return null;
+      return { type: 'RESTORE_ELEMENT', payload: { element: found.node, targetParentId: found.parentId, insertIndex: found.index, pageId } };
+    }
+    case 'ADD_ELEMENT': {
+      return { type: 'DELETE_ELEMENT', payload: action.payload.element.id };
+    }
+    case 'RESTORE_ELEMENT': {
+      return { type: 'DELETE_ELEMENT', payload: action.payload.element.id };
+    }
+    case 'MOVE_NODE': {
+      const { sourceId } = action.payload;
+      let found;
+      for (const p of state.pages) {
+        found = findNodeWithContext(p.elements, sourceId);
+        if (found) break;
+      }
+      if (!found) return null;
+      return { type: 'MOVE_NODE', payload: { sourceId, targetParentId: found.parentId, insertIndex: found.index } };
+    }
+    case 'REORDER_ELEMENTS': {
+      const { fromIndex, toIndex } = action.payload;
+      return { type: 'REORDER_ELEMENTS', payload: { fromIndex: toIndex, toIndex: fromIndex } };
+    }
+    case 'UPDATE_THEME': {
+      const { category, key } = action.payload;
+      const oldVal = state.theme[category][key];
+      return { type: 'UPDATE_THEME', payload: { category, key, value: oldVal } };
+    }
+    case 'UPDATE_PAGE_BG': {
+      const currentPage = state.pages.find(p => p.id === state.currentPageId);
+      return { type: 'UPDATE_PAGE_BG', payload: { bg: currentPage.canvasBg || '#ffffff' } };
+    }
+    default:
+      return null;
+  }
+}
+
+function useUndoReducer(reducer, initialSt) {
+  const [history, setHistory] = React.useState({ past: [], present: initialSt, future: [] })
 
   const dispatch = useCallback((action) => {
     if (action.type === 'UNDO') {
       setHistory(h => {
         if (h.past.length === 0) return h
-        const prev = h.past[h.past.length - 1]
-        return { past: h.past.slice(0, -1), present: prev, future: [h.present, ...h.future].slice(0, MAX_HISTORY) }
+        const op = h.past[h.past.length - 1]
+        const newPresent = reducer(h.present, op.undo)
+        return { past: h.past.slice(0, -1), present: newPresent, future: [op, ...h.future].slice(0, MAX_HISTORY) }
       })
       return
     }
     if (action.type === 'REDO') {
       setHistory(h => {
         if (h.future.length === 0) return h
-        const next = h.future[0]
-        return { past: [...h.past, h.present].slice(-MAX_HISTORY), present: next, future: h.future.slice(1) }
+        const op = h.future[0]
+        const newPresent = reducer(h.present, op.redo)
+        return { past: [...h.past, op].slice(-MAX_HISTORY), present: newPresent, future: h.future.slice(1) }
       })
       return
     }
+
     setHistory(h => {
+      const undoAction = getUndoAction(h.present, action)
       const newPresent = reducer(h.present, action)
+      
       if (newPresent === h.present) return h
+      
       if (NON_HISTORY_ACTIONS.has(action.type)) {
         return { ...h, present: newPresent }
       }
-      return { past: [...h.past, h.present].slice(-MAX_HISTORY), present: newPresent, future: [] }
+      
+      if (undoAction) {
+        const op = { undo: undoAction, redo: action }
+        return { past: [...h.past, op].slice(-MAX_HISTORY), present: newPresent, future: [] }
+      }
+      
+      return { ...h, present: newPresent }
     })
   }, [reducer])
 
-  return [history.present, dispatch, history.past.length > 0, history.future.length > 0]
+  const resetHistory = useCallback((newState) => {
+    setHistory({ past: [], present: newState, future: [] })
+  }, [])
+
+  return [history.present, dispatch, history.past.length > 0, history.future.length > 0, resetHistory]
 }
 
 export function BuilderProvider({ children, projectId }) {
-  const [state, dispatch, canUndo, canRedo] = useUndoReducer(builderReducer, initialState, projectId)
+  const [state, dispatch, canUndo, canRedo, resetHistory] = useUndoReducer(builderReducer, initialState)
   const [previewMode, setPreviewMode] = useState(false)
   const [viewportWidth, setViewportWidth] = useState('desktop')
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Save state to local storage whenever it changes
+  // Load state from DB
   React.useEffect(() => {
-    if (!projectId) return
-    try {
-      const storageKey = `siteforge_project_${projectId}`
-      const toSave = { pages: state.pages, currentPageId: state.currentPageId }
-      localStorage.setItem(storageKey, JSON.stringify(toSave))
-
-      // Also update the updated_at timestamp in the project registry
-      const registrySaved = localStorage.getItem('siteforge_projects')
-      if (registrySaved) {
-        const registry = JSON.parse(registrySaved)
-        const updated = registry.map(p => p.id === projectId ? { ...p, updatedAt: Date.now() } : p)
-        localStorage.setItem('siteforge_projects', JSON.stringify(updated))
-      }
-    } catch (e) {
-      console.warn("Failed to save to local storage", e)
+    if (!projectId) {
+      setIsLoading(false)
+      return
     }
-  }, [state.pages, state.currentPageId, projectId])
+    import('../utils/db').then(({ getProject }) => {
+      getProject(projectId).then(project => {
+        if (project && project.pages && project.currentPageId) {
+          resetHistory({
+            ...initialState,
+            ...project,
+            selectedElementId: null,
+            selectedChildInfo: null
+          })
+        }
+        setIsLoading(false)
+      }).catch(e => {
+        console.error("Failed to load project", e)
+        setIsLoading(false)
+      })
+    })
+  }, [projectId, resetHistory])
+
+  // Save state to IndexedDB with debounce
+  React.useEffect(() => {
+    if (!projectId || isLoading) return
+    
+    const saveState = async () => {
+      try {
+        const { getProject, saveProject } = await import('../utils/db')
+        const project = await getProject(projectId)
+        if (project) {
+          project.pages = state.pages
+          project.components = state.components || []
+          project.currentPageId = state.currentPageId
+          project.theme = state.theme
+          await saveProject(project)
+        }
+      } catch (e) {
+        console.warn("Failed to save to DB", e)
+      }
+    }
+
+    const timeoutId = setTimeout(saveState, 500)
+    return () => clearTimeout(timeoutId)
+  }, [state.pages, state.components, state.currentPageId, state.theme, projectId, isLoading])
+
+
 
   // ── Keyboard shortcuts: Ctrl+Z / Ctrl+Y ──
   React.useEffect(() => {
@@ -598,16 +768,30 @@ export function BuilderProvider({ children, projectId }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [dispatch, state.selectedElementId])
 
-  const currentPage = state.pages.find((p) => p.id === state.currentPageId)
-  const selectedElement = currentPage?.elements.find((el) => el.id === state.selectedElementId)
-  const selectedChildElement = state.selectedChildInfo
-    ? currentPage?.elements
-        .find((el) => el.id === state.selectedChildInfo.parentId)
-        ?.children?.find((c) => c.id === state.selectedChildInfo.childId) || null
+  const isEditingComponent = (state.components || []).some(c => c.id === state.currentPageId)
+  const currentPage = isEditingComponent 
+    ? (state.components || []).find((c) => c.id === state.currentPageId)
+    : state.pages.find((p) => p.id === state.currentPageId)
+  const selectedElement = state.selectedElementId && currentPage 
+    ? findNodeWithContext(currentPage.elements, state.selectedElementId)?.node || null
+    : null
+  const selectedChildElement = state.selectedChildInfo && currentPage
+    ? findNodeWithContext(currentPage.elements, state.selectedChildInfo.childId)?.node || null
     : null
 
+  const stateRef = React.useRef(state);
+  React.useEffect(() => { stateRef.current = state; }, [state]);
+
   const addElement = useCallback((element, insertIndex, targetParentId = null) => {
-    dispatch({ type: 'ADD_ELEMENT', payload: { element, insertIndex, targetParentId } })
+    const assignIds = (el) => ({
+      ...el,
+      id: el.id || uuidv4(),
+      props: { ...(el.props || {}) },
+      styles: { ...(el.styles || {}) },
+      children: (el.children || []).map(assignIds)
+    })
+    const newElement = assignIds(element)
+    dispatch({ type: 'ADD_ELEMENT', payload: { element: newElement, insertIndex, targetParentId } })
   }, [dispatch])
 
   const updateElement = useCallback((id, updates) => {
@@ -618,8 +802,38 @@ export function BuilderProvider({ children, projectId }) {
     dispatch({ type: 'DELETE_ELEMENT', payload: id })
   }, [dispatch])
 
+  const deleteComponent = useCallback((id) => {
+    dispatch({ type: 'DELETE_COMPONENT', payload: id })
+  }, [dispatch])
+
   const duplicateElement = useCallback((id) => {
-    dispatch({ type: 'DUPLICATE_ELEMENT', payload: id })
+    let nodeToDuplicate = null;
+    let parentId = null;
+    let indexInParent = -1;
+    let targetPageId = null;
+
+    for (const page of stateRef.current.pages) {
+      const found = findNodeWithContext(page.elements, id);
+      if (found) {
+        nodeToDuplicate = found.node;
+        parentId = found.parentId;
+        indexInParent = found.index;
+        targetPageId = page.id;
+        break;
+      }
+    }
+    if (!nodeToDuplicate) return;
+
+    const assignIds = (el) => ({
+      ...el,
+      id: uuidv4(),
+      props: { ...(el.props || {}) },
+      styles: { ...(el.styles || {}) },
+      children: (el.children || []).map(assignIds)
+    });
+    const copy = assignIds(nodeToDuplicate);
+
+    dispatch({ type: 'RESTORE_ELEMENT', payload: { element: copy, targetParentId: parentId, insertIndex: indexInParent + 1, pageId: targetPageId } });
   }, [dispatch])
 
   const selectElement = useCallback((id) => {
@@ -670,6 +884,10 @@ export function BuilderProvider({ children, projectId }) {
     dispatch({ type: 'SELECT_CHILD', payload: { parentId, childId } })
   }, [dispatch])
 
+  const createComponent = useCallback((elementId, name) => {
+    dispatch({ type: 'CREATE_COMPONENT', payload: { elementId, name } })
+  }, [dispatch])
+
   const updateChildElement = useCallback((parentId, childId, updates) => {
     dispatch({ type: 'UPDATE_CHILD_ELEMENT', payload: { parentId, childId, updates } })
   }, [dispatch])
@@ -692,10 +910,19 @@ export function BuilderProvider({ children, projectId }) {
     return objectUrl
   }, [])
 
+  const loadTemplate = useCallback((elements) => {
+    dispatch({ type: 'LOAD_TEMPLATE', payload: elements })
+  }, [dispatch])
+
+  if (isLoading) {
+    return <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#fafafb', color: '#6b7280' }}>Loading Editor...</div>
+  }
+
   return (
     <BuilderContext.Provider
       value={{
         state,
+        projectId,
         dispatch,
         currentPage,
         selectedElement,
@@ -704,6 +931,7 @@ export function BuilderProvider({ children, projectId }) {
         addElement,
         updateElement,
         deleteElement,
+        deleteComponent,
         duplicateElement,
         selectElement,
         reorderElements,
@@ -714,10 +942,11 @@ export function BuilderProvider({ children, projectId }) {
         moveElementUp,
         moveElementDown,
         switchPage,
-        loadTemplate: useCallback((elements) => dispatch({ type: 'LOAD_TEMPLATE', payload: elements }), [dispatch]),
+        loadTemplate,
         addChildElement,
         deleteChildElement,
         selectChild,
+        createComponent,
         updateChildElement,
         selectedChildElement,
         selectedChildInfo: state.selectedChildInfo,

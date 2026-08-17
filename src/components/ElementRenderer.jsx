@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, createContext, useContext } from 'react'
 import { useBuilder } from '../context/BuilderContext'
 import ScrollReveal from './ScrollReveal'
+import { normalizeStyles } from '../utils/styleUtils'
+
+const CyclicCheckContext = createContext(new Set());
 
 // ── Shared navigation hook used by ALL template components ────────────────────
 // Returns a handleLink(e, href, linkType) function that correctly handles
@@ -44,18 +47,22 @@ const OTAGA_ICONS = {
   facebook: (c, s) => <svg key="fb" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={s} height={s} style={{ display: 'block' }}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>,
   behance: (c, s) => <svg key="be" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={s} height={s} style={{ display: 'block' }}><path d="M2 7h7.5C11.4 7 13 8.1 13 10s-1.6 3-3.5 3H2V7z" /><path d="M2 13h8.5C12.7 13 15 14.3 15 16.5S12.7 20 10.5 20H2v-7z" /><line x1="16" y1="7" x2="22" y2="7" /><path d="M22 12c0-2.8-1.3-5-4-5s-4 2.2-4 5 1.3 5 4 5c2.2 0 3.4-1 3.9-2.5" /></svg>,
 }
-export const DEFAULT_OTAGA_SOCIALS = [
+const DEFAULT_OTAGA_SOCIALS = [
   { type: 'instagram', url: '#' },
   { type: 'dribbble', url: '#' },
   { type: 'linkedin', url: '#' },
 ]
 
 /* ── OTAGA Custom Navbar Template ─────────────────────────────────────────── */
-function OtagaNavbar({ props, styles, activeHref, onLinkClick, isPreview }) {
+function OtagaNavbar({ props, elementStyles, activeHref, onLinkClick, isPreview }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredLink, setHoveredLink] = useState(null)
   const [hoveredMobileLink, setHoveredMobileLink] = useState(null)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'OTAGA'
   const socials = props.otagaSocials || DEFAULT_OTAGA_SOCIALS
@@ -170,10 +177,14 @@ function OtagaNavbar({ props, styles, activeHref, onLinkClick, isPreview }) {
 }
 
 /* ── Classic Minimal Navbar Template ──────────────────────────────────────── */
-function ClassicMinimalNavbar({ props, styles, activeHref, onLinkClick, isPreview }) {
+function ClassicMinimalNavbar({ props, elementStyles, activeHref, onLinkClick, isPreview }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredLink, setHoveredLink] = useState(null)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'Brand'
   const ctaText = props.classicCtaText || 'Get Started'
@@ -241,10 +252,14 @@ function ClassicMinimalNavbar({ props, styles, activeHref, onLinkClick, isPrevie
 }
 
 /* ── Glass Floating Navbar Template ───────────────────────────────────────── */
-function GlassFloatingNavbar({ props, styles, activeHref, onLinkClick }) {
+function GlassFloatingNavbar({ props, elementStyles, activeHref, onLinkClick }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredLink, setHoveredLink] = useState(null)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'Brand'
   const isMobile = viewportWidth === 'mobile'
@@ -301,10 +316,14 @@ function GlassFloatingNavbar({ props, styles, activeHref, onLinkClick }) {
 }
 
 /* ── Shop / E-commerce Navbar Template ────────────────────────────────────── */
-function ShopNavbar({ props, styles, activeHref, onLinkClick, isPreview }) {
+function ShopNavbar({ props, elementStyles, activeHref, onLinkClick, isPreview }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredLink, setHoveredLink] = useState(null)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'ShopCo'
   const cartCount = props.shopCartCount !== undefined ? String(props.shopCartCount) : '3'
@@ -415,9 +434,13 @@ function ShopNavbar({ props, styles, activeHref, onLinkClick, isPreview }) {
 }
 
 /* ── Sidebar Tabs Nav Template (icon activity bar, like VS Code) ───────────── */
-function SidebarTabsNavbar({ props, styles, activeHref, onLinkClick, sidebarOnly = false }) {
+function SidebarTabsNavbar({ props, elementStyles, activeHref, onLinkClick, sidebarOnly = false }) {
   const [localActiveTab, setLocalActiveTab] = useState(0)
   const [hoveredTab, setHoveredTab] = useState(null)
+  const { viewportWidth } = useBuilder()
+
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
 
   const links = props.links || []
   // Prefer activeHref from parent (tracks current page) over local click state
@@ -532,11 +555,15 @@ function SidebarTabsNavbar({ props, styles, activeHref, onLinkClick, sidebarOnly
 }
 
 /* ── Sidebar Nav Template ──────────────────────────────────────────────────── */
-function SidebarNavbar({ props, styles, activeHref, onLinkClick, sidebarOnly = false }) {
+function SidebarNavbar({ props, elementStyles, activeHref, onLinkClick, sidebarOnly = false }) {
   const [hoveredLink, setHoveredLink] = useState(null)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'Dashboard'
   const pageTitle = props.sidebarPageTitle || 'Overview'
@@ -768,9 +795,13 @@ function SidebarNavbar({ props, styles, activeHref, onLinkClick, sidebarOnly = f
 /* ── Puzzle Game Navbar ────────────────────────────────────────────────────── */
 const PUZZLE_PATH = "M20,12V10a2,2,0,0,0-2-2,2,2,0,0,1-2-2,2,2,0,0,0-2-2H12V2a2,2,0,0,0-2-2A2,2,0,0,0,8,2V4H6A2,2,0,0,0,4,6,2,2,0,0,1,2,8,2,2,0,0,0,0,10v2a2,2,0,0,0,2,2,2,2,0,0,1,2,2,2,2,0,0,0,2,2H8v2a2,2,0,0,0,2,2,2,2,0,0,0,2-2V20h2a2,2,0,0,0,2-2,2,2,0,0,1,2-2,2,2,0,0,0,2-2Z"
 
-function PuzzleNavbar({ props, styles, activeHref, onLinkClick }) {
+function PuzzleNavbar({ props, elementStyles, activeHref, onLinkClick }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { viewportWidth } = useBuilder()
+  
+  const normalized = normalizeStyles(elementStyles)
+  const styles = normalized[viewportWidth] || {}
+  
   const links = props.links || []
   const brand = props.brand || 'puzle'
   const accent = props.puzzleAccent || '#f97316'
@@ -4737,6 +4768,8 @@ function FoodFooter({ element }) {
 export default function ElementRenderer({ element, isPreview = false, childrenSlot = null, sidebarOnly = false }) {
   const { type, props } = element
   
+  if (props?.hidden) return null;
+
   const isNewStyleFormat = element.styles && (element.styles.desktop || element.styles.mobile || element.styles.tablet || element.styles.hover)
   const styles = isNewStyleFormat ? {} : (element.styles || {})
   const styleClass = isNewStyleFormat ? `el-${element.id}` : ''
@@ -4849,6 +4882,29 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
   if (type === 'winzy-hero') return withAnchor(<WinzyHero element={element} />)
 
   switch (type) {
+    case 'component-instance': {
+      const visited = useContext(CyclicCheckContext);
+      if (visited.has(element.componentId)) {
+        return withAnchor(<div style={{padding:'20px', color:'red'}}>Circular Component Detected</div>);
+      }
+
+      const comp = (state.components || []).find(c => c.id === element.componentId)
+      if (!comp || !comp.elements || comp.elements.length === 0) return withAnchor(<div style={{padding:'20px', color:'red'}}>Missing Component</div>)
+      
+      const newVisited = new Set(visited);
+      newVisited.add(element.componentId);
+
+      return withAnchor(
+        <CyclicCheckContext.Provider value={newVisited}>
+          <div className={styleClass} style={{ ...styles, position: 'relative' }}>
+            {comp.elements.map(child => (
+              <ElementRenderer key={child.id} element={child} isPreview={isPreview} />
+            ))}
+          </div>
+        </CyclicCheckContext.Provider>
+      )
+    }
+
     case 'navbar': {
       // Custom design template override
       if ((props.navTemplate || 'default') !== 'default') {
@@ -5225,7 +5281,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'container': {
       return (
-        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, maxWidth: props.maxWidth || '1200px', margin: '0 auto', width: '100%' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={isNewStyleFormat ? {} : { ...styles, maxWidth: props.maxWidth || '1200px', margin: '0 auto', width: '100%' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5239,7 +5295,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'flex': {
       return (
-        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, display: 'flex', flexDirection: props.direction || 'row', justifyContent: props.justify || 'flex-start', alignItems: props.align || 'stretch', gap: props.gap || '20px', flexWrap: 'wrap' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={isNewStyleFormat ? {} : { ...styles, display: 'flex', flexDirection: props.direction || 'row', justifyContent: props.justify || 'flex-start', alignItems: props.align || 'stretch', gap: props.gap || '20px', flexWrap: 'wrap' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5253,7 +5309,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'grid': {
       return (
-        <div id={props.sectionId || element.id} className={styleClass} style={{ ...styles, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (props.columns || 'repeat(3, 1fr)'), gap: props.gap || '24px' }}>
+        <div id={props.sectionId || element.id} className={styleClass} style={isNewStyleFormat ? {} : { ...styles, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (props.columns || 'repeat(3, 1fr)'), gap: props.gap || '24px' }}>
           {isPreview ? (
             (element.children || []).map((child) => (
               <ScrollReveal key={child.id} animation={child.props?.animation}>
@@ -5280,7 +5336,7 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
         : {}
 
       return (
-        <section id={props.sectionId || element.id} className={styleClass} style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
+        <section id={props.sectionId || element.id} className={styleClass} style={isNewStyleFormat ? {} : { ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
           {props.title && (
             <h2 style={{ fontSize: isMobile ? '1.5rem' : isTablet ? '1.75rem' : '2rem', fontWeight: '700', marginBottom: '12px' }}>{props.title}</h2>
           )}
@@ -5314,8 +5370,9 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
 
     case 'columns': {
       return (
-        <section className={styleClass} style={{ ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
+        <section className={styleClass} style={isNewStyleFormat ? {} : { ...styles, padding: isMobile ? '40px 16px' : isTablet ? '48px 24px' : styles.padding }}>
           <style>{`.sf-col { transition: transform 0.25s ease, box-shadow 0.25s ease; border-radius: 16px; } .sf-col:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }`}</style>
+
           <div style={{ display: 'flex', gap: isMobile ? '20px' : '32px', flexWrap: 'wrap', justifyContent: 'center' }}>
             {(props.columns || []).map((col, i) => (
               <div key={i} className="sf-col" style={{ flex: isMobile ? '1 1 100%' : '1 1 200px', maxWidth: isMobile ? '100%' : '320px', textAlign: 'center', padding: '20px' }}>
@@ -5594,6 +5651,99 @@ export default function ElementRenderer({ element, isPreview = false, childrenSl
           <div>
             <div style={{ fontWeight: '700', color: 'var(--color-secondary)', fontSize: '0.95rem' }}>{props.author}</div>
             {props.role && <div style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '2px' }}>{props.role}</div>}
+          </div>
+        </section>
+      )
+
+    case 'icon':
+      return withAnchor(
+        <div style={{ ...styles, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          {props.icon === 'star' ? (
+             <svg width={props.size || '24px'} height={props.size || '24px'} fill={props.color || 'currentColor'} viewBox="0 0 24 24">
+               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+             </svg>
+          ) : (
+             <span style={{ fontSize: props.size || '24px', color: props.color || 'currentColor' }}>★</span>
+          )}
+        </div>
+      )
+
+    case 'pricing-table':
+      return withAnchor(
+        <section style={styles}>
+          <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {(props.plans || []).map((plan, i) => (
+              <div key={i} style={{ 
+                flex: '1 1 280px', 
+                maxWidth: '320px',
+                border: plan.isPopular ? '2px solid var(--color-primary)' : '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '32px 24px',
+                backgroundColor: plan.isPopular ? 'rgba(79, 70, 229, 0.03)' : '#ffffff',
+                boxShadow: plan.isPopular ? '0 10px 25px -5px rgba(0,0,0,0.1)' : '0 4px 6px -1px rgba(0,0,0,0.05)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {plan.isPopular && <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'var(--color-primary)', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>POPULAR</div>}
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '1.25rem', color: 'var(--color-secondary)' }}>{plan.name}</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '24px', color: 'var(--color-secondary)' }}>{plan.price}</div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', textAlign: 'left', flex: 1 }}>
+                  {(plan.features || []).map((feat, j) => (
+                    <li key={j} style={{ padding: '8px 0', borderBottom: '1px solid #f3f4f6', color: '#4b5563', fontSize: '0.9rem' }}>✓ {feat}</li>
+                  ))}
+                </ul>
+                <button style={{ width: '100%', padding: '12px', borderRadius: '6px', border: 'none', background: plan.isPopular ? 'var(--color-primary)' : '#e5e7eb', color: plan.isPopular ? '#fff' : '#374151', fontWeight: '600', cursor: 'pointer' }}>Choose Plan</button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+
+    case 'faq':
+      return withAnchor(
+        <section style={styles}>
+          {props.title && <h2 style={{ fontSize: '2rem', marginBottom: '32px', textAlign: 'center', color: 'var(--color-secondary)' }}>{props.title}</h2>}
+          <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'left' }}>
+            {(props.faqs || []).map((faq, i) => (
+              <div key={i} style={{ borderBottom: '1px solid #e5e7eb', padding: '24px 0' }}>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.1rem', color: 'var(--color-secondary)' }}>{faq.q}</h3>
+                <p style={{ margin: 0, color: '#4b5563', lineHeight: 1.6 }}>{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+
+    case 'gallery':
+      return withAnchor(
+        <section style={styles}>
+          {props.title && <h2 style={{ fontSize: '2rem', marginBottom: '32px', color: 'var(--color-secondary)' }}>{props.title}</h2>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+            {(props.images || []).map((img, i) => (
+              <div key={i} style={{ aspectRatio: '1 / 1', overflow: 'hidden', borderRadius: '8px', backgroundColor: '#f3f4f6' }}>
+                <img src={img} alt={`Gallery image ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+
+    case 'blog-section':
+      return withAnchor(
+        <section style={styles}>
+          {props.title && <h2 style={{ fontSize: '2rem', marginBottom: '40px', textAlign: 'center', color: 'var(--color-secondary)' }}>{props.title}</h2>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+            {(props.posts || []).map((post, i) => (
+              <div key={i} style={{ backgroundColor: '#ffffff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', textAlign: 'left' }}>
+                <img src={post.image} alt={post.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                <div style={{ padding: '24px' }}>
+                  <div style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: '8px' }}>{post.date}</div>
+                  <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: 'var(--color-secondary)' }}>{post.title}</h3>
+                  <div style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '600', fontSize: '0.9rem' }}>Read Article →</div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )

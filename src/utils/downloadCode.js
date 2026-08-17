@@ -17,7 +17,7 @@ export async function downloadSite(state, uploadedImages = []) {
   // Replace blob: URLs in all pages with relative paths (images/filename)
   // and collect the unique image files that are actually used
   const usedImages = new Map() // name → File
-  const resolvedPages = pages.map((page) => resolvePageBlobs(page, blobMap, usedImages))
+  const resolvedPages = pages.map((page) => resolvePageBlobs(page, blobMap, usedImages, state.components || []))
 
   // Generate HTML for each page (using resolved paths)
   resolvedPages.forEach((page) => {
@@ -35,7 +35,7 @@ export async function downloadSite(state, uploadedImages = []) {
   // Add shared CSS and JS
   const allElements = resolvedPages.reduce((acc, page) => [...acc, ...page.elements], [])
   const themeCSS = generateThemeCSS(theme)
-  const dynamicCSS = generateCSSForElements(allElements)
+  const dynamicCSS = generateCSSForElements(allElements, state.components || [])
   zip.file('styles.css', BASE_CSS + '\n/* Theme Variables */\n' + themeCSS + '\n/* Generated Styles */\n' + dynamicCSS)
   zip.file('script.js', BASE_JS)
 
@@ -47,18 +47,18 @@ export async function downloadSite(state, uploadedImages = []) {
 }
 
 // Deep-replace all blob: URL strings in an element's props (and nested arrays)
-function resolvePageBlobs(page, blobMap, usedImages) {
+function resolvePageBlobs(page, blobMap, usedImages, components) {
   return {
     ...page,
-    elements: page.elements.map((el) => resolveElementBlobs(el, blobMap, usedImages)),
+    elements: page.elements.map((el) => resolveElementBlobs(el, blobMap, usedImages, components)),
   }
 }
 
-function resolveElementBlobs(el, blobMap, usedImages) {
+function resolveElementBlobs(el, blobMap, usedImages, components) {
   const newProps = resolveProps(el.props || {}, blobMap, usedImages)
-  const newEl = { ...el, props: newProps }
+  const newEl = { ...el, props: newProps, allComponents: components }
   if (el.children) {
-    newEl.children = el.children.map((child) => resolveElementBlobs(child, blobMap, usedImages))
+    newEl.children = el.children.map((child) => resolveElementBlobs(child, blobMap, usedImages, components))
   }
   return newEl
 }
