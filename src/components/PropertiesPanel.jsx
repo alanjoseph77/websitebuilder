@@ -9,11 +9,11 @@ import {
 
 const S = {
   panel: {
-    width: '260px',
+    width: '100%',
+    height: '100%',
     flexShrink: 0,
     minHeight: 0,
     backgroundColor: '#ffffff',
-    borderLeft: '1px solid #e5e7eb',
     display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
@@ -3576,7 +3576,7 @@ function StyleTab({ element, updateElement }) {
   )
 }
 
-export default function PropertiesPanel() {
+export default function PropertiesPanel({ onClose }) {
   const { state, selectedElement, updateElement, selectedChildElement, selectedChildInfo, updateChildElement, currentPage, updatePageSettings, updateTheme, deleteElement, deleteChildElement, createComponent, deleteComponent, switchPage } = useBuilder()
   const [activeTab, setActiveTab] = useState('content')
   const [globalTab, setGlobalTab] = useState('page')
@@ -3599,9 +3599,20 @@ export default function PropertiesPanel() {
       <div style={S.panel}>
         <div style={S.header}>
           <span>Global Settings</span>
-          <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#16a34a', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
-            {currentPage?.name || 'Page'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#16a34a', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+              {currentPage?.name || 'Page'}
+            </span>
+            {onClose && (
+              <button
+                onClick={onClose}
+                style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px', fontSize: '1rem', fontWeight: 'bold', lineHeight: 1 }}
+                title="Close"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={S.tabs}>
@@ -3737,6 +3748,15 @@ export default function PropertiesPanel() {
           >
             🗑 Delete
           </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px', fontSize: '1rem', fontWeight: 'bold', lineHeight: 1 }}
+              title="Close"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

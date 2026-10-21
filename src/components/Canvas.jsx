@@ -163,10 +163,17 @@ export default function Canvas({ leftOpen, setLeftOpen, rightOpen, setRightOpen,
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(100)
   const [showGrid, setShowGrid] = useState(false)
+  const [isMobileScreen, setIsMobileScreen] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobileScreen(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const elements = currentPage?.elements || []
-  const maxWidth = VIEWPORT_WIDTHS[viewportWidth] || '100%'
-  const isSmallView = viewportWidth === 'mobile' || viewportWidth === 'tablet'
+  const maxWidth = (viewportWidth === 'mobile') ? 'min(420px, 100%)' : (VIEWPORT_WIDTHS[viewportWidth] || '100%')
+  const isSmallView = viewportWidth === 'mobile' || viewportWidth === 'tablet' || isMobileScreen
 
   const getBreadcrumbs = () => {
     const targetId = state.selectedChildInfo ? state.selectedChildInfo.childId : state.selectedElementId;
@@ -352,33 +359,40 @@ export default function Canvas({ leftOpen, setLeftOpen, rightOpen, setRightOpen,
     <div style={{
       flex: 1,
       overflow: 'auto',
+      WebkitOverflowScrolling: 'touch',
       background: (previewMode && viewportWidth === 'desktop') ? '#fff' : '#f9fafb',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: (previewMode && viewportWidth === 'desktop') ? '0' : (isSmallView ? '12px' : '32px')
+      padding: (previewMode && viewportWidth === 'desktop') ? '0' : (isMobileScreen ? '8px 4px 88px 4px' : '32px'),
+      boxSizing: 'border-box',
+      width: '100%',
     }}>
       {!previewMode && (
-        <div style={{ ...S.canvasLabel, maxWidth: maxWidth, justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ ...S.canvasLabel, maxWidth: maxWidth, justifyContent: 'space-between', padding: isMobileScreen ? '4px 8px' : '4px 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobileScreen ? '8px' : '16px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Layers size={12} /> Canvas</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', borderLeft: '1px solid #333', paddingLeft: '16px' }}>
-              <Layers size={16} cursor="pointer" onClick={() => { setLeftOpen(!leftOpen); setLeftTab('layers'); }} style={{ margin: '0 4px', color: '#9ca3af' }}/>
-              <Eye size={16} cursor="pointer" onClick={() => setPreviewMode(true)} style={{ margin: '0 4px', color: '#9ca3af' }}/>
-              <Settings size={16} cursor="pointer" onClick={() => setRightOpen(!rightOpen)} style={{ margin: '0 4px', color: '#9ca3af' }}/>
-              <div style={{ width: '1px', height: '16px', background: '#333', margin: '0 8px' }} />
-              <LayoutPanelLeft size={16} cursor="pointer" onClick={() => setLeftOpen(!leftOpen)} style={{ color: '#9ca3af' }}/>
-            </div>
+            {!isMobileScreen && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', borderLeft: '1px solid #333', paddingLeft: '16px' }}>
+                <Layers size={16} cursor="pointer" onClick={() => { setLeftOpen(!leftOpen); setLeftTab('layers'); }} style={{ margin: '0 4px', color: '#9ca3af' }}/>
+                <Eye size={16} cursor="pointer" onClick={() => setPreviewMode(true)} style={{ margin: '0 4px', color: '#9ca3af' }}/>
+                <Settings size={16} cursor="pointer" onClick={() => setRightOpen(!rightOpen)} style={{ margin: '0 4px', color: '#9ca3af' }}/>
+                <div style={{ width: '1px', height: '16px', background: '#333', margin: '0 8px' }} />
+                <LayoutPanelLeft size={16} cursor="pointer" onClick={() => setLeftOpen(!leftOpen)} style={{ color: '#9ca3af' }}/>
+              </div>
+            )}
           </div>
           <span style={{ fontSize: '0.68rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            {viewportWidth === 'mobile' ? <><Smartphone size={11} /> Mobile 375px</> : viewportWidth === 'tablet' ? <><Tablet size={11} /> Tablet 768px</> : <><Monitor size={11} /> Desktop</>}
+            {viewportWidth === 'mobile' ? <><Smartphone size={11} /> Mobile View</> : viewportWidth === 'tablet' ? <><Tablet size={11} /> Tablet View</> : <><Monitor size={11} /> Desktop View</>}
           </span>
         </div>
       )}
 
       <div
         style={{
-          maxWidth: (previewMode && viewportWidth === 'desktop') ? '100%' : (VIEWPORT_WIDTHS[viewportWidth] || '100%'),
+          maxWidth: (previewMode && viewportWidth === 'desktop') 
+            ? '100%' 
+            : (viewportWidth === 'mobile' ? 'min(420px, 100%)' : (VIEWPORT_WIDTHS[viewportWidth] || '100%')),
           width: '100%',
           minHeight: (previewMode && viewportWidth === 'desktop') ? '100vh' : '600px',
           background: '#fff',
@@ -421,15 +435,17 @@ export default function Canvas({ leftOpen, setLeftOpen, rightOpen, setRightOpen,
                   <DropZone onDrop={(e) => handleDropAtIndex(e, 0)} />
                   {elements.length === 0 ? (
                     <div style={{
-                      padding: '40px', textAlign: 'center', color: '#9ca3af',
-                      border: '2px dashed #e5e7eb', margin: '20px', borderRadius: '8px',
+                      padding: isMobileScreen ? '24px 16px' : '40px', textAlign: 'center', color: '#9ca3af',
+                      border: '2px dashed #e5e7eb', margin: isMobileScreen ? '12px' : '20px', borderRadius: '8px',
                       background: canvasDragOver ? '#eff6ff' : 'transparent',
                       borderColor: canvasDragOver ? '#3b82f6' : '#e5e7eb',
                       minHeight: '200px', display: 'flex', flexDirection: 'column',
                       alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
                     }}>
                       <LayoutTemplate size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
-                      <p>Drag elements here or click the + button to start building</p>
+                      <p style={{ fontSize: '0.85rem' }}>
+                        {isMobileScreen ? 'Tap + or select Elements from the bottom menu to start building' : 'Drag elements here or click the + button to start building'}
+                      </p>
                     </div>
                   ) : (
                     elements.map((el, i) => (
@@ -450,13 +466,14 @@ export default function Canvas({ leftOpen, setLeftOpen, rightOpen, setRightOpen,
           <div 
             onClick={() => addElement({ type: 'section', props: { layout: '1-col' }, styles: { padding: '60px 20px', backgroundColor: '#ffffff' } })}
             style={{ position: 'absolute', bottom: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#3b82f6', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 100, border: '2px solid #fff' }}
+            title="Add Section"
           >
             <Plus size={16} />
           </div>
         )}
       </div>
 
-      {!previewMode && (
+      {!previewMode && !isMobileScreen && (
         <>
           {/* Breadcrumbs - Bottom Left */}
           <div style={{ position: 'absolute', bottom: '16px', left: '24px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>

@@ -48,9 +48,9 @@ var libsPromise = null;
 function loadLibs() {
   if (!libsPromise) {
     libsPromise = Promise.all([
-      Promise.resolve().then(() => (init_empty(), empty_exports)),
-      Promise.resolve().then(() => (init_empty(), empty_exports)),
-      Promise.resolve().then(() => (init_empty(), empty_exports))
+      import("three/examples/jsm/loaders/GLTFLoader.js"),
+      import("three/examples/jsm/loaders/FBXLoader.js"),
+      import("@pixiv/three-vrm")
     ]).then(([g, f, v]) => ({ GLTFLoader: g.GLTFLoader, FBXLoader: f.FBXLoader, VRM: v }));
   }
   return libsPromise;

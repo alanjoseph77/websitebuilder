@@ -129,28 +129,53 @@
 .museum-root #flash.go{animation:museum-flash .65s ease-out}
 @keyframes museum-flash{0%{opacity:.95}100%{opacity:0}}
 .museum-root #b-menu{display:none}
-@media (max-width:640px){.museum-root #b-menu{display:inline-flex;flex:none}
-.museum-root .hud-btns{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 60px);flex-direction:column;align-items:stretch;gap:2px;
-    background:rgba(26,21,18,.86);border:1px solid var(--glass-line);border-radius:16px;padding:6px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);min-width:190px}
-.museum-root .hud-btns.open{display:flex}
-.museum-root .hud-btns .gbtn{background:transparent;border-color:transparent;justify-content:space-between;font-size:15px;padding:12px 14px;backdrop-filter:none;-webkit-backdrop-filter:none}
-.museum-root .chip{max-width:calc(100vw - 130px);min-width:0}
-.museum-root .chip .n{font-size:20px;overflow:hidden;text-overflow:ellipsis}
-.museum-root .chip .d{font-size:9px;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis}
-.museum-root #joy{width:112px;height:112px}
-.museum-root .right-actions{gap:8px}
-.museum-root .right-actions .gbtn:not(#action){padding:8px 13px;font-size:13px}
-.museum-root #action{font-size:15px;padding:12px 18px}
-.museum-root #bubble p{max-width:200px;font-size:14px}
-.museum-root .ntag{font-size:11px}
-.museum-root .f input,.museum-root .f select,.museum-root .f textarea{font-size:16px}
-.museum-root .lb .row,.museum-root #photo .row{flex-wrap:wrap;justify-content:center}
-.museum-root .card{padding:30px 22px 24px}
-.museum-root .wtitle{font-size:40px}}
-@media (max-height:480px) and (orientation:landscape){.museum-root #joy{width:96px;height:96px}
-.museum-root #knob{width:46px;height:46px;margin:-23px 0 0 -23px}
-.museum-root .chip .d{display:none}
-.museum-root .hud-btns{top:calc(env(safe-area-inset-top,0px) + 50px);max-height:calc(100vh - 70px);overflow-y:auto}
-.museum-root .card{margin:6px auto}
-.museum-root .lb img{max-height:52vh}}
+
+/* Always ensure touch joystick is visible on touch screens & narrow displays */
+@media (hover: none), (pointer: coarse), (max-width: 900px) {
+  .museum-root #joy { display: block !important; }
+  .museum-root #hint { display: none !important; }
+}
+
+@media (max-width:640px){
+  .museum-root #b-menu{display:inline-flex;flex:none}
+  .museum-root .hud-btns{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 54px);flex-direction:column;align-items:stretch;gap:4px;
+    background:rgba(26,21,18,.92);border:1px solid var(--glass-line);border-radius:16px;padding:8px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);min-width:210px;box-shadow:0 12px 36px rgba(0,0,0,0.5)}
+  .museum-root .hud-btns.open{display:flex}
+  .museum-root .hud-btns .gbtn{background:rgba(255,255,255,0.06);border-color:transparent;justify-content:space-between;font-size:15px;padding:12px 16px;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:10px}
+  .museum-root .hud-btns .gbtn:hover{background:rgba(255,255,255,0.12)}
+  .museum-root .chip{max-width:calc(100vw - 120px);min-width:0;padding:6px 10px}
+  .museum-root .chip .n{font-size:19px;overflow:hidden;text-overflow:ellipsis}
+  .museum-root .chip .d{font-size:9px;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis}
+  .museum-root #joy{width:108px;height:108px}
+  .museum-root #knob{width:48px;height:48px;margin:-24px 0 0 -24px}
+  .museum-root .right-actions{gap:8px}
+  .museum-root .right-actions .gbtn:not(#action){padding:9px 14px;font-size:13px;border-radius:999px}
+  .museum-root #action{font-size:15px;padding:12px 18px;border-radius:999px}
+  .museum-root #bubble p{max-width:200px;font-size:14px}
+  .museum-root .ntag{font-size:11px}
+  .museum-root .f input,.museum-root .f select,.museum-root .f textarea{font-size:16px}
+  .museum-root .lb .row,.museum-root #photo .row{flex-wrap:wrap;justify-content:center}
+  .museum-root .card{padding:28px 18px 22px;border-radius:12px}
+  .museum-root .wtitle{font-size:38px}
+}
+
+@media (max-width:440px){
+  .museum-root #joy{width:92px;height:92px}
+  .museum-root #knob{width:42px;height:42px;margin:-21px 0 0 -21px}
+  .museum-root .hud-bottom{padding-left:12px;padding-right:12px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+  .museum-root .hud-top{padding-left:12px;padding-right:12px}
+  .museum-root .right-actions .gbtn{padding:8px 11px;font-size:12px}
+  .museum-root #action{padding:10px 14px;font-size:13px}
+  .museum-root .chip .n{font-size:17px}
+  .museum-root .card h1{font-size:clamp(36px, 12vw, 48px)}
+}
+
+@media (max-height:480px) and (orientation:landscape){
+  .museum-root #joy{width:86px;height:86px}
+  .museum-root #knob{width:40px;height:40px;margin:-20px 0 0 -20px}
+  .museum-root .chip .d{display:none}
+  .museum-root .hud-btns{top:calc(env(safe-area-inset-top,0px) + 50px);max-height:calc(100vh - 70px);overflow-y:auto}
+  .museum-root .card{margin:6px auto}
+  .museum-root .lb img{max-height:52vh}
+}
 @media (prefers-reduced-motion:reduce){.museum-root *{transition:none!important;animation:none!important}}

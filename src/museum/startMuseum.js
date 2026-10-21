@@ -851,7 +851,7 @@ const visitors=[];
 for(let i=0;i<visitorCount;i++) visitors.push(Characters.addCouple(Characters.GALLERY_ROUTE, 6 + i*44, {variant:i+1, holdHands:i===1, label:'Couple '+(i+1)}));
 
 /* ---------- input ---------- */
-const isCoarse = matchMedia('(pointer: coarse)').matches;
+const isCoarse = matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 840;
 if(isCoarse) root.classList.add('coarse');
 const keys={};
 const joy={x:0,y:0};
@@ -876,13 +876,46 @@ on(window,'keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 on(window,'blur',()=>{ for(const k in keys) keys[k]=false; });
 
 let drag=null;
-canvas.addEventListener('pointerdown',e=>{ drag={id:e.pointerId,x:e.clientX,y:e.clientY}; canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointermove',e=>{
-  if(!drag||drag.id!==e.pointerId) return;
-  const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY;
-  cam.yaw-=dx*.006; cam.pitch=Math.max(.04,Math.min(1.1,cam.pitch+dy*.004)); cam.yawGoal=null;
+const pointers = new Map();
+let prevPinchDist = null;
+canvas.addEventListener('pointerdown',e=>{
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  canvas.setPointerCapture(e.pointerId);
+  if(pointers.size === 1) {
+    drag = {id:e.pointerId, x:e.clientX, y:e.clientY};
+  } else if(pointers.size === 2) {
+    drag = null;
+    const pts = Array.from(pointers.values());
+    prevPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
 });
-const endDrag=e=>{ if(drag&&drag.id===e.pointerId) drag=null; };
+canvas.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if(pointers.size === 2 && prevPinchDist) {
+    const pts = Array.from(pointers.values());
+    const curDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const delta = prevPinchDist - curDist;
+    cam.dist = Math.max(2.2, Math.min(7, cam.dist + delta * 0.012));
+    prevPinchDist = curDist;
+    return;
+  }
+  if(drag && drag.id === e.pointerId) {
+    const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY;
+    cam.yaw-=dx*.006; cam.pitch=Math.max(.04,Math.min(1.1,cam.pitch+dy*.004)); cam.yawGoal=null;
+  }
+});
+const endDrag=e=>{
+  pointers.delete(e.pointerId);
+  if(pointers.size < 2) prevPinchDist = null;
+  if(drag && drag.id === e.pointerId) {
+    drag = null;
+    if(pointers.size === 1) {
+      const [remId, pt] = pointers.entries().next().value;
+      drag = { id: remId, x: pt.x, y: pt.y };
+    }
+  }
+};
 canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
 canvas.addEventListener('wheel',e=>{ cam.dist=Math.max(2.2,Math.min(7,cam.dist+e.deltaY*.004)); e.preventDefault(); },{passive:false});
 

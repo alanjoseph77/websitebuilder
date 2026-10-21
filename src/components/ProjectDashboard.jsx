@@ -73,6 +73,16 @@ export default function ProjectDashboard({ onOpenProject, onGoHome }) {
 
         .pd-open-btn { opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; display: flex; alignItems: center; gap: 6px; color: #ea580c; font-weight: 600; font-size: 0.9rem; }
         .pd-card:hover .pd-open-btn { opacity: 1; transform: translateX(0); }
+
+        @media (max-width: 768px) {
+          .pd-header-nav { padding: 14px 16px; flex-direction: column; gap: 12px; align-items: stretch; }
+          .pd-btn-home { justify-content: center; width: 100%; font-size: 0.85rem; padding: 9px 16px; }
+          .pd-grid { padding: 16px; gap: 16px; grid-template-columns: 1fr; }
+          .pd-card { height: auto; min-height: 190px; padding: 18px; }
+          .pd-card-new { height: 160px; }
+          .pd-icon-btn { opacity: 1 !important; transform: scale(1) !important; }
+          .pd-open-btn { opacity: 1 !important; transform: translateX(0) !important; }
+        }
       `}} />
 
       <div className="pd-bg-mesh"></div>

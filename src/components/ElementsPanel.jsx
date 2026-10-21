@@ -375,9 +375,10 @@ function ElementCard({ element, onAddClick, isLarge, previewHeight = 180 }) {
   )
 }
 
-export default function ElementsPanel() {
+export default function ElementsPanel({ onSelectElement }) {
   const { addElement, state } = useBuilder()
   const [search, setSearch] = useState('')
+  const [toastMsg, setToastMsg] = useState(null)
   const [openCategories, setOpenCategories] = useState(() =>
     DISPLAY_CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat.name]: true }), {})
   )
@@ -393,6 +394,10 @@ export default function ElementsPanel() {
     const el = { type: elementDef.type, props: { ...elementDef.props }, styles: { ...elementDef.styles } }
     if (elementDef.componentId) el.componentId = elementDef.componentId
     addElement(el)
+    
+    setToastMsg(elementDef.label || elementDef.type)
+    setTimeout(() => setToastMsg(null), 2400)
+    if (onSelectElement) onSelectElement()
   }
 
   const userComponentsCategory = state.components && state.components.length > 0 ? [{
@@ -438,6 +443,24 @@ export default function ElementsPanel() {
         </div>
       </div>
 
+      {toastMsg && (
+        <div style={{
+          margin: '8px 12px 0 12px',
+          padding: '8px 14px',
+          background: '#10b981',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontSize: '0.78rem',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+        }}>
+          <span>✓ Added {toastMsg} to canvas</span>
+        </div>
+      )}
+
       {filteredCategories.map((cat) => (
         <div key={cat.name}>
           <div
@@ -475,7 +498,7 @@ export default function ElementsPanel() {
 
       <div style={{ ...S.tip, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
         <Lightbulb size={13} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '1px' }} />
-        Drag elements to the canvas, or click to add at the end.
+        Tap any element to add it directly to your page.
       </div>
     </div>
   )

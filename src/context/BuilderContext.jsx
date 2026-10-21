@@ -684,7 +684,7 @@ function useUndoReducer(reducer, initialSt) {
 export function BuilderProvider({ children, projectId }) {
   const [state, dispatch, canUndo, canRedo, resetHistory] = useUndoReducer(builderReducer, initialState)
   const [previewMode, setPreviewMode] = useState(false)
-  const [viewportWidth, setViewportWidth] = useState('desktop')
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768) ? 'mobile' : 'desktop')
   const [isLoading, setIsLoading] = useState(true)
 
   // Load state from DB

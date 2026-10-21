@@ -62,13 +62,15 @@ const OVERLAY_BTN = (color = '#4f6ef7') => ({
   color: '#fff',
   border: 'none',
   borderRadius: '4px',
-  padding: '4px 8px',
+  padding: '5px 8px',
+  minHeight: '26px',
   fontSize: '0.72rem',
   cursor: 'pointer',
   fontWeight: '600',
   display: 'flex',
   alignItems: 'center',
   gap: '3px',
+  touchAction: 'manipulation',
 })
 
 export default function CanvasElement({ element, index, parentId = null, totalCount, sidebarOnly = false }) {

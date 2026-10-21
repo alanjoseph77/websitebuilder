@@ -157,88 +157,118 @@ export default function Toolbar({ onBack }) {
   const viewportWidthPx = viewportWidth === 'mobile' ? '375px' : viewportWidth === 'tablet' ? '768px' : '1280px';
 
   return (
-    <div style={S.toolbar}>
+    <div style={{ ...S.toolbar, padding: isMobile ? '0 10px' : '0 16px', gap: isMobile ? '8px' : '16px' }}>
       {/* Group Logo and Back button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px', flex: isMobile ? 'none' : 1 }}>
         {onBack && (
           <button 
             onClick={onBack}
             style={{ 
               background: 'transparent', border: 'none',
-              padding: '6px 0', fontSize: '0.8rem', fontWeight: '500', color: '#9ca3af',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s',
+              padding: isMobile ? '6px 2px' : '6px 0', fontSize: '0.8rem', fontWeight: '500', color: '#9ca3af',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s',
             }}
             onMouseEnter={e => e.currentTarget.style.color = '#ffffff'}
             onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}
+            title="Back to Projects"
           >
-            <ArrowLeft size={14} /> Projects
+            <ArrowLeft size={16} /> {!isMobile && 'Projects'}
           </button>
         )}
         
         {/* Logo */}
-        <div style={S.logo}>
-          <Flame size={18} style={{ color: '#ef4444' }} />
+        <div style={{ ...S.logo, fontSize: isMobile ? '0.95rem' : '1.1rem' }}>
+          <Flame size={isMobile ? 16 : 18} style={{ color: '#ef4444' }} />
           Site<span style={S.logoSpan}>Forge</span>
         </div>
       </div>
 
       {/* Center: Viewport Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, justifyContent: 'center' }}>
-        <div style={{...S.viewportGroup, background: 'transparent'}}>
-          <button 
-            style={{...S.viewportBtn(viewportWidth === 'desktop'), background: viewportWidth === 'desktop' ? 'rgba(255,255,255,0.1)' : 'transparent', border: viewportWidth === 'desktop' ? '1px solid rgba(255,255,255,0.2)' : 'none', padding: '4px 12px', width: 'auto'}} 
-            onClick={() => setViewportWidth('desktop')} 
-            title="Desktop"
+      {isMobile ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button
+            onClick={() => setViewportWidth(viewportWidth === 'mobile' ? 'desktop' : 'mobile')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 8px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.18)',
+              background: 'rgba(255,255,255,0.08)',
+              color: '#fff',
+              fontSize: '0.72rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+            }}
+            title={`Current: ${viewportWidth}. Tap to toggle view`}
           >
-            <Monitor size={15} style={{marginRight: '6px'}} /> {viewportWidth === 'desktop' ? 'Desktop' : ''}
+            {viewportWidth === 'mobile' ? <Smartphone size={13} style={{ color: '#60a5fa' }} /> : <Monitor size={13} style={{ color: '#60a5fa' }} />}
+            <span style={{ textTransform: 'capitalize' }}>{viewportWidth}</span>
           </button>
-          <button style={S.viewportBtn(viewportWidth === 'mobile')} onClick={() => setViewportWidth('mobile')} title="Mobile"><Smartphone size={15} /></button>
-          <button style={S.viewportBtn(viewportWidth === 'tablet')} onClick={() => setViewportWidth('tablet')} title="Tablet"><Tablet size={15} /></button>
         </div>
-        
-        <div style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span>{viewportWidthPx}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>100% <ChevronDown size={12} /></span>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, justifyContent: 'center' }}>
+          <div style={{...S.viewportGroup, background: 'transparent'}}>
+            <button 
+              style={{...S.viewportBtn(viewportWidth === 'desktop'), background: viewportWidth === 'desktop' ? 'rgba(255,255,255,0.1)' : 'transparent', border: viewportWidth === 'desktop' ? '1px solid rgba(255,255,255,0.2)' : 'none', padding: '4px 12px', width: 'auto'}} 
+              onClick={() => setViewportWidth('desktop')} 
+              title="Desktop"
+            >
+              <Monitor size={15} style={{marginRight: '6px'}} /> {viewportWidth === 'desktop' ? 'Desktop' : ''}
+            </button>
+            <button style={S.viewportBtn(viewportWidth === 'mobile')} onClick={() => setViewportWidth('mobile')} title="Mobile"><Smartphone size={15} /></button>
+            <button style={S.viewportBtn(viewportWidth === 'tablet')} onClick={() => setViewportWidth('tablet')} title="Tablet"><Tablet size={15} /></button>
+          </div>
+          
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span>{viewportWidthPx}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>100% <ChevronDown size={12} /></span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Right: Actions */}
-      <div style={{ ...S.actions, flex: 1, justifyContent: 'flex-end', gap: '16px' }}>
+      <div style={{ ...S.actions, flex: isMobile ? 'none' : 1, justifyContent: 'flex-end', gap: isMobile ? '6px' : '16px', marginLeft: isMobile ? 'auto' : 0 }}>
         {/* Undo / Redo */}
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: isMobile ? '2px' : '8px' }}>
           <button
-            style={{ ...S.viewportBtn(false), opacity: canUndo ? 1 : 0.4, cursor: canUndo ? 'pointer' : 'default', color: '#fff' }}
+            style={{ ...S.viewportBtn(false), opacity: canUndo ? 1 : 0.4, cursor: canUndo ? 'pointer' : 'default', color: '#fff', width: isMobile ? '28px' : '30px' }}
             onClick={undo}
             disabled={!canUndo}
             title="Undo (Ctrl+Z)"
           >
-            <Undo2 size={16} />
+            <Undo2 size={isMobile ? 15 : 16} />
           </button>
           <button
-            style={{ ...S.viewportBtn(false), opacity: canRedo ? 1 : 0.4, cursor: canRedo ? 'pointer' : 'default', color: '#fff' }}
+            style={{ ...S.viewportBtn(false), opacity: canRedo ? 1 : 0.4, cursor: canRedo ? 'pointer' : 'default', color: '#fff', width: isMobile ? '28px' : '30px' }}
             onClick={redo}
             disabled={!canRedo}
             title="Redo (Ctrl+Y)"
           >
-            <Redo2 size={16} />
+            <Redo2 size={isMobile ? 15 : 16} />
           </button>
         </div>
         
-        <div style={{ width: '1px', height: '24px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+        {!isMobile && <div style={{ width: '1px', height: '24px', backgroundColor: 'rgba(255,255,255,0.1)' }} />}
         
-        <button style={{...S.btn('secondary', isMobile), background: 'transparent', border: '1px solid rgba(255,255,255,0.2)'}} onClick={() => setPreviewMode(!previewMode)} title="Preview Mode">
+        <button 
+          style={{...S.btn('secondary', isMobile), background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: isMobile ? '6px 8px' : '7px 16px'}} 
+          onClick={() => setPreviewMode(!previewMode)} 
+          title="Preview Mode"
+        >
           {previewMode ? <Pencil size={15} /> : <Eye size={15} />}
           {!isMobile && (previewMode ? ' Edit' : ' Preview')}
         </button>
         
         <button 
-          style={{...S.btn('primary', isMobile), background: '#3b82f6'}} 
+          style={{...S.btn('primary', isMobile), background: '#3b82f6', padding: isMobile ? '6px 10px' : '7px 16px'}} 
           onClick={handleDownload}
           disabled={downloading}
           title="Download Code"
         >
           {downloading ? <Loader2 size={15} className="spin" /> : <Download size={15} />}
-          {!isMobile && (downloading ? ' Exporting...' : ' Export')}
+          <span>{downloading ? (isMobile ? '...' : ' Exporting...') : ' Export'}</span>
         </button>
       </div>
     </div>

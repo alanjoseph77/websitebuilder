@@ -9,7 +9,7 @@ import Canvas from './components/Canvas'
 import PropertiesPanel from './components/PropertiesPanel'
 import LandingPage from './components/LandingPage'
 import ProjectDashboard from './components/ProjectDashboard'
-import { LayoutGrid, Sliders, ArrowLeft, Undo, Redo } from 'lucide-react'
+import { LayoutGrid, Sliders, ArrowLeft, Undo, Redo, FileText, Layers, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { ELEMENT_CATEGORIES } from './data/elementTypes'
 import { generateCSSForElements, generateThemeCSS } from './utils/styleUtils'
@@ -137,131 +137,256 @@ function BuilderUI({ setActiveProjectId, setShowEditor }) {
       {!previewMode && <Toolbar onBack={() => { setShowEditor(false); setActiveProjectId(null) }} />}
       <div style={bodyStyles}>
         {/* Left Panel */}
+        {/* Left Panel Drawer */}
         <div style={{
           display: (leftOpen && !previewMode) ? 'flex' : 'none',
           flexDirection: 'column',
           position: isMobile ? 'absolute' : 'relative',
           zIndex: isMobile ? 100 : 1,
           height: '100%',
-          width: isMobile ? '300px' : '280px',
-            maxWidth: '85vw',
-            flexShrink: 0,
-            left: 0,
-            top: 0,
-            boxShadow: isMobile ? '4px 0 16px rgba(0,0,0,0.15)' : 'none',
-            backgroundColor: '#fff',
-            borderRight: '1px solid #e5e7eb',
-          }}>
-            <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', padding: '0 8px', gap: '4px' }}>
+          width: isMobile ? 'min(360px, 92vw)' : '280px',
+          maxWidth: '92vw',
+          flexShrink: 0,
+          left: 0,
+          top: 0,
+          boxShadow: isMobile ? '4px 0 24px rgba(0,0,0,0.22)' : 'none',
+          backgroundColor: '#fff',
+          borderRight: '1px solid #e5e7eb',
+        }}>
+          {/* Header tabs + close button */}
+          <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e5e7eb', padding: '0 8px', gap: '2px', background: '#fafafa' }}>
+            <button 
+              onClick={() => setLeftTab('elements')} 
+              style={{ outline: 'none', flex: 1, padding: '12px 2px', background: 'none', border: 'none', borderBottom: leftTab === 'elements' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'elements' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'elements' ? '700' : '500', cursor: 'pointer', fontSize: '0.78rem', transition: 'all 0.15s' }}
+            >
+              Elements
+            </button>
+            <button 
+              onClick={() => setLeftTab('pages')} 
+              style={{ outline: 'none', flex: 1, padding: '12px 2px', background: 'none', border: 'none', borderBottom: leftTab === 'pages' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'pages' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'pages' ? '700' : '500', cursor: 'pointer', fontSize: '0.78rem', transition: 'all 0.15s' }}
+            >
+              Pages
+            </button>
+            <button 
+              onClick={() => setLeftTab('layers')} 
+              style={{ outline: 'none', flex: 1, padding: '12px 2px', background: 'none', border: 'none', borderBottom: leftTab === 'layers' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'layers' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'layers' ? '700' : '500', cursor: 'pointer', fontSize: '0.78rem', transition: 'all 0.15s' }}
+            >
+              Layers
+            </button>
+            <button 
+              onClick={() => setLeftTab('assets')} 
+              style={{ outline: 'none', flex: 1, padding: '12px 2px', background: 'none', border: 'none', borderBottom: leftTab === 'assets' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'assets' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'assets' ? '700' : '500', cursor: 'pointer', fontSize: '0.78rem', transition: 'all 0.15s' }}
+            >
+              Assets
+            </button>
+            {isMobile && (
               <button 
-                onClick={() => setLeftTab('elements')} 
-                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'elements' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'elements' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'elements' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
-              >
-                Elements
-              </button>
-              <button 
-                onClick={() => setLeftTab('pages')} 
-                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'pages' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'pages' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'pages' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
-              >
-                Pages
-              </button>
-              <button 
-                onClick={() => setLeftTab('layers')} 
-                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'layers' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'layers' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'layers' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
-              >
-                Layers
-              </button>
-              <button 
-                onClick={() => setLeftTab('assets')} 
-                style={{ outline: 'none', flex: 1, padding: '14px 4px', background: 'none', border: 'none', borderBottom: leftTab === 'assets' ? '2px solid #3b82f6' : '2px solid transparent', color: leftTab === 'assets' ? '#3b82f6' : '#6b7280', fontWeight: leftTab === 'assets' ? '600' : '500', cursor: 'pointer', fontSize: '0.8rem', transition: 'all 0.15s' }}
-              >
-                Assets
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              {leftTab === 'elements' ? <ElementsPanel /> : leftTab === 'layers' ? <LayersPanel /> : leftTab === 'assets' ? <AssetsPanel /> : <PagesPanel />}
-            </div>
-            {/* Left Sidebar Footer */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid #e5e7eb', fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                 <Undo size={14} style={{ cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.undo?.()} /> Undo <span style={{ opacity: 0.6 }}>⌘Z</span>
-               </div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                 <Redo size={14} style={{ cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.redo?.()} /> Redo <span style={{ opacity: 0.6 }}>⇧⌘Z</span>
-               </div>
-            </div>
-            {isMobile && leftOpen && (
-               <button onClick={() => setLeftOpen(false)} style={{
-                 position: 'absolute', top: 12, right: -40, background: '#1a1a2e', color: 'white', border: 'none', padding: '8px 12px', cursor: 'pointer', zIndex: 101, borderRadius: '0 6px 6px 0', fontSize: '1rem'
-               }} title="Close Sidebar">✕</button>
-            )}
-          </div>
-
-          {/* Canvas Area */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            <Canvas 
-              leftOpen={leftOpen} setLeftOpen={setLeftOpen}
-              rightOpen={rightOpen} setRightOpen={setRightOpen}
-              leftTab={leftTab} setLeftTab={setLeftTab}
-            />
-            {previewMode && (
-              <button 
-                onClick={() => setPreviewMode(false)}
+                onClick={() => setLeftOpen(false)} 
                 style={{
-                  position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
-                  background: '#1a1a2e', color: 'white', padding: '12px 24px', borderRadius: '30px',
-                  border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', cursor: 'pointer',
-                  fontWeight: '600', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '8px'
-                }}
+                  background: 'transparent', border: 'none', padding: '6px 8px', cursor: 'pointer', color: '#6b7280', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }} 
+                title="Close Drawer"
               >
-                Exit Full Screen Preview
+                <X size={18} />
               </button>
             )}
           </div>
-
-          {/* Mobile Backdrops */}
-          {isMobile && (leftOpen || rightOpen) && !previewMode && (
-            <div 
-              onClick={() => { setLeftOpen(false); setRightOpen(false) }}
-              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 90, transition: 'opacity 0.2s' }} 
-            />
-          )}
-
-          {/* Floating Mobile Buttons */}
-          {isMobile && !leftOpen && !previewMode && (
-            <button 
-              onClick={() => { setLeftOpen(true); setRightOpen(false); }}
-              style={{ position: 'fixed', bottom: 20, left: 20, zIndex: 1000, background: '#4f6ef7', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '30px', boxShadow: '0 4px 14px rgba(79,110,247,0.3)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-              <LayoutGrid size={18} /> Elements
-            </button>
-          )}
-
-          {isMobile && !rightOpen && !previewMode && (
-            <button 
-              onClick={() => { setRightOpen(true); setLeftOpen(false); }}
-              style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000, background: '#1a1a2e', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '30px', boxShadow: '0 4px 14px rgba(0,0,0,0.2)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-              <Sliders size={18} /> Settings
-            </button>
-          )}
-
-          {/* Properties Panel (Right) */}
-          <div style={{
-            display: (rightOpen && !previewMode) ? 'flex' : 'none',
-            position: isMobile ? 'absolute' : 'relative',
-            zIndex: isMobile ? 100 : 1,
-            height: '100%',
-            right: 0,
-            top: 0,
-            boxShadow: isMobile ? '-4px 0 16px rgba(0,0,0,0.15)' : 'none',
-            backgroundColor: '#fff',
-          }}>
-            {isMobile && rightOpen && (
-               <button onClick={() => setRightOpen(false)} style={{
-                 position: 'absolute', top: 12, left: -40, background: '#1a1a2e', color: 'white', border: 'none', padding: '8px 12px', cursor: 'pointer', zIndex: 101, borderRadius: '6px 0 0 6px', fontSize: '1rem'
-               }} title="Close Settings">✕</button>
-            )}
-            <PropertiesPanel />
+          <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            {leftTab === 'elements' ? <ElementsPanel /> : leftTab === 'layers' ? <LayersPanel /> : leftTab === 'assets' ? <AssetsPanel /> : <PagesPanel />}
           </div>
+          {/* Left Sidebar Footer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: '1px solid #e5e7eb', fontSize: '0.75rem', color: '#6b7280', fontWeight: '500', background: '#fafafa' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.undo?.()}>
+              <Undo size={14} /> Undo <span style={{ opacity: 0.6 }}>⌘Z</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} onClick={() => window.__builderContextAPI?.redo?.()}>
+              <Redo size={14} /> Redo <span style={{ opacity: 0.6 }}>⇧⌘Z</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Canvas Area */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <Canvas 
+            leftOpen={leftOpen} setLeftOpen={setLeftOpen}
+            rightOpen={rightOpen} setRightOpen={setRightOpen}
+            leftTab={leftTab} setLeftTab={setLeftTab}
+          />
+          {previewMode && (
+            <button 
+              onClick={() => setPreviewMode(false)}
+              style={{
+                position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+                background: '#1a1a2e', color: 'white', padding: '12px 24px', borderRadius: '30px',
+                border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.3)', cursor: 'pointer',
+                fontWeight: '600', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '8px'
+              }}
+            >
+              Exit Full Screen Preview
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Backdrops */}
+        {isMobile && (leftOpen || rightOpen) && !previewMode && (
+          <div 
+            onClick={() => { setLeftOpen(false); setRightOpen(false) }}
+            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', zIndex: 90, transition: 'opacity 0.2s' }} 
+          />
+        )}
+
+        {/* Modern Glassmorphic Mobile Bottom Dock */}
+        {isMobile && !previewMode && (
+          <nav 
+            aria-label="Mobile Navigation"
+            style={{
+              position: 'fixed',
+              bottom: 'max(14px, env(safe-area-inset-bottom, 14px))',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 95,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '5px 8px',
+              background: 'rgba(17, 24, 39, 0.94)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              borderRadius: '36px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              maxWidth: 'calc(100vw - 20px)',
+            }}
+          >
+            <button
+              onClick={() => {
+                if (leftOpen && leftTab === 'elements') {
+                  setLeftOpen(false)
+                } else {
+                  setLeftTab('elements')
+                  setLeftOpen(true)
+                  setRightOpen(false)
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '8px 12px',
+                borderRadius: '24px',
+                border: 'none',
+                background: (leftOpen && leftTab === 'elements') ? '#3b82f6' : 'transparent',
+                color: (leftOpen && leftTab === 'elements') ? '#fff' : '#d1d5db',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <LayoutGrid size={15} /> Elements
+            </button>
+
+            <button
+              onClick={() => {
+                if (leftOpen && leftTab === 'pages') {
+                  setLeftOpen(false)
+                } else {
+                  setLeftTab('pages')
+                  setLeftOpen(true)
+                  setRightOpen(false)
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '8px 10px',
+                borderRadius: '24px',
+                border: 'none',
+                background: (leftOpen && leftTab === 'pages') ? '#3b82f6' : 'transparent',
+                color: (leftOpen && leftTab === 'pages') ? '#fff' : '#d1d5db',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <FileText size={15} /> Pages
+            </button>
+
+            <button
+              onClick={() => {
+                setRightOpen(!rightOpen)
+                setLeftOpen(false)
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '8px 10px',
+                borderRadius: '24px',
+                border: 'none',
+                background: rightOpen ? '#3b82f6' : 'transparent',
+                color: rightOpen ? '#fff' : '#d1d5db',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Sliders size={15} /> Style
+            </button>
+
+            <button
+              onClick={() => {
+                if (leftOpen && leftTab === 'layers') {
+                  setLeftOpen(false)
+                } else {
+                  setLeftTab('layers')
+                  setLeftOpen(true)
+                  setRightOpen(false)
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '8px 10px',
+                borderRadius: '24px',
+                border: 'none',
+                background: (leftOpen && leftTab === 'layers') ? '#3b82f6' : 'transparent',
+                color: (leftOpen && leftTab === 'layers') ? '#fff' : '#d1d5db',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Layers size={15} /> Layers
+            </button>
+          </nav>
+        )}
+
+        {/* Properties Panel (Right Drawer) */}
+        <div style={{
+          display: (rightOpen && !previewMode) ? 'flex' : 'none',
+          flexDirection: 'column',
+          position: isMobile ? 'absolute' : 'relative',
+          zIndex: isMobile ? 100 : 1,
+          height: '100%',
+          width: isMobile ? 'min(360px, 92vw)' : '280px',
+          maxWidth: '92vw',
+          right: 0,
+          top: 0,
+          boxShadow: isMobile ? '-4px 0 24px rgba(0,0,0,0.22)' : 'none',
+          backgroundColor: '#fff',
+          borderLeft: '1px solid #e5e7eb',
+        }}>
+          <PropertiesPanel onClose={isMobile ? () => setRightOpen(false) : undefined} />
+        </div>
         </div>
       </div>
   )
