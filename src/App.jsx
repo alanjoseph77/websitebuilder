@@ -268,7 +268,7 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
-  const [forceLanding, setForceLanding] = useState(false)
+  const [forceLanding, setForceLanding] = useState(true)
   const [dbProjects, setDbProjects] = useState(null)
 
   useEffect(() => {
