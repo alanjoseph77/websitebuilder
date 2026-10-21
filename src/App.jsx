@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { BuilderProvider, useBuilder } from './context/BuilderContext'
 import Toolbar from './components/Toolbar'
 import ElementsPanel from './components/ElementsPanel'
@@ -13,6 +13,9 @@ import { LayoutGrid, Sliders, ArrowLeft, Undo, Redo } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { ELEMENT_CATEGORIES } from './data/elementTypes'
 import { generateCSSForElements, generateThemeCSS } from './utils/styleUtils'
+
+// 3D museum: its code only downloads when someone opens it
+const Museum = lazy(() => import('./museum/Museum'))
 
 const appStyles = {
   display: 'flex',
@@ -270,6 +273,7 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [forceLanding, setForceLanding] = useState(true)
   const [dbProjects, setDbProjects] = useState(null)
+  const [showMuseum, setShowMuseum] = useState(false)
 
   useEffect(() => {
     if (!showEditor) {
@@ -278,6 +282,14 @@ export default function App() {
       })
     }
   }, [showEditor])
+
+  if (showMuseum) {
+    return (
+      <Suspense fallback={<div style={{ position: 'fixed', inset: 0, background: '#1e1b19', color: '#f6efe3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif' }}>Opening the museum…</div>}>
+        <Museum onExit={() => setShowMuseum(false)} />
+      </Suspense>
+    )
+  }
 
   if (!showEditor) {
     if (dbProjects === null) return null // Wait for DB load
@@ -306,6 +318,7 @@ export default function App() {
         setShowEditor(true)
       }} 
       onGoDashboard={() => setForceLanding(false)}
+      onOpenMuseum={() => setShowMuseum(true)}
       hasProjects={hasProjects}
     />
   }

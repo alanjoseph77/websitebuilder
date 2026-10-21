@@ -1,0 +1,156 @@
+/* Celebration Museum styles — all scoped under .museum-root so nothing leaks into the builder. */
+.museum-root{position:fixed;inset:0;z-index:1000;overflow:hidden;background:#1e1b19;color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.4;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.museum-root *,.museum-root *::before,.museum-root *::after{box-sizing:content-box}
+.museum-root p,.museum-root h1,.museum-root h2{margin:0}
+.museum-root img{max-width:100%}
+.museum-root{--paper:#f7f2e8;
+  --ink:#2b2420;
+  --gold:#a8843f;
+  --glass:rgba(26,21,18,.64);
+  --glass-line:rgba(255,246,230,.16);
+  --on-glass:#f6efe3;
+  --muted:#8a7f72;
+  --f-script:"Pinyon Script","Snell Roundhand","Apple Chancery",cursive;
+  --f-caps:"Marcellus",Georgia,"Times New Roman",serif;
+  --f-ui:"Jost",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;}
+.museum-root [hidden]{display:none!important}
+.museum-root #c{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none}
+.museum-root button{font:inherit;cursor:pointer}
+.museum-root button:focus-visible,.museum-root input:focus-visible,.museum-root select:focus-visible,.museum-root label:focus-within{outline:2px solid var(--gold);outline-offset:2px}
+.museum-root .hud-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  padding-top:calc(env(safe-area-inset-top,0px) + 12px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none;z-index:5}
+.museum-root .hud-top>*{pointer-events:auto}
+.museum-root .chip{background:var(--glass);border:1px solid var(--glass-line);color:var(--on-glass);border-radius:14px;padding:8px 14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);min-width:0}
+.museum-root .chip .n{font-family:var(--f-script);font-size:26px;line-height:1.05;white-space:nowrap}
+.museum-root .chip .d{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#d8cbb6}
+.museum-root .hud-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.museum-root .gbtn{background:var(--glass);border:1px solid var(--glass-line);color:var(--on-glass);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:500;letter-spacing:.02em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:inline-flex;align-items:center;gap:8px}
+.museum-root .gbtn:hover{background:rgba(40,32,27,.78)}
+.museum-root kbd{font-family:var(--f-ui);font-size:11px;border:1px solid rgba(255,246,230,.5);border-radius:5px;padding:1px 6px;line-height:1.4}
+.museum-root.coarse kbd{display:none}
+.museum-root .hud-bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+  padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px);
+  padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none;z-index:5}
+.museum-root .hud-bottom>*{pointer-events:auto}
+.museum-root #joy{width:124px;height:124px;border-radius:50%;background:rgba(26,21,18,.38);border:1px solid var(--glass-line);position:relative;touch-action:none;display:none}
+.museum-root.coarse #joy{display:block}
+.museum-root #knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(246,239,227,.85);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.museum-root #hint{color:var(--on-glass);font-size:12px;letter-spacing:.04em;background:var(--glass);border:1px solid var(--glass-line);border-radius:999px;padding:7px 12px}
+.museum-root.coarse #hint{display:none}
+.museum-root .right-actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.museum-root #action{font-size:15px;padding:12px 18px;background:rgba(26,21,18,.78)}
+.museum-root #action[hidden]{display:none!important}
+.museum-root .ntag{position:fixed;left:0;top:0;z-index:3;transform:translate(-50%,-100%);pointer-events:none;background:var(--glass);color:var(--on-glass);font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.museum-root .ntag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#e9c46a;margin-right:6px;vertical-align:1px}
+@media (max-width:560px){.museum-root .chip{padding:6px 10px}
+.museum-root .chip .n{font-size:21px}
+.museum-root .chip .d{font-size:9px;letter-spacing:.1em;white-space:nowrap}
+.museum-root .hud-btns{gap:6px}
+.museum-root .gbtn{padding:7px 11px;font-size:12px}}
+.museum-root #bubble{position:fixed;left:0;top:0;z-index:4;transform:translate(-50%,-100%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px}
+.museum-root #bubble p{background:#fffdf8;color:var(--ink);font-size:15px;padding:9px 14px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.22);max-width:240px;text-align:center;position:relative}
+.museum-root #bubble p::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#fffdf8}
+.museum-root #bubble span{background:var(--glass);color:var(--on-glass);font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+.museum-root #bubble span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#e9c46a;margin-right:6px;vertical-align:1px}
+.museum-root .overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow-y:auto;touch-action:pan-y;
+  background:rgba(20,16,14,.52);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding-block:calc(env(safe-area-inset-top,0px) + 20px) calc(env(safe-area-inset-bottom,0px) + 20px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.museum-root .card{background:var(--paper);color:var(--ink);width:100%;max-width:440px;margin:auto;padding:38px 30px 30px;text-align:center;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.4);border-radius:4px}
+.museum-root .card::before{content:"";position:absolute;inset:10px;border:1px solid rgba(168,132,63,.55);pointer-events:none}
+.museum-root .card::after{content:"";position:absolute;inset:15px;border:1px solid rgba(168,132,63,.25);pointer-events:none}
+.museum-root .card .host{font-family:var(--f-caps);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0}
+.museum-root .card h1{font-family:var(--f-script);font-weight:400;font-size:clamp(44px,13vw,62px);line-height:1.05;color:var(--gold);margin:14px 0 6px;text-wrap:balance}
+.museum-root .card h1 em{font-style:normal;font-size:.7em;padding:0 .12em}
+.museum-root .card .line{font-family:var(--f-caps);font-size:16px;margin:0 0 18px}
+.museum-root .rule{display:flex;align-items:center;gap:10px;margin:0 auto 18px;max-width:220px}
+.museum-root .rule::before,.museum-root .rule::after{content:"";flex:1;height:1px;background:rgba(168,132,63,.6)}
+.museum-root .rule i{width:7px;height:7px;transform:rotate(45deg);background:var(--gold)}
+.museum-root .card .date{font-family:var(--f-caps);font-size:17px;letter-spacing:.12em;text-transform:uppercase;margin:0}
+.museum-root .card .time{font-size:14px;color:var(--muted);margin:4px 0 14px}
+.museum-root .card .venue{font-family:var(--f-caps);font-size:19px;margin:0}
+.museum-root .card .city{font-size:14px;color:var(--muted);margin:3px 0 0}
+.museum-root .card .count{display:inline-block;margin:18px 0 0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(168,132,63,.5);padding:5px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
+.museum-root .card .rsvp{font-size:13px;color:var(--muted);margin:12px 0 0}
+.museum-root .card .actions{display:flex;flex-direction:column;gap:10px;margin-top:24px;position:relative;z-index:1}
+.museum-root .pbtn{background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:13px 20px;font-size:15px;font-weight:500;letter-spacing:.04em}
+.museum-root .pbtn:hover{background:#40352f}
+.museum-root .tbtn{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;font-size:14px;padding:6px}
+.museum-root .card .note{font-size:12px;color:var(--muted);margin:14px 0 0}
+.museum-root .lb{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:min(92vw,520px);margin:auto}
+.museum-root .lb img{max-height:68vh;max-width:100%;border:12px solid #fffdf8;box-shadow:0 20px 60px rgba(0,0,0,.45);background:#fffdf8}
+.museum-root .lb .cap{color:var(--on-glass);font-family:var(--f-caps);font-size:20px;text-align:center}
+.museum-root .lb .num{color:#cbbfae;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.museum-root .lb .row{display:flex;gap:10px}
+.museum-root #sheet{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);box-sizing:border-box;z-index:25;background:var(--paper);color:var(--ink);overflow-y:auto;touch-action:pan-y;
+  box-shadow:-20px 0 60px rgba(0,0,0,.35);-webkit-user-select:text;user-select:text;
+  padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 28px);
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.museum-root .sh-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+.museum-root .sh-head h2{font-family:var(--f-caps);font-weight:400;font-size:24px;margin:0}
+.museum-root .sh-sub{font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+.museum-root fieldset{border:0;border-top:1px solid rgba(168,132,63,.4);margin:0;padding:16px 0 20px;display:grid;gap:12px;min-width:0}
+.museum-root legend{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding-right:10px;font-weight:600}
+.museum-root .f{display:grid;gap:5px;min-width:0}
+.museum-root .f label{font-size:12px;color:var(--muted);font-weight:500}
+.museum-root .f input,.museum-root .f select{font:inherit;font-size:15px;color:var(--ink);background:#fffdf8;border:1px solid #d9cfbf;border-radius:8px;padding:9px 11px;min-width:0;width:100%;box-sizing:border-box}
+.museum-root .f input[type=color]{padding:3px;height:40px}
+.museum-root .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.museum-root .photo-row{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}
+.museum-root .thumb{width:62px;height:78px;border-radius:4px;background:#e9e1d3 center/cover no-repeat;border:3px solid #fffdf8;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.museum-root .pr-ctrl{display:grid;gap:6px;min-width:0}
+.museum-root .pr-btns{display:flex;gap:8px;flex-wrap:wrap}
+.museum-root .upl{position:relative;overflow:hidden;font-size:13px;border:1px solid #cbbfae;border-radius:999px;padding:5px 12px;background:#fffdf8;cursor:pointer}
+.museum-root .upl input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.museum-root .mini{font-size:13px;border:0;background:none;color:var(--muted);text-decoration:underline;padding:5px 2px}
+.museum-root .warn{font-size:12px;color:#8a3a2a;margin:0}
+.museum-root .chk{display:flex;gap:10px;align-items:center;font-size:14px}
+.museum-root .chk input{width:18px;height:18px;accent-color:var(--ink)}
+.museum-root .sh-foot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding-top:8px;flex-wrap:wrap}
+.museum-root .card .sub{font-family:var(--f-caps);font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:-2px 0 10px}
+.museum-root .card .rule::before,.museum-root .card .rule::after{background:var(--gold);opacity:.6}
+.museum-root .card.wish{text-align:left}
+.museum-root .card.wish .host,.museum-root .card.wish .wtitle{text-align:center}
+.museum-root .wtitle{font-family:var(--f-script);font-weight:400;font-size:46px;color:var(--gold);margin:6px 0 14px}
+.museum-root .card.wish .f{margin-bottom:12px;position:relative;z-index:1}
+.museum-root .f textarea{font:inherit;font-size:15px;color:var(--ink);background:#fffdf8;border:1px solid #d9cfbf;border-radius:8px;padding:9px 11px;width:100%;box-sizing:border-box;resize:vertical;-webkit-user-select:text;user-select:text}
+.museum-root .card.wish input{-webkit-user-select:text;user-select:text}
+.museum-root #photo{flex-direction:column;gap:14px}
+.museum-root .polaroid{background:#fffdf8;padding:12px 12px 18px;box-shadow:0 24px 70px rgba(0,0,0,.45);transform:rotate(-1.5deg);max-width:min(88vw,560px);margin-top:auto}
+.museum-root .polaroid img{display:block;width:100%;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.museum-root .pcap{font-family:var(--f-script);font-size:34px;color:var(--ink);text-align:center;margin:10px 0 0}
+.museum-root .pdate{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:center;margin:2px 0 0}
+.museum-root .phint{color:var(--on-glass);font-size:13px;margin:0}
+.museum-root #photo .row{display:flex;gap:10px;margin-bottom:auto}
+.museum-root #flash{position:fixed;inset:0;z-index:30;background:#fffdf8;pointer-events:none;opacity:0}
+.museum-root #flash.go{animation:museum-flash .65s ease-out}
+@keyframes museum-flash{0%{opacity:.95}100%{opacity:0}}
+.museum-root #b-menu{display:none}
+@media (max-width:640px){.museum-root #b-menu{display:inline-flex;flex:none}
+.museum-root .hud-btns{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 60px);flex-direction:column;align-items:stretch;gap:2px;
+    background:rgba(26,21,18,.86);border:1px solid var(--glass-line);border-radius:16px;padding:6px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);min-width:190px}
+.museum-root .hud-btns.open{display:flex}
+.museum-root .hud-btns .gbtn{background:transparent;border-color:transparent;justify-content:space-between;font-size:15px;padding:12px 14px;backdrop-filter:none;-webkit-backdrop-filter:none}
+.museum-root .chip{max-width:calc(100vw - 130px);min-width:0}
+.museum-root .chip .n{font-size:20px;overflow:hidden;text-overflow:ellipsis}
+.museum-root .chip .d{font-size:9px;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis}
+.museum-root #joy{width:112px;height:112px}
+.museum-root .right-actions{gap:8px}
+.museum-root .right-actions .gbtn:not(#action){padding:8px 13px;font-size:13px}
+.museum-root #action{font-size:15px;padding:12px 18px}
+.museum-root #bubble p{max-width:200px;font-size:14px}
+.museum-root .ntag{font-size:11px}
+.museum-root .f input,.museum-root .f select,.museum-root .f textarea{font-size:16px}
+.museum-root .lb .row,.museum-root #photo .row{flex-wrap:wrap;justify-content:center}
+.museum-root .card{padding:30px 22px 24px}
+.museum-root .wtitle{font-size:40px}}
+@media (max-height:480px) and (orientation:landscape){.museum-root #joy{width:96px;height:96px}
+.museum-root #knob{width:46px;height:46px;margin:-23px 0 0 -23px}
+.museum-root .chip .d{display:none}
+.museum-root .hud-btns{top:calc(env(safe-area-inset-top,0px) + 50px);max-height:calc(100vh - 70px);overflow-y:auto}
+.museum-root .card{margin:6px auto}
+.museum-root .lb img{max-height:52vh}}
+@media (prefers-reduced-motion:reduce){.museum-root *{transition:none!important;animation:none!important}}

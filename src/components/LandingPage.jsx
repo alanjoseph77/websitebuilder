@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Play, X, CheckCircle, Layout, Code, Globe, Star, ArrowUpRight, ArrowDown, Download, FileJson, FileCode2, Image as ImageIcon } from 'lucide-react';
 
-export default function LandingPage({ onGetStarted, onGoDashboard, hasProjects }) {
+export default function LandingPage({ onGetStarted, onGoDashboard, onOpenMuseum, hasProjects }) {
   const scrollTo = (id) => {
     const container = document.querySelector('.lp-scroll-container');
     if (!container) return;
@@ -118,6 +118,7 @@ export default function LandingPage({ onGetStarted, onGoDashboard, hasProjects }
           <span onClick={() => scrollTo('about')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>About</span>
           <span onClick={() => scrollTo('templates')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>Templates</span>
           <span onClick={() => scrollTo('features')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>Features</span>
+          <span onClick={onOpenMuseum} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#ea580c'} onMouseOut={e=>e.currentTarget.style.color='inherit'}>3D Museum</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -180,6 +181,14 @@ export default function LandingPage({ onGetStarted, onGoDashboard, hasProjects }
               <div style={{ width: '36px', height: '36px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowRight size={18} color="#ea580c" />
               </div>
+            </button>
+            <button 
+              onClick={onOpenMuseum}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#ea580c'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#d1d5db'; }}
+              style={{ padding: '8px 24px', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '30px', fontSize: '1.05rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.3s ease', minHeight: '52px' }}
+            >
+              Explore 3D Museum
             </button>
           </div>
 
